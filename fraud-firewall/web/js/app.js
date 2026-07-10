@@ -221,13 +221,14 @@ function renderFindings(result) {
   const tl = findings.timeline?.length ?? 0;
   const off = findings.offences?.length ?? 0;
   const bf = findings.brain_findings?.length ?? 0;
+  const ent = findings.entities?.length ?? 0;
   const consensus = findings.consensus;
   const consensusStr = consensus
     ? ` · consensus ${consensus.verdict} (${consensus.count} brains)`
     : "";
   $("extractMessage").textContent =
     `${findings.atom_count} evidence atom(s) · ${contradictions.length} contradiction(s) · ` +
-    `${tl} timeline event(s) · ${off} offence(s) · ${bf} brain finding(s)${consensusStr}.`;
+    `${tl} timeline event(s) · ${off} offence(s) · ${bf} brain finding(s) · ${ent} part(y/ies)${consensusStr}.`;
 
   $("contraList").innerHTML = contradictions
     .map((c) => {
@@ -240,6 +241,7 @@ function renderFindings(result) {
           <span class="badge">${escapeHtml(c.brain_source)}</span>
           <span class="badge sev-${sev}">${escapeHtml(sev)}</span>
           <span class="badge">${escapeHtml(c.confidence)}</span>
+          ${c.respondent ? `<span class="badge">${escapeHtml(c.respondent)}</span>` : ""}
           ${quorum ? '<span class="badge quorum">QUORUM ✓</span>' : ""}
         </div>
         <p class="claim"><span class="tag">A</span>${escapeHtml(c.claim_a.text)}
@@ -288,15 +290,31 @@ async function runExtract(documents, seal) {
 
 let uploadedCount = 0;
 
+function getGeo() {
+  return new Promise((resolve) => {
+    if (!navigator.geolocation) return resolve(null);
+    navigator.geolocation.getCurrentPosition(
+      (p) => resolve(p.coords),
+      () => resolve(null),
+      { timeout: 6000, maximumAge: 600000 },
+    );
+  });
+}
+
 async function uploadEvidenceFiles(files) {
   const status = $("uploadStatus");
   status.hidden = false;
   const names = [];
+  // Capture upload location once (approximate on laptops; permission-based).
+  const coords = await getGeo();
+  const geoQs = coords
+    ? `&lat=${coords.latitude}&lon=${coords.longitude}&acc=${coords.accuracy ?? ""}`
+    : "";
   for (const file of files) {
     status.textContent = `Uploading ${file.name}…`;
     try {
       const buf = await file.arrayBuffer();
-      const rec = await api(`/v1/evidence/upload?filename=${encodeURIComponent(file.name)}`, {
+      const rec = await api(`/v1/evidence/upload?filename=${encodeURIComponent(file.name)}${geoQs}`, {
         method: "POST",
         headers: { "Content-Type": "application/octet-stream" },
         body: buf,

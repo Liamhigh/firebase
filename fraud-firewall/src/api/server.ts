@@ -250,12 +250,25 @@ export function startServer(firewall: FraudFirewall): {
 
       if (method === "POST" && url.pathname === "/v1/evidence/upload") {
         const filename = url.searchParams.get("filename") || `upload-${Date.now()}.txt`;
+        const lat = url.searchParams.get("lat");
+        const lon = url.searchParams.get("lon");
+        const gps =
+          lat && lon
+            ? {
+                latitude: Number(lat),
+                longitude: Number(lon),
+                accuracy: url.searchParams.get("acc")
+                  ? Number(url.searchParams.get("acc"))
+                  : undefined,
+                timestamp: new Date().toISOString(),
+              }
+            : undefined;
         const bytes = await readRawBody(req);
         if (bytes.length === 0) {
           return sendJson(res, 400, { error: "empty upload" });
         }
         try {
-          const doc = await parseUpload(new Uint8Array(bytes), filename);
+          const doc = await parseUpload(new Uint8Array(bytes), filename, gps);
           const receipt = firewall.ingestEvidence(doc);
           return sendJson(res, 202, {
             ...receipt,

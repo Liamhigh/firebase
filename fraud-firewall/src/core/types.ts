@@ -462,6 +462,35 @@ export interface NineBrainConsensus {
   verdict: "CONFIRMED" | "INSUFFICIENT" | "INDETERMINATE";
 }
 
+/** A party / entity of interest extracted from the evidence. */
+export const EntitySchema = z.object({
+  name: z.string(),
+  type: z.enum(["person", "organization"]),
+  mentions: z.number().int().positive(),
+  first_seen: z.object({
+    evidence_id: z.string(),
+    page: z.number().int().nonnegative(),
+    line: z.number().int().nonnegative(),
+  }),
+});
+export type Entity = z.infer<typeof EntitySchema>;
+
+/** External court-case / litigation search over the entities of interest. */
+export interface CaseSearch {
+  provider: string;
+  status: "OFFLINE" | "SEARCHED";
+  queries: string[];
+  results: Array<{
+    entity: string;
+    jurisdiction?: string;
+    case_reference?: string;
+    title?: string;
+    url?: string;
+    note?: string;
+  }>;
+  note: string;
+}
+
 /** Aggregate findings written to the vault `findings/` directory (spec §7.2). */
 export interface ExtractionFindings {
   generated_at: string;
@@ -476,4 +505,6 @@ export interface ExtractionFindings {
   offences: Offence[];
   brain_findings: BrainFinding[];
   consensus: NineBrainConsensus;
+  entities: Entity[];
+  case_search: CaseSearch;
 }

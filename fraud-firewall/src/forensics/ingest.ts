@@ -1,5 +1,5 @@
 import { createRequire } from "node:module";
-import type { ForensicDocument } from "../core/types.js";
+import type { ForensicDocument, Gps } from "../core/types.js";
 
 /**
  * Turn an uploaded file (PDF or text) into a ForensicDocument with per-page
@@ -36,6 +36,7 @@ export function evidenceIdFromFilename(filename: string): string {
 export async function parseUpload(
   bytes: Uint8Array,
   filename: string,
+  gps?: Gps,
 ): Promise<ForensicDocument> {
   const evidence_id = evidenceIdFromFilename(filename);
   const source_file = filename;
@@ -49,7 +50,7 @@ export async function parseUpload(
     if (pages.length === 0 && (result.text ?? "").trim()) {
       pages.push({ page: 1, text: result.text!.trim() });
     }
-    return { evidence_id, type: "document", source_file, pages };
+    return { evidence_id, type: "document", source_file, pages, gps };
   }
 
   // Plain text (or other) — decode as UTF-8; split on form-feeds as page breaks.
@@ -63,5 +64,6 @@ export async function parseUpload(
     type: "document",
     source_file,
     pages: pages.length ? pages : [{ page: 1, text: text.trim() }],
+    gps,
   };
 }

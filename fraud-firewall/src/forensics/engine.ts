@@ -13,6 +13,8 @@ import { ContradictionEngine } from "./contradiction.js";
 import { buildTimelineFromAtoms } from "./timeline.js";
 import { buildOffencesFromContradictions } from "./offences.js";
 import { runBrainAnalysis, computeConsensus } from "./brains.js";
+import { extractEntities, respondentFor } from "./entities.js";
+import { createCaseLawProvider } from "./caselaw.js";
 import { DocumentSealingService } from "../core/sealing.js";
 import {
   ensureVault,
@@ -60,7 +62,10 @@ export class ForensicEngine {
     this.sealing = new DocumentSealingService(config);
   }
 
-  /** Validate + persist an original document; add it to the extraction buffer. */
+  /**
+   * Validate + persist an original document into the vault with a SHA-512
+   * chain-of-custody seal record, and add it to the extraction buffer.
+   */
   ingest(input: unknown): EvidenceReceipt {
     const doc = ForensicDocumentSchema.parse(input);
     const pages = toPages(doc);
@@ -68,10 +73,24 @@ export class ForensicEngine {
     const ingestedAt = new Date().toISOString();
     this.buffer.set(doc.evidence_id, doc);
 
+    // Original evidence stored in the vault (spec §7.2 evidence/).
     writeJson(evidencePath(this.config, doc.evidence_id), {
       ...doc,
       sha512: digest,
       page_count: pages.length,
+      ingested_at: ingestedAt,
+    });
+    // Chain-of-custody seal record: immutable SHA-512 fingerprint of the intake.
+    writeJson(evidencePath(this.config, doc.evidence_id).replace(/\.json$/, ".seal.json"), {
+      evidence_id: doc.evidence_id,
+      source_file: doc.source_file,
+      type: doc.type,
+      sha512: digest,
+      page_count: pages.length,
+      gps: doc.gps ?? null,
+      jurisdiction: doc.jurisdiction ?? null,
+      custody: "SEALED",
+      hash_algorithm: "SHA-512",
       ingested_at: ingestedAt,
     });
 
@@ -126,6 +145,15 @@ export class ForensicEngine {
     const brainFindings = runBrainAnalysis(atoms, now);
     const consensus = computeConsensus(contradictions, brainFindings, offences);
 
+    // Parties of interest + respondent attribution (anchor each contradiction
+    // to the person it concerns) + external court-case search over the entities.
+    const entities = extractEntities(atoms);
+    const people = entities.filter((e) => e.type === "person");
+    for (const c of contradictions) {
+      c.respondent = respondentFor(people, c.claim_a.text, c.claim_b.text);
+    }
+    const caseSearch = await createCaseLawProvider().search(entities);
+
     const findings: ExtractionFindings = {
       generated_at: now,
       constitution_version: this.config.constitution_version,
@@ -139,6 +167,8 @@ export class ForensicEngine {
       offences,
       brain_findings: brainFindings,
       consensus,
+      entities,
+      case_search: caseSearch,
     };
 
     const atomsPath = findingsPath(this.config, "evidence_atoms.json");
@@ -146,12 +176,16 @@ export class ForensicEngine {
     const timelinePath = findingsPath(this.config, "timeline.json");
     const offencesPath = findingsPath(this.config, "offence_matrix.json");
     const brainFindingsPath = findingsPath(this.config, "brain_findings.json");
+    const entitiesPath = findingsPath(this.config, "entities.json");
+    const caseSearchPath = findingsPath(this.config, "case_search.json");
     const manifestPath = findingsPath(this.config, "manifest.json");
     writeJson(atomsPath, atoms);
     writeJson(contradictionsPath, contradictions);
     writeJson(timelinePath, timeline);
     writeJson(offencesPath, offences);
     writeJson(brainFindingsPath, brainFindings);
+    writeJson(entitiesPath, entities);
+    writeJson(caseSearchPath, caseSearch);
     writeJson(manifestPath, {
       generated_at: findings.generated_at,
       constitution_version: findings.constitution_version,
@@ -162,7 +196,9 @@ export class ForensicEngine {
       timeline_count: timeline.length,
       offence_count: offences.length,
       brain_finding_count: brainFindings.length,
+      entity_count: entities.length,
       consensus,
+      case_search: { provider: caseSearch.provider, status: caseSearch.status },
       evidence: docs.map((d) => ({
         evidence_id: d.evidence_id,
         source_file: d.source_file,
@@ -214,9 +250,16 @@ function summarize(findings: ExtractionFindings): string {
     `Evidence atoms: ${findings.atom_count}`,
     `Contradictions: ${findings.contradiction_count}`,
     "",
+    "PARTIES / ENTITIES OF INTEREST:",
+    ...(findings.entities.length
+      ? findings.entities.map(
+          (e) => `- ${e.name} (${e.type}, ${e.mentions} mentions; first seen ${e.first_seen.evidence_id} p.${e.first_seen.page})`,
+        )
+      : ["- No recurring parties identified."]),
+    "",
     "CONTRADICTIONS:",
     ...findings.contradictions.flatMap((c) => [
-      `${c.contradiction_id} [${c.brain_source}] severity=${c.severity} confidence=${c.confidence} quorum=${c.triple_ai_consensus.quorum}`,
+      `${c.contradiction_id} [${c.brain_source}] respondent=${c.respondent ?? "unattributed"} severity=${c.severity} confidence=${c.confidence} quorum=${c.triple_ai_consensus.quorum}`,
       `  A: "${c.claim_a.text}" (${c.claim_a.source})`,
       `  B: "${c.claim_b.text}" (${c.claim_b.source})`,
       `  Law: ${c.applicable_law.join("; ") || "n/a"}`,
@@ -249,6 +292,12 @@ function summarize(findings: ExtractionFindings): string {
     `- Active brains (${findings.consensus.count}): ${findings.consensus.active_brains.join(", ") || "none"}`,
     `- Threshold: >=${findings.consensus.threshold} independent brains`,
     `- Verdict: ${findings.consensus.verdict}`,
+    "",
+    "COURT CASE SEARCH:",
+    `- Provider: ${findings.case_search.provider} (${findings.case_search.status})`,
+    ...findings.case_search.results
+      .slice(0, 20)
+      .map((r) => `- ${r.entity}${r.case_reference ? ` — ${r.case_reference}` : ""}${r.note ? ` (${r.note})` : ""}`),
     "",
     "COURT-READY DECLARATION:",
     "Prepared under Constitution v5.2.7 with Triple-AI verification (Gemma 3 + Phi-3 + 9-Brain).",

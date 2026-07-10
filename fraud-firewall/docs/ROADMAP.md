@@ -57,6 +57,18 @@ whole ruleset is embedded in every seal's hash. Endpoints: `GET /v1/constitution
   embedded without hash circularity.
 - Remaining for strict veraPDF PASS: sRGB OutputIntent (ICC) + embedded fonts.
 
+### Parties, respondents, chain-of-custody, GPS, case search ✅ DONE
+- ✅ **Entities of interest** (`forensics/entities.ts`): heuristic extraction of recurring
+  people + organisations; each contradiction is **anchored to a respondent** (person) and
+  page. Parties + applicable statutes appear in the sealed report.
+- ✅ **Chain of custody**: every uploaded evidence file is stored in the vault with a
+  SHA-512 `*.seal.json` seal record (custody = SEALED); the findings report is always sealed.
+- ✅ **GPS**: the console captures the browser geolocation at upload time (approximate on
+  laptops, permission-based) and records it on the evidence + seal record.
+- 🟡 **Court-case search** (`forensics/caselaw.ts`): entity-driven query framework + report
+  section; OFFLINE by default (real SA/UAE/international court databases need an
+  authenticated provider — drop-in via `createCaseLawProvider`).
+
 ### Evidence file upload ✅ DONE
 - ✅ Load real evidence files directly: `POST /v1/evidence/upload?filename=…` accepts raw
   PDF/TXT bytes, extracts text per page (`pdf-parse` for PDFs), and ingests them into the
