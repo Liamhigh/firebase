@@ -206,6 +206,10 @@ export interface FirewallConfig {
     alerts_dir: string;
     invoices_dir: string;
     sealed_dir: string;
+    /** Original uploaded evidence (spec §7.2). Defaults to <vault_dir>/evidence. */
+    evidence_dir?: string;
+    /** Forensic engine output JSON (spec §7.2). Defaults to <vault_dir>/findings. */
+    findings_dir?: string;
   };
   server: {
     host: string;
@@ -220,4 +224,154 @@ export interface DetectionSignal {
   score: number;
   reasons: string[];
   related_txn_ids: string[];
+}
+
+/* ------------------------------------------------------------------ *
+ * Forensic evidence extraction models
+ * Spec references: VO-ANDROID-SPEC-5.2.7-2026 §4.3, §12.1, §12.2
+ * ------------------------------------------------------------------ */
+
+/** Severity scale for contradictions (spec §12.2). */
+export const SeveritySchema = z.enum([
+  "CRITICAL",
+  "VERY_HIGH",
+  "HIGH",
+  "MODERATE",
+  "LOW",
+]);
+export type Severity = z.infer<typeof SeveritySchema>;
+
+/**
+ * Nine-Brain source identifiers (spec §1.3 / Table 5).
+ * The extraction engine attributes each atom / contradiction to the brain
+ * that produced it. Deterministic offline heuristics stand in for the
+ * model roles without changing the contract.
+ */
+export const BrainSourceSchema = z.enum([
+  "B1-ContradictionBrain",
+  "B2-DocumentForensics",
+  "B3-Communications",
+  "B4-Linguistics",
+  "B5-Timeline",
+  "B6-Financial",
+  "B7-LegalMapping",
+  "B8-AudioForensics",
+  "B9-RnDValidation",
+]);
+export type BrainSource = z.infer<typeof BrainSourceSchema>;
+
+/** Ordinal verifier vote used inside triple-AI consensus blocks. */
+export const VerifierVoteSchema = z.enum([
+  "CONCURS",
+  "VERIFIED",
+  "DISSENTS",
+  "ABSTAIN",
+  "INSUFFICIENT",
+]);
+export type VerifierVote = z.infer<typeof VerifierVoteSchema>;
+
+/** Triple-AI consensus block embedded in atoms and contradictions. */
+export const TripleAiConsensusSchema = z.object({
+  gemma3: VerifierVoteSchema,
+  phi3: VerifierVoteSchema,
+  nine_brain: VerifierVoteSchema,
+  quorum: z.boolean(),
+});
+export type TripleAiConsensus = z.infer<typeof TripleAiConsensusSchema>;
+
+export const GpsSchema = z.object({
+  latitude: z.number(),
+  longitude: z.number(),
+  accuracy: z.number().optional(),
+  timestamp: z.string().optional(),
+});
+export type Gps = z.infer<typeof GpsSchema>;
+
+export const EvidenceTypeSchema = z.enum([
+  "document",
+  "email",
+  "chat",
+  "image",
+  "audio",
+  "video",
+  "scan",
+]);
+export type EvidenceType = z.infer<typeof EvidenceTypeSchema>;
+
+/** A single uploaded piece of evidence, ready for extraction (spec §4.1). */
+export const ForensicDocumentSchema = z.object({
+  evidence_id: z.string(),
+  type: EvidenceTypeSchema.default("document"),
+  source_file: z.string(),
+  /** Whole-document text; alternatively provide `pages`. */
+  text: z.string().optional(),
+  /** Page-segmented text for accurate page anchoring. */
+  pages: z
+    .array(z.object({ page: z.number().int().positive(), text: z.string() }))
+    .optional(),
+  gps: GpsSchema.optional(),
+  jurisdiction: z.string().optional(),
+});
+export type ForensicDocument = z.infer<typeof ForensicDocumentSchema>;
+
+/** Evidence Atom — verbatim, anchored extract (spec §12.1). */
+export const EvidenceAtomSchema = z.object({
+  atom_id: z.string(),
+  evidence_id: z.string(),
+  type: EvidenceTypeSchema,
+  source_file: z.string(),
+  sha512: z.string(),
+  page_number: z.number().int().positive(),
+  line_range: z.string(),
+  content: z.string(),
+  context_before: z.string(),
+  context_after: z.string(),
+  gps: GpsSchema.optional(),
+  jurisdiction: z.string().optional(),
+  legal_citations: z.array(z.string()).default([]),
+  confidence: ConfidenceSchema,
+  extracted_by: BrainSourceSchema,
+  triple_ai_consensus: TripleAiConsensusSchema,
+  timestamp: z.string(),
+});
+export type EvidenceAtom = z.infer<typeof EvidenceAtomSchema>;
+
+/** One side of a contradiction, anchored to source evidence (spec §12.2). */
+export const ClaimAnchorSchema = z.object({
+  text: z.string(),
+  source: z.string(),
+  evidence_id: z.string(),
+  page: z.number().int().positive(),
+  line: z.number().int().nonnegative(),
+  sha512: z.string(),
+});
+export type ClaimAnchor = z.infer<typeof ClaimAnchorSchema>;
+
+/** Structured contradiction (spec §12.2). */
+export const ContradictionSchema = z.object({
+  contradiction_id: z.string(),
+  brain_source: BrainSourceSchema,
+  respondent: z.string().optional(),
+  claim_a: ClaimAnchorSchema,
+  claim_b: ClaimAnchorSchema,
+  severity: SeveritySchema,
+  legal_significance: z.string().optional(),
+  applicable_law: z.array(z.string()).default([]),
+  confidence: ConfidenceSchema,
+  resolution_status: z.enum(["CONFIRMED", "PENDING", "DISMISSED"]),
+  triple_ai_consensus: TripleAiConsensusSchema,
+  timestamp: z.string(),
+});
+export type Contradiction = z.infer<typeof ContradictionSchema>;
+
+/** Aggregate findings written to the vault `findings/` directory (spec §7.2). */
+export interface ExtractionFindings {
+  generated_at: string;
+  constitution_version: string;
+  institution: string;
+  document_count: number;
+  atom_count: number;
+  contradiction_count: number;
+  atoms: EvidenceAtom[];
+  contradictions: Contradiction[];
 }

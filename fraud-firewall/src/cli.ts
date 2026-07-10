@@ -3,6 +3,7 @@ import { loadConfig } from "./core/config.js";
 import { FraudFirewall, demoTransactions } from "./pipeline/firewall.js";
 import { startServer } from "./api/server.js";
 import { ensureVault } from "./storage/vault.js";
+import { demoDocuments } from "./forensics/engine.js";
 
 async function main(): Promise<void> {
   const [cmd = "help", ...rest] = process.argv.slice(2);
@@ -19,6 +20,16 @@ async function main(): Promise<void> {
       const txns = demoTransactions();
       console.log(`Running demo with ${txns.length} transactions...`);
       const result = await firewall.monitor(txns);
+      console.log(JSON.stringify(result, null, 2));
+      break;
+    }
+    case "extract": {
+      const seal = rest.includes("--seal");
+      const documents = demoDocuments();
+      console.log(
+        `Extracting evidence from ${documents.length} demo document(s)${seal ? " (sealing findings)" : ""}...`,
+      );
+      const result = await firewall.extractEvidence({ documents, seal });
       console.log(JSON.stringify(result, null, 2));
       break;
     }
@@ -54,6 +65,7 @@ async function main(): Promise<void> {
 Commands:
   serve                 Start HTTP API (default port ${config.server.port})
   demo                  Run end-to-end fraud detection demo
+  extract [--seal]      Run evidence extraction + contradiction demo
   credits               Show seal credit ledger
   credits add <n> <ref> Add seal credits with payment proof
   seal <ref> <title> <body...>

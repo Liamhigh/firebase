@@ -41,7 +41,9 @@
     "audit_log": "./vault/ai-audit.jsonl",
     "alerts_dir": "./vault/alerts",
     "invoices_dir": "./vault/invoices",
-    "sealed_dir": "./vault/sealed"
+    "sealed_dir": "./vault/sealed",
+    "evidence_dir": "./vault/evidence",
+    "findings_dir": "./vault/findings"
   },
   "server": {
     "host": "0.0.0.0",
