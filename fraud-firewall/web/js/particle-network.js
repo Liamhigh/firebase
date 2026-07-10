@@ -165,13 +165,14 @@ export function mountParticleNetwork(canvas) {
   resize();
   frame();
   window.addEventListener("resize", resize);
-  canvas.addEventListener("mousemove", onMove);
-  canvas.addEventListener("mouseleave", onLeave);
+  // Track mouse on window so the decorative canvas never intercepts clicks
+  window.addEventListener("mousemove", onMove);
+  window.addEventListener("mouseleave", onLeave);
 
   return () => {
     cancelAnimationFrame(raf);
     window.removeEventListener("resize", resize);
-    canvas.removeEventListener("mousemove", onMove);
-    canvas.removeEventListener("mouseleave", onLeave);
+    window.removeEventListener("mousemove", onMove);
+    window.removeEventListener("mouseleave", onLeave);
   };
 }

@@ -68,7 +68,7 @@ body {
   inset: 0;
   width: 100%;
   height: 100%;
-  pointer-events: auto;
+  pointer-events: none;
 }
 
 img {
@@ -281,10 +281,14 @@ select {
 
 .btn {
   appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border: 1px solid transparent;
   border-radius: 0.45rem;
   padding: 0.8rem 1.2rem;
   cursor: pointer;
+  text-decoration: none;
   transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
 }
 
@@ -292,20 +296,25 @@ select {
   transform: translateY(-1px);
 }
 
-.btn:disabled {
+.btn:disabled,
+.btn.is-disabled {
   opacity: 0.55;
   cursor: not-allowed;
   transform: none;
+  pointer-events: none;
 }
 
 .btn-primary {
-  background: linear-gradient(180deg, var(--gold-300), var(--gold-400));
-  color: var(--navy-950);
+  background-color: #d4a843 !important;
+  background-image: none !important;
+  color: #040d1b !important;
   font-weight: 700;
+  border-color: #d4a843 !important;
 }
 
 .btn-primary:hover {
-  background: linear-gradient(180deg, #f0d27a, var(--gold-300));
+  background-color: #e8c567 !important;
+  border-color: #e8c567 !important;
 }
 
 .btn-ghost {

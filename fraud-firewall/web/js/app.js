@@ -108,7 +108,7 @@ function showResult(result) {
 
 async function runMonitor(transactions) {
   $("monitorBtn").disabled = true;
-  $("runDemoBtn").disabled = true;
+  $("runDemoBtn").classList.add("is-disabled");
   try {
     const result = await api("/v1/monitor", {
       method: "POST",
@@ -121,7 +121,7 @@ async function runMonitor(transactions) {
     toast(err.message, "err");
   } finally {
     $("monitorBtn").disabled = false;
-    $("runDemoBtn").disabled = false;
+    $("runDemoBtn").classList.remove("is-disabled");
   }
 }
 
@@ -136,7 +136,8 @@ $("loadDemoBtn").addEventListener("click", () => {
 
 $("refreshCreditsBtn").addEventListener("click", () => refreshCredits());
 
-$("runDemoBtn").addEventListener("click", async () => {
+$("runDemoBtn").addEventListener("click", async (event) => {
+  event.preventDefault();
   loadDemoIntoEditor();
   await runMonitor(DEMO_TXNS);
 });
