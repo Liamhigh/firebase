@@ -202,6 +202,72 @@
           <div class="verify-grid" id="verifyGrid"></div>
         </div>
       </section>
+
+      <section class="panel pricing" id="pricingPanel">
+        <h2>Pricing &amp; Licensing</h2>
+        <p class="sub">
+          One rule: Verum Omnis takes <strong>20%</strong> of value. Private individuals and
+          SAPS are permanently free. Data is never sold.
+        </p>
+
+        <div class="price-streams" id="priceStreams"></div>
+
+        <div class="quote-form">
+          <div class="field">
+            <label for="quoteCategory">Category</label>
+            <select id="quoteCategory">
+              <option value="fraud_recovery">Fraud recovery — 20% of value prevented</option>
+              <option value="legal_services">Legal services — 20% of local lawyer fees</option>
+              <option value="ai_subscription">AI subscription — 20% of turnover</option>
+              <option value="commercial">Commercial engagement — 20%</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="quoteUserType">User type</label>
+            <select id="quoteUserType">
+              <option value="bank">Bank</option>
+              <option value="ai_company">AI company</option>
+              <option value="institution">Institution</option>
+              <option value="commercial">Commercial</option>
+              <option value="individual">Private individual (free)</option>
+              <option value="saps">SAPS (free)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="quoteAmount" id="quoteAmountLabel">Value prevented (ZAR)</label>
+            <input id="quoteAmount" type="number" min="0" step="1000" placeholder="1500000" />
+          </div>
+          <div class="field legal-only" id="quoteJurisdictionField" hidden>
+            <label for="quoteJurisdiction">Jurisdiction</label>
+            <select id="quoteJurisdiction">
+              <option value="ZA-KZN">ZA-KZN</option>
+              <option value="ZA-GP">ZA-GP</option>
+              <option value="ZA-WC">ZA-WC</option>
+              <option value="UAE">UAE</option>
+              <option value="US">US</option>
+              <option value="UK">UK</option>
+              <option value="EU">EU</option>
+            </select>
+          </div>
+          <div class="field legal-only" id="quoteComplexityField" hidden>
+            <label for="quoteComplexity">Matter complexity</label>
+            <select id="quoteComplexity">
+              <option value="simple">Simple</option>
+              <option value="moderate" selected>Moderate</option>
+              <option value="complex">Complex</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="cta-row">
+          <button class="btn btn-primary" id="quoteBtn" type="button">Calculate 20% share</button>
+        </div>
+
+        <div class="result" hidden id="quoteResultBlock">
+          <div class="quote-amount" id="quoteAmountOut"></div>
+          <div class="verify-grid" id="quoteGrid"></div>
+        </div>
+      </section>
     </main>
 
     <footer class="shell footer">

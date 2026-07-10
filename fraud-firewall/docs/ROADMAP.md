@@ -23,7 +23,7 @@ reconstruction, offence matrix, and financial analysis remain in scope because
 | Email delivery | V | 🟡 writes queued JSON (no SMTP) |
 | Real local LLMs (Gemma/Phi/Mistral) | II | 🟡 deterministic heuristics |
 | Sealed-report content: timeline, offence matrix, financial analysis | V §5.3 | 🟡 Phase 1 |
-| Licensing / pricing tiers | VI, IV §4.3 | ⛔ |
+| Licensing / pricing (universal 20% model + free tiers) | VI, business constitution | ✅ pricing engine + quotes; SMTP delivery still pending |
 | Bank system integration (read-only APIs) | VII | ⛔ (in-memory buffer) |
 | Cloud deployment / system requirements | IX | 🟡 on-prem Docker only |
 
@@ -47,9 +47,13 @@ reconstruction, offence matrix, and financial analysis remain in scope because
 - Dep: OTS network egress. Risk: medium.
 
 ### Phase 3 — Notifications + licensing/pricing
-- Real SMTP "send-only" email gateway behind `NotificationService` (VII), with delivery audit.
-- Pricing tables + subscription tiers (Basic/Professional/Enterprise), per-seal vs bulk, license-tier enforcement (VI, §4.3).
-- Dep: SMTP credentials. Risk: medium.
+- ✅ **Pricing engine** (`core/pricing.ts`): universal **20% share** model per the business
+  constitution — fraud recovery (20% of value prevented), legal services (20% of local
+  lawyer fees, geographically benchmarked), AI-company subscription (20% of turnover),
+  any commercial engagement (20%). Private individuals + SAPS permanently **free**; data
+  never sold. `GET /v1/pricing`, `POST /v1/pricing/quote`, console Pricing panel.
+- ⛔ (remaining) Real SMTP "send-only" email gateway behind `NotificationService` (VII), with delivery audit. Dep: SMTP credentials.
+- ⏸ Bank document-sealing subscriptions — to be discussed (per operator).
 
 ### Phase 4 — Bank system integration
 - Read-only connectors (Transaction Engine, Account DB, KYC, Comms logs) behind a `BankSource` interface + dev mock; data-access controls; per-access audit logging; wire Mistral agents to real sources (VII §7.1–7.4, VIII).

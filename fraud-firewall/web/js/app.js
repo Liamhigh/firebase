@@ -370,6 +370,98 @@ async function runVerify() {
 
 $("verifyBtn").addEventListener("click", runVerify);
 
+/* ---------------- Pricing & licensing ---------------- */
+
+const AMOUNT_LABELS = {
+  fraud_recovery: "Value prevented (ZAR)",
+  ai_subscription: "AI company annual turnover (ZAR)",
+  commercial: "Commercial engagement value (ZAR)",
+  legal_services: "Explicit lawyer fee (optional — leave blank to benchmark)",
+};
+
+function fmtMoney(n, currency) {
+  return `${currency} ${Number(n).toLocaleString("en-ZA", { maximumFractionDigits: 2 })}`;
+}
+
+async function loadPricing() {
+  try {
+    const p = await api("/v1/pricing");
+    const cards = [
+      { t: "Fraud recovery", c: p.streams.fraud_recovery, free: false },
+      { t: "Legal services", c: p.streams.legal_services, free: false },
+      { t: "AI subscription", c: p.streams.ai_subscription, free: false },
+      { t: "Commercial", c: p.streams.commercial, free: false },
+      { t: "Private individuals", c: p.free.individuals, free: true },
+      { t: "SAPS", c: p.free.saps, free: true },
+    ];
+    $("priceStreams").innerHTML = cards
+      .map(
+        (x) =>
+          `<div class="price-card ${x.free ? "free" : ""}"><div class="pc-title">${escapeHtml(x.t)}</div><p class="pc-copy">${escapeHtml(x.c)}</p></div>`,
+      )
+      .join("");
+  } catch {
+    /* pricing is best-effort */
+  }
+}
+
+function syncQuoteForm() {
+  const cat = $("quoteCategory").value;
+  $("quoteAmountLabel").textContent = AMOUNT_LABELS[cat];
+  const legal = cat === "legal_services";
+  $("quoteJurisdictionField").hidden = !legal;
+  $("quoteComplexityField").hidden = !legal;
+}
+
+async function runQuote() {
+  const category = $("quoteCategory").value;
+  const userType = $("quoteUserType").value;
+  const amount = parseFloat($("quoteAmount").value) || 0;
+  const payload = { category, user_type: userType };
+  if (category === "fraud_recovery") payload.recovered_value = amount;
+  else if (category === "ai_subscription") payload.annual_turnover = amount;
+  else if (category === "commercial") payload.commercial_value = amount;
+  else if (category === "legal_services") {
+    if (amount > 0) payload.lawyer_fee = amount;
+    payload.jurisdiction = $("quoteJurisdiction").value;
+    payload.complexity = $("quoteComplexity").value;
+  }
+  $("quoteBtn").disabled = true;
+  try {
+    const q = await api("/v1/pricing/quote", { method: "POST", body: JSON.stringify(payload) });
+    $("quoteResultBlock").hidden = false;
+    const out = $("quoteAmountOut");
+    if (q.billable) {
+      out.className = "quote-amount";
+      out.textContent = `${fmtMoney(q.charge, q.currency)}  (20% of ${fmtMoney(q.base_amount, q.currency)})`;
+    } else {
+      out.className = "quote-amount free";
+      out.textContent = "FREE";
+    }
+    const rows = [
+      row("Category", q.category),
+      row("User type", q.user_type),
+      row("Billable", q.billable ? "YES (20%)" : "NO — free"),
+      row(q.base_label, fmtMoney(q.base_amount, q.currency)),
+      row("Verum 20% share", fmtMoney(q.charge, q.currency)),
+    ];
+    if (q.benchmark) {
+      rows.push(row("Lawyer benchmark", `${q.benchmark.hourly_rate}/hr x ${q.benchmark.hours}h x ${q.benchmark.entity_multiplier}`));
+    }
+    rows.push(row("Notes", q.notes.join(" ")));
+    $("quoteGrid").innerHTML = rows.join("");
+  } catch (err) {
+    toast(err.message, "err");
+  } finally {
+    $("quoteBtn").disabled = false;
+  }
+}
+
+$("quoteCategory").addEventListener("change", syncQuoteForm);
+$("quoteBtn").addEventListener("click", runQuote);
+syncQuoteForm();
+loadPricing();
+
 loadDemoIntoEditor();
 loadDemoDocsIntoEditor();
 refreshHealth();

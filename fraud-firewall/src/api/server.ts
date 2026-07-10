@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 import type { FraudFirewall } from "../pipeline/firewall.js";
 import { TransactionSchema } from "../core/types.js";
 import { findingsPath, readJson } from "../storage/vault.js";
+import type { QuoteInput } from "../core/pricing.js";
 import { z } from "zod";
 
 const WEB_ROOT = resolve(
@@ -99,6 +100,46 @@ export function startServer(firewall: FraudFirewall): {
 
       if (method === "GET" && url.pathname === "/v1/agents") {
         return sendJson(res, 200, { agents: firewall.listAgents() });
+      }
+
+      if (method === "GET" && url.pathname === "/v1/pricing") {
+        return sendJson(res, 200, firewall.getPricing());
+      }
+
+      if (method === "POST" && url.pathname === "/v1/pricing/quote") {
+        const body = JSON.parse(await readBody(req)) as {
+          category?: string;
+          user_type?: string;
+          recovered_value?: number;
+          annual_turnover?: number;
+          commercial_value?: number;
+          lawyer_fee?: number;
+          jurisdiction?: string;
+          complexity?: "simple" | "moderate" | "complex";
+          entity_type?: "individual" | "sme" | "corporate" | "institution";
+          currency?: string;
+        };
+        const validCategories = ["fraud_recovery", "legal_services", "ai_subscription", "commercial"];
+        const validUsers = ["individual", "saps", "bank", "ai_company", "institution", "commercial"];
+        if (!body.category || !validCategories.includes(body.category)) {
+          return sendJson(res, 400, { error: `category must be one of ${validCategories.join(", ")}` });
+        }
+        if (!body.user_type || !validUsers.includes(body.user_type)) {
+          return sendJson(res, 400, { error: `user_type must be one of ${validUsers.join(", ")}` });
+        }
+        const quote = firewall.quote({
+          category: body.category as QuoteInput["category"],
+          userType: body.user_type as QuoteInput["userType"],
+          recoveredValue: body.recovered_value,
+          annualTurnover: body.annual_turnover,
+          commercialValue: body.commercial_value,
+          lawyerFee: body.lawyer_fee,
+          jurisdiction: body.jurisdiction,
+          complexity: body.complexity,
+          entityType: body.entity_type,
+          currency: body.currency,
+        });
+        return sendJson(res, 200, quote);
       }
 
       if (method === "POST" && url.pathname === "/v1/credits/purchase") {

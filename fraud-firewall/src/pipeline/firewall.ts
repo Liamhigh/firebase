@@ -22,6 +22,7 @@ import { ForensicEngine } from "../forensics/engine.js";
 import { verifySeal, type SealVerification } from "../core/verification.js";
 import { buildTimelineFromTransactions } from "../forensics/timeline.js";
 import { offenceFromFraud } from "../forensics/offences.js";
+import { computeQuote, revenueModel, type QuoteInput } from "../core/pricing.js";
 import {
   alertPath,
   ensureVault,
@@ -82,6 +83,16 @@ export class FraudFirewall {
   /** Extract evidence atoms + contradictions from documents (spec §4.2/§4.3). */
   extractEvidence(opts: { documents?: unknown[]; seal?: boolean } = {}) {
     return this.forensics.extract(opts);
+  }
+
+  /** Revenue model (business constitution): the universal 20% share + free tiers. */
+  getPricing() {
+    return revenueModel();
+  }
+
+  /** Compute a 20% quote for a given category/user type (honours free tiers). */
+  quote(input: QuoteInput) {
+    return computeQuote(input);
   }
 
   /** Verify a sealed document: SHA-512 match + OpenTimestamps anchor (spec §6.4). */

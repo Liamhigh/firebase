@@ -652,6 +652,86 @@ select {
   word-break: break-all;
 }
 
+/* Pricing & licensing */
+.pricing {
+  margin-bottom: 3rem;
+  animation: rise 0.9s ease 0.22s both;
+}
+
+.price-streams {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.6rem;
+  margin-bottom: 1.2rem;
+}
+
+@media (max-width: 640px) {
+  .price-streams {
+    grid-template-columns: 1fr;
+  }
+}
+
+.price-card {
+  border: 1px solid rgba(74, 126, 199, 0.2);
+  border-left: 3px solid var(--gold-400);
+  border-radius: var(--radius);
+  background: rgba(4, 13, 27, 0.45);
+  padding: 0.7rem 0.9rem;
+}
+
+.price-card.free {
+  border-left-color: var(--success);
+}
+
+.price-card .pc-title {
+  font-weight: 600;
+  color: var(--paper);
+  font-size: 0.9rem;
+}
+
+.price-card .pc-copy {
+  margin: 0.2rem 0 0;
+  font-size: 0.8rem;
+  color: var(--muted-foreground);
+}
+
+.quote-form {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+}
+
+@media (max-width: 640px) {
+  .quote-form {
+    grid-template-columns: 1fr;
+  }
+}
+
+.quote-form select {
+  width: 100%;
+  border: 1px solid hsl(var(--input));
+  border-radius: var(--radius);
+  background: rgba(4, 13, 27, 0.65);
+  padding: 0.7rem 0.8rem;
+  color: var(--paper);
+  outline: none;
+}
+
+.quote-form select:focus {
+  border-color: var(--gold-400);
+}
+
+.quote-amount {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  color: var(--gold-300);
+  margin-bottom: 0.6rem;
+}
+
+.quote-amount.free {
+  color: var(--success);
+}
+
 .footer {
   border-top: 1px solid rgba(74, 126, 199, 0.16);
   padding: 1.5rem 0 2.5rem;
