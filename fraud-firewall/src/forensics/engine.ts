@@ -12,6 +12,7 @@ import { EvidenceExtractor } from "./extractor.js";
 import { ContradictionEngine } from "./contradiction.js";
 import { buildTimelineFromAtoms } from "./timeline.js";
 import { buildOffencesFromContradictions } from "./offences.js";
+import { runBrainAnalysis, computeConsensus } from "./brains.js";
 import { DocumentSealingService } from "../core/sealing.js";
 import {
   ensureVault,
@@ -122,6 +123,8 @@ export class ForensicEngine {
     });
     const timeline = buildTimelineFromAtoms(atoms);
     const offences = buildOffencesFromContradictions(contradictions);
+    const brainFindings = runBrainAnalysis(atoms, now);
+    const consensus = computeConsensus(contradictions, brainFindings, offences);
 
     const findings: ExtractionFindings = {
       generated_at: now,
@@ -134,17 +137,21 @@ export class ForensicEngine {
       contradictions,
       timeline,
       offences,
+      brain_findings: brainFindings,
+      consensus,
     };
 
     const atomsPath = findingsPath(this.config, "evidence_atoms.json");
     const contradictionsPath = findingsPath(this.config, "contradictions.json");
     const timelinePath = findingsPath(this.config, "timeline.json");
     const offencesPath = findingsPath(this.config, "offence_matrix.json");
+    const brainFindingsPath = findingsPath(this.config, "brain_findings.json");
     const manifestPath = findingsPath(this.config, "manifest.json");
     writeJson(atomsPath, atoms);
     writeJson(contradictionsPath, contradictions);
     writeJson(timelinePath, timeline);
     writeJson(offencesPath, offences);
+    writeJson(brainFindingsPath, brainFindings);
     writeJson(manifestPath, {
       generated_at: findings.generated_at,
       constitution_version: findings.constitution_version,
@@ -154,6 +161,8 @@ export class ForensicEngine {
       contradiction_count: findings.contradiction_count,
       timeline_count: timeline.length,
       offence_count: offences.length,
+      brain_finding_count: brainFindings.length,
+      consensus,
       evidence: docs.map((d) => ({
         evidence_id: d.evidence_id,
         source_file: d.source_file,
@@ -228,6 +237,18 @@ function summarize(findings: ExtractionFindings): string {
           `  Anchors: ${o.evidence_anchors.join(" | ")}`,
         ])
       : ["- No offences identified."]),
+    "",
+    "NINE-BRAIN ANALYSIS:",
+    ...(findings.brain_findings.length
+      ? findings.brain_findings.map(
+          (b) => `- [${b.brain_source}] ${b.category}: "${b.description}" (${b.evidence_id} p.${b.page})`,
+        )
+      : ["- No additional brain findings."]),
+    "",
+    "NINE-BRAIN CONSENSUS:",
+    `- Active brains (${findings.consensus.count}): ${findings.consensus.active_brains.join(", ") || "none"}`,
+    `- Threshold: >=${findings.consensus.threshold} independent brains`,
+    `- Verdict: ${findings.consensus.verdict}`,
     "",
     "COURT-READY DECLARATION:",
     "Prepared under Constitution v5.2.7 with Triple-AI verification (Gemma 3 + Phi-3 + 9-Brain).",

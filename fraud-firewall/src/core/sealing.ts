@@ -1,4 +1,14 @@
-import { PDFDocument, PDFPage, StandardFonts, degrees, rgb } from "pdf-lib";
+import {
+  PDFDocument,
+  PDFPage,
+  PDFName,
+  PDFRawStream,
+  PDFHexString,
+  AFRelationship,
+  StandardFonts,
+  degrees,
+  rgb,
+} from "pdf-lib";
 import QRCode from "qrcode";
 import { PNG } from "pngjs";
 import {
@@ -113,7 +123,25 @@ export class DocumentSealingService {
     const digest = sha512(contentForHash);
     const sealId = makeSealId(digest);
     const verifyUrl = appendSeal(this.config.verum.verify_url, sealId);
+    const otsProofFile = `${sealId}.ots`;
+    const otsPath = sealedPath(this.config, sealId).replace(/\.pdf$/, ".ots");
 
+    // Anchor the CONTENT digest to Bitcoin (OpenTimestamps) BEFORE assembling
+    // the PDF, so the proof can be embedded inside the sealed bundle (the
+    // PDF/A-3B "embedded files" feature). Live mode submits to real calendars.
+    let otsBytes: Uint8Array | undefined;
+    let documentSha256: string | undefined;
+    if (this.config.ots?.mode === "live") {
+      try {
+        const res = await otsStamp(Buffer.from(digest, "utf8"));
+        otsBytes = res.otsBytes;
+        documentSha256 = res.sha256;
+      } catch {
+        otsBytes = undefined; // fall back to mock proof below
+      }
+    }
+
+    const embeddedFiles: string[] = [];
     const pdfBytes = await this.buildSealedPdf({
       title: input.title,
       bodyText: input.bodyText,
@@ -124,35 +152,25 @@ export class DocumentSealingService {
       ruleset,
       report: input.report,
       verifyUrl,
+      evidencePayload: input.evidencePayload,
+      otsBytes,
+      otsStatus: "PENDING",
+      embeddedFilesOut: embeddedFiles,
     });
 
-    // SHA-512 happens LAST: fingerprint the final watermarked, QR-stamped PDF.
-    // This is the value anchored to the blockchain via OpenTimestamps and the
-    // value re-computed at verification time.
+    // SHA-512 happens LAST: fingerprint the final sealed PDF (with embedded
+    // proof/evidence). Registered for tamper detection and verify-by-file.
     const documentSha512 = sha512(Buffer.from(pdfBytes));
 
-    // OpenTimestamps: submit the document hash to real Bitcoin calendars when
-    // live; otherwise write an offline mock proof. Status stays PENDING until
-    // Bitcoin confirmation (a few hours) — see verification.ts.
-    const otsProofFile = `${sealId}.ots`;
-    const otsPath = sealedPath(this.config, sealId).replace(/\.pdf$/, ".ots");
-    let documentSha256: string | undefined;
-    let liveAnchored = false;
-    if (this.config.ots?.mode === "live") {
-      try {
-        const res = await otsStamp(pdfBytes);
-        writeFileSync(otsPath, Buffer.from(res.otsBytes)); // real binary .ots proof
-        documentSha256 = res.sha256;
-        liveAnchored = true;
-      } catch {
-        liveAnchored = false; // fall through to mock proof
-      }
-    }
-    if (!liveAnchored) {
+    // Also persist the proof externally (verification-by-file + portability).
+    if (otsBytes) {
+      writeFileSync(otsPath, Buffer.from(otsBytes));
+    } else {
       writeJson(otsPath, {
         version: 1,
         provider: "OpenTimestamps",
         file_sha512: documentSha512,
+        content_sha512: digest,
         seal_id: sealId,
         calendar_urls: OTS_CALENDARS,
         submitted_at: createdAt,
@@ -172,13 +190,15 @@ export class DocumentSealingService {
       document_reference: input.documentReference,
       verify_url: verifyUrl,
       ots_proof_file: otsProofFile,
+      ots_embedded: Boolean(otsBytes),
+      embedded_files: embeddedFiles,
       blockchain: {
         provider: "OpenTimestamps",
         status: "PENDING",
         submitted_at: createdAt,
         calendar_urls: OTS_CALENDARS,
         confirmations: 0,
-        ots_receipt: `ots-${shortCode(documentSha256 ?? documentSha512, 16)}`,
+        ots_receipt: `ots-${shortCode(documentSha256 ?? digest, 16)}`,
       },
     };
 
@@ -218,6 +238,11 @@ export class DocumentSealingService {
     ruleset: ReturnType<typeof constitutionRuleset>;
     report?: SealReportMeta;
     verifyUrl: string;
+    evidencePayload?: unknown;
+    otsBytes?: Uint8Array;
+    otsStatus?: string;
+    /** Populated with the names of files embedded in the PDF. */
+    embeddedFilesOut?: string[];
   }): Promise<Uint8Array> {
     const doc = await PDFDocument.create();
     const font = await doc.embedFont(StandardFonts.Helvetica);
@@ -500,7 +525,145 @@ export class DocumentSealingService {
       this.drawSealFooter(p, font, params.sealId, params.digest, i + 2, total, false);
     });
 
+    // ---- Document metadata (Info + XMP) ----
+    const created = safeDate(params.createdAt);
+    doc.setTitle(pdfSafe(headerSubject || params.title));
+    doc.setAuthor("Verum Omnis");
+    doc.setSubject(pdfSafe(`Sealed forensic report ${params.documentReference}`));
+    doc.setProducer("Verum Omnis Guardian Fraud Firewall");
+    doc.setCreator(`Constitutional Forensic AI v${params.ruleset.version}`);
+    doc.setKeywords([
+      params.sealId,
+      `sha512:${params.digest.slice(0, 32)}`,
+      "VERUM OMNIS SEALED",
+      `constitution:v${params.ruleset.version}`,
+      "PDF/A-3B",
+    ]);
+    doc.setCreationDate(created);
+    doc.setModificationDate(created);
+
+    // ---- Embedded files (PDF/A-3B feature, spec §6.3) ----
+    const embedded = params.embeddedFilesOut ?? [];
+    const attach = async (
+      bytes: Uint8Array,
+      name: string,
+      description: string,
+      afRelationship: AFRelationship,
+    ): Promise<void> => {
+      try {
+        await doc.attach(bytes, name, {
+          mimeType: name.endsWith(".json") ? "application/json" : "application/octet-stream",
+          description,
+          creationDate: created,
+          modificationDate: created,
+          afRelationship,
+        });
+        embedded.push(name);
+      } catch {
+        // Embedding is best-effort; never fail a seal because of an attachment.
+      }
+    };
+
+    // Verum metadata sidecar (mirrors the sealed-document metadata keys).
+    const verumMeta = {
+      seal_id: params.sealId,
+      verum_hash: params.digest,
+      verum_content_sha512: params.digest,
+      constitution_hash: params.ruleset.hash,
+      constitution_version: params.ruleset.version,
+      verify_url: params.verifyUrl,
+      ots_embedded: Boolean(params.otsBytes),
+      ots_status: params.otsStatus ?? "PENDING",
+      hash_algorithm: "SHA-512",
+      blockchain: "Bitcoin via OpenTimestamps",
+      output_standard: "PDF/A-3B",
+    };
+    await attach(
+      new TextEncoder().encode(JSON.stringify(verumMeta, null, 2)),
+      "verum-metadata.json",
+      "Verum Omnis seal metadata",
+      AFRelationship.Supplement,
+    );
+    if (params.otsBytes) {
+      await attach(
+        params.otsBytes,
+        "verum-proof.ots",
+        "OpenTimestamps Bitcoin proof",
+        AFRelationship.Supplement,
+      );
+    }
+    if (params.evidencePayload !== undefined) {
+      await attach(
+        new TextEncoder().encode(JSON.stringify(params.evidencePayload, null, 2)),
+        "evidence.json",
+        "Original evidence payload",
+        AFRelationship.Source,
+      );
+    }
+
+    // XMP metadata declaring the PDF/A-3B target (best-effort).
+    this.applyXmp(doc, {
+      title: headerSubject || params.title,
+      sealId: params.sealId,
+      hash: params.digest,
+      version: params.ruleset.version,
+      otsStatus: params.otsStatus ?? "PENDING",
+    });
+
     return doc.save();
+  }
+
+  /**
+   * Inject an XMP metadata stream declaring the PDF/A-3B target and Verum
+   * seal properties, plus a deterministic document ID. Best-effort — any
+   * failure is swallowed so a seal is never blocked by metadata plumbing.
+   */
+  private applyXmp(
+    doc: PDFDocument,
+    meta: { title: string; sealId: string; hash: string; version: string; otsStatus: string },
+  ): void {
+    try {
+      const title = escapeXml(pdfSafe(meta.title));
+      const xmp = `<?xpacket begin="\ufeff" id="W5M0MpCehiHzreSzNTczkc9d"?>
+<x:xmpmeta xmlns:x="adobe:ns:meta/">
+ <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+  <rdf:Description rdf:about="" xmlns:pdfaid="http://www.aiim.org/pdfa/ns/id/">
+   <pdfaid:part>3</pdfaid:part>
+   <pdfaid:conformance>B</pdfaid:conformance>
+  </rdf:Description>
+  <rdf:Description rdf:about="" xmlns:dc="http://purl.org/dc/elements/1.1/">
+   <dc:title><rdf:Alt><rdf:li xml:lang="x-default">${title}</rdf:li></rdf:Alt></dc:title>
+   <dc:creator><rdf:Seq><rdf:li>Verum Omnis</rdf:li></rdf:Seq></dc:creator>
+  </rdf:Description>
+  <rdf:Description rdf:about="" xmlns:verum="https://verumglobal.foundation/ns/1.0/">
+   <verum:sealId>${escapeXml(meta.sealId)}</verum:sealId>
+   <verum:hash>${escapeXml(meta.hash)}</verum:hash>
+   <verum:constitutionVersion>${escapeXml(meta.version)}</verum:constitutionVersion>
+   <verum:otsStatus>${escapeXml(meta.otsStatus)}</verum:otsStatus>
+   <verum:otsEmbedded>true</verum:otsEmbedded>
+  </rdf:Description>
+ </rdf:RDF>
+</x:xmpmeta>
+<?xpacket end="w"?>`;
+      const bytes = new TextEncoder().encode(xmp);
+      const dict = doc.context.obj({
+        Type: "Metadata",
+        Subtype: "XML",
+        Length: bytes.length,
+      });
+      const stream = PDFRawStream.of(dict, bytes);
+      const ref = doc.context.register(stream);
+      doc.catalog.set(PDFName.of("Metadata"), ref);
+
+      // Deterministic document ID from the content hash (PDF/A wants a stable ID).
+      const idHex = meta.hash.slice(0, 32);
+      doc.context.trailerInfo.ID = doc.context.obj([
+        PDFHexString.of(idHex),
+        PDFHexString.of(idHex),
+      ]);
+    } catch {
+      // Metadata is best-effort.
+    }
   }
 
   private drawSealFooter(
@@ -575,6 +738,23 @@ function wrapText(text: string, width: number): string[] {
   }
   if (current) lines.push(current);
   return lines;
+}
+
+/** Parse an ISO date, defaulting to now on failure (pdf-lib needs a valid Date). */
+function safeDate(iso?: string): Date {
+  if (!iso) return new Date();
+  const d = new Date(iso);
+  return Number.isNaN(d.getTime()) ? new Date() : d;
+}
+
+/** Minimal XML escaping for XMP text values. */
+function escapeXml(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
 }
 
 /** Append a seal id to the configured verify URL, preserving any hash fragment. */

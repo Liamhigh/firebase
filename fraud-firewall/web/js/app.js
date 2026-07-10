@@ -220,9 +220,14 @@ function renderFindings(result) {
 
   const tl = findings.timeline?.length ?? 0;
   const off = findings.offences?.length ?? 0;
+  const bf = findings.brain_findings?.length ?? 0;
+  const consensus = findings.consensus;
+  const consensusStr = consensus
+    ? ` · consensus ${consensus.verdict} (${consensus.count} brains)`
+    : "";
   $("extractMessage").textContent =
     `${findings.atom_count} evidence atom(s) · ${contradictions.length} contradiction(s) · ` +
-    `${tl} timeline event(s) · ${off} offence(s).`;
+    `${tl} timeline event(s) · ${off} offence(s) · ${bf} brain finding(s)${consensusStr}.`;
 
   $("contraList").innerHTML = contradictions
     .map((c) => {

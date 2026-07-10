@@ -63,6 +63,28 @@ describe("sealing produces a watermarked, anchored forensic PDF", () => {
 
     rmSync(config.storage.vault_dir, { recursive: true, force: true });
   });
+
+  it("embeds evidence + verum metadata as PDF/A-3B attachments", async () => {
+    const config = isolatedConfig();
+    const svc = new DocumentSealingService(config);
+    const sealed = await svc.seal({
+      documentReference: "VO-TEST-EMB",
+      title: "Embedded Test",
+      bodyText: "Body.",
+      evidencePayload: { atoms: 3, contradictions: 1 },
+      report: { subject: "Test Co" },
+      createdAt: CREATED,
+    });
+    assert.ok(sealed.seal.embedded_files?.includes("verum-metadata.json"));
+    assert.ok(sealed.seal.embedded_files?.includes("evidence.json"));
+    // Mock OTS mode does not embed a live proof.
+    assert.equal(sealed.seal.ots_embedded, false);
+    // The XMP metadata stream (uncompressed) declares the PDF/A-3B target.
+    const pdf = Buffer.from(sealed.pdfBytes).toString("latin1");
+    assert.match(pdf, /pdfaid:part/);
+    assert.match(pdf, /pdfaid:conformance/);
+    rmSync(config.storage.vault_dir, { recursive: true, force: true });
+  });
 });
 
 describe("seal verification (spec §6.4)", () => {

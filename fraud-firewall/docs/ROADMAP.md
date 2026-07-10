@@ -48,6 +48,22 @@ whole ruleset is embedded in every seal's hash. Endpoints: `GET /v1/constitution
 - Broaden detection heuristics across `FraudType`s.
 - Touches: `forensics/`, `pipeline/`, `core/verification.ts`, `api/server.ts`, `web/`. Risk: low.
 
+### Sealing completeness (§6.3 / Core Statutes) ✅ DONE
+- ✅ Sealed PDFs embed the **OpenTimestamps proof (`verum-proof.ots`), the original
+  evidence (`evidence.json`), and `verum-metadata.json`** as attachments (PDF/A-3B
+  embedded-files feature), plus rich Info metadata and an **XMP stream declaring
+  PDF/A-3B** (`pdfaid:part=3`, `conformance=B`) and Verum seal properties + a
+  deterministic document ID. OTS now anchors the content digest so the proof can be
+  embedded without hash circularity.
+- Remaining for strict veraPDF PASS: sRGB OutputIntent (ICC) + embedded fonts.
+
+### Nine-Brain analysis + consensus ✅ DONE
+- ✅ Added deterministic **B2 Document Forensics** (tamper/forgery), **B3 Communications**
+  (deletions/gaps), **B4 Linguistics** (evasion/gaslighting) detectors (`forensics/brains.ts`),
+  complementing B1/B5/B6 (contradictions) and B7 (offences). Enforces the **≥3-brain
+  consensus** verdict (CONFIRMED / INSUFFICIENT / INDETERMINATE). Findings + consensus are
+  written to the vault, embedded in the sealed report, and shown in the console.
+
 ### Phase 2 — Real blockchain anchoring ✅ DONE
 - ✅ Real OpenTimestamps stamping to public calendars on seal (`core/opentimestamps.ts`),
   storing a real binary `.ots` proof; `config.ots.mode` (`live`/`mock`) with automatic

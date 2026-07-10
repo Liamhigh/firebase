@@ -59,6 +59,10 @@ export const SealRecordSchema = z.object({
   verify_url: z.string().optional(),
   /** OpenTimestamps proof filename stored alongside the sealed PDF. */
   ots_proof_file: z.string().optional(),
+  /** True when the OpenTimestamps proof is embedded inside the sealed PDF. */
+  ots_embedded: z.boolean().optional(),
+  /** Attachments embedded in the sealed PDF (PDF/A-3B feature). */
+  embedded_files: z.array(z.string()).optional(),
   blockchain: z
     .object({
       provider: z.literal("OpenTimestamps"),
@@ -434,6 +438,30 @@ export const OffenceSchema = z.object({
 });
 export type Offence = z.infer<typeof OffenceSchema>;
 
+/** A finding from one of the forensic Nine-Brain analysis modules (§1.3/§4). */
+export const BrainFindingSchema = z.object({
+  finding_id: z.string(),
+  brain_source: BrainSourceSchema,
+  category: z.string(),
+  severity: SeveritySchema,
+  confidence: ConfidenceSchema,
+  description: z.string(),
+  evidence_id: z.string(),
+  page: z.number().int().nonnegative(),
+  line: z.number().int().nonnegative(),
+  sha512: z.string(),
+});
+export type BrainFinding = z.infer<typeof BrainFindingSchema>;
+
+/** Nine-Brain consensus: ≥3 independent brains must agree (White Paper §4). */
+export interface NineBrainConsensus {
+  active_brains: string[];
+  count: number;
+  threshold: number;
+  meets_threshold: boolean;
+  verdict: "CONFIRMED" | "INSUFFICIENT" | "INDETERMINATE";
+}
+
 /** Aggregate findings written to the vault `findings/` directory (spec §7.2). */
 export interface ExtractionFindings {
   generated_at: string;
@@ -446,4 +474,6 @@ export interface ExtractionFindings {
   contradictions: Contradiction[];
   timeline: TimelineEvent[];
   offences: Offence[];
+  brain_findings: BrainFinding[];
+  consensus: NineBrainConsensus;
 }
