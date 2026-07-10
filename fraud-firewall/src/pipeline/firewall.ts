@@ -18,6 +18,7 @@ import { DocumentSealingService } from "../core/sealing.js";
 import { generateCommissionInvoice } from "../core/commission.js";
 import { NotificationService } from "../notifications/email.js";
 import { SealCreditLedgerService } from "../core/sealCredits.js";
+import { ForensicEngine } from "../forensics/engine.js";
 import {
   alertPath,
   ensureVault,
@@ -47,6 +48,7 @@ export class FraudFirewall {
   private readonly notifications: NotificationService;
   private readonly credits: SealCreditLedgerService;
   private readonly agents: MistralAgentPool;
+  private readonly forensics: ForensicEngine;
   private readonly buffer: Transaction[] = [];
   private alertSeq = 0;
   private caseSeq = 0;
@@ -62,6 +64,21 @@ export class FraudFirewall {
     this.notifications = new NotificationService(config);
     this.credits = new SealCreditLedgerService(config);
     this.agents = new MistralAgentPool(config, () => [...this.buffer]).configureDefaultPool();
+    this.forensics = new ForensicEngine(config);
+  }
+
+  /** Ingest an evidence document for forensic extraction (spec §4.1). */
+  ingestEvidence(doc: unknown) {
+    return this.forensics.ingest(doc);
+  }
+
+  listEvidence() {
+    return this.forensics.listEvidence();
+  }
+
+  /** Extract evidence atoms + contradictions from documents (spec §4.2/§4.3). */
+  extractEvidence(opts: { documents?: unknown[]; seal?: boolean } = {}) {
+    return this.forensics.extract(opts);
   }
 
   getConfig(): FirewallConfig {
@@ -248,6 +265,12 @@ export class FraudFirewall {
         transactions: txns,
       },
       createdAt: now.toISOString(),
+      report: {
+        subject: this.config.institution.name,
+        subtitle: `${alert.fraud_type} — Guardian Fraud Firewall Investigation`,
+        caseReference: caseRef,
+        jurisdiction: this.config.institution.jurisdiction,
+      },
     });
 
     const invoice = generateCommissionInvoice({

@@ -135,6 +135,53 @@
           </div>
         </aside>
       </section>
+
+      <section class="panel extraction" id="extractionPanel">
+        <h2>Evidence Extraction</h2>
+        <p class="sub">
+          Ingest documents, extract anchored evidence atoms (SHA-512 + page/line), and detect
+          structured contradictions across the Nine-Brain roles. Deterministic and offline
+          (spec §4.2 / §4.3 / §12.1 / §12.2).
+        </p>
+
+        <div class="stat-row">
+          <div class="stat">
+            <span class="label">Documents</span>
+            <span class="value" id="docCountValue">—</span>
+          </div>
+          <div class="stat">
+            <span class="label">Evidence Atoms</span>
+            <span class="value" id="atomCountValue">—</span>
+          </div>
+          <div class="stat">
+            <span class="label">Contradictions</span>
+            <span class="value" id="contraCountValue">—</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="docInput">Documents (JSON array of forensic documents)</label>
+          <textarea id="docInput" spellcheck="false"></textarea>
+        </div>
+
+        <div class="cta-row">
+          <button class="btn btn-primary" id="extractBtn" type="button">Extract &amp; Detect</button>
+          <button class="btn btn-ghost" id="loadDemoDocsBtn" type="button">Load Demo Evidence</button>
+          <label class="seal-toggle"><input type="checkbox" id="sealFindingsChk" /> Seal findings</label>
+        </div>
+
+        <div class="result" hidden id="extractResultBlock">
+          <p class="sub" id="extractMessage"></p>
+          <div class="contra-list" id="contraList"></div>
+          <details class="raw-findings">
+            <summary>Raw findings JSON</summary>
+            <pre id="extractPre"></pre>
+          </details>
+          <div class="cta-row" id="extractDownloadRow" hidden>
+            <a class="btn btn-ghost" id="downloadFindingsSeal" href="#" target="_blank" rel="noreferrer">Download Sealed Findings PDF</a>
+          </div>
+        </div>
+      </section>
     </main>
 
     <footer class="shell footer">
