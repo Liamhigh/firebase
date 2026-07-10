@@ -106,6 +106,26 @@ export function startServer(firewall: FraudFirewall): {
         return sendJson(res, 200, firewall.getPricing());
       }
 
+      if (method === "GET" && url.pathname === "/v1/constitution") {
+        return sendJson(res, 200, firewall.getConstitution());
+      }
+
+      if (method === "GET" && url.pathname === "/v1/brains") {
+        return sendJson(res, 200, firewall.getBrains());
+      }
+
+      if (method === "POST" && url.pathname === "/v1/constitution/check") {
+        const body = JSON.parse(await readBody(req)) as {
+          purpose?: string;
+          bias_score?: number;
+        };
+        return sendJson(
+          res,
+          200,
+          firewall.constitutionCheck({ purpose: body.purpose, biasScore: body.bias_score }),
+        );
+      }
+
       if (method === "POST" && url.pathname === "/v1/pricing/quote") {
         const body = JSON.parse(await readBody(req)) as {
           category?: string;

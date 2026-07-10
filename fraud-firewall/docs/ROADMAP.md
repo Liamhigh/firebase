@@ -27,6 +27,17 @@ reconstruction, offence matrix, and financial analysis remain in scope because
 | Bank system integration (read-only APIs) | VII | ⛔ (in-memory buffer) |
 | Cloud deployment / system requirements | IX | 🟡 on-prem Docker only |
 
+## Constitutional governance (encoded from the sealed Constitution v5.2.7 + White Paper)
+✅ `src/constitution/v5.2.7.json` now encodes the full law: definitions, 8 prime directives,
+triple verification, the **canonical forensic Nine-Brain (B1 Contradiction … B9 R&D Advisory,
+non-voting)** with the ≥3-brain consensus rule, governance brain rules, core statutes,
+**Article X — Non-Weaponization & Anti-War Doctrine**, licensing, hard-coded constants
+(20% commission, 99% foundation, 0.3% ethics halt, 72h dead-man, 7 guardians, 9 brains),
+and safeguards. Enforced via `assertConstitutionIntegrity` (startup), an Ethics Core kill
+switch, and an Article X weaponization guard writing to an immutable Silence Ledger. The
+whole ruleset is embedded in every seal's hash. Endpoints: `GET /v1/constitution`,
+`GET /v1/brains`, `POST /v1/constitution/check`.
+
 ## Phases
 
 ### Phase 1 — Complete the sealed report + detection (offline, no external deps)

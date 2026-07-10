@@ -27,6 +27,16 @@ import { createLlmProvider, type LlmProvider } from "../ai/llm.js";
 import { findingsPath, readJson } from "../storage/vault.js";
 import type { Contradiction, Offence, TimelineEvent } from "../core/types.js";
 import {
+  assertConstitutionIntegrity,
+  loadConstitution,
+  type Constitution,
+} from "../core/constitution.js";
+import {
+  assessEthics,
+  assessWeaponization,
+  recordSilenceLedger,
+} from "../core/ethics.js";
+import {
   alertPath,
   ensureVault,
   invoicePath,
@@ -57,6 +67,7 @@ export class FraudFirewall {
   private readonly agents: MistralAgentPool;
   private readonly forensics: ForensicEngine;
   private readonly llm: LlmProvider;
+  private readonly constitution: Constitution;
   private readonly buffer: Transaction[] = [];
   private alertSeq = 0;
   private caseSeq = 0;
@@ -74,6 +85,50 @@ export class FraudFirewall {
     this.agents = new MistralAgentPool(config, () => [...this.buffer]).configureDefaultPool();
     this.forensics = new ForensicEngine(config);
     this.llm = createLlmProvider(config);
+    // Fail fast if the sealed Constitution has been tampered with.
+    this.constitution = loadConstitution(config.constitution_version);
+    assertConstitutionIntegrity(this.constitution);
+  }
+
+  /** Full machine-readable Constitution (embedded into every seal). */
+  getConstitution(): Constitution {
+    return this.constitution;
+  }
+
+  /** The canonical forensic Nine-Brain registry + consensus rule (§4). */
+  getBrains(): NonNullable<Constitution["nine_brains"]> {
+    return (
+      this.constitution.nine_brains ?? {
+        consensus_rule: "At least three independent brains must agree.",
+        brains: [],
+      }
+    );
+  }
+
+  /**
+   * Constitutional gate: Ethics Core kill-switch (bias > 0.3% halts) and
+   * Article X non-weaponization check. A weaponization breach is recorded in
+   * the immutable Silence Ledger.
+   */
+  constitutionCheck(input: { purpose?: string; biasScore?: number }) {
+    const ethics = assessEthics(input.biasScore ?? 0);
+    const weaponization = input.purpose
+      ? assessWeaponization(input.purpose)
+      : { breach: false, matches: [], message: "No purpose supplied." };
+    let silence_ledger: { ledger_path: string; sha512: string } | undefined;
+    if (weaponization.breach) {
+      silence_ledger = recordSilenceLedger(this.config, {
+        type: "WEAPONIZATION_ATTEMPT",
+        detail: weaponization.classification ?? "CONSTITUTIONAL BREACH",
+        purpose: input.purpose,
+      });
+    }
+    return {
+      allowed: !ethics.halted && !weaponization.breach,
+      ethics,
+      weaponization,
+      silence_ledger,
+    };
   }
 
   /**
