@@ -57,8 +57,8 @@ export const MONTHS = new Set([
  * overlap) and used to decide whether two claims about the same topic conflict.
  */
 export const NEGATIVE_TOKENS = new Set([
-  "no", "not", "never", "without", "failed", "fell", "collapsed", "denied",
-  "cancelled", "canceled", "terminated", "false", "untrue", "rejected",
+  "no", "not", "never", "without", "failed", "fell", "fallen", "collapsed",
+  "denied", "cancelled", "canceled", "terminated", "false", "untrue", "rejected",
   "lost", "absent", "decreased", "declined", "abandoned", "void", "dismissed",
 ]);
 
@@ -71,6 +71,9 @@ export const POSITIVE_TOKENS = new Set([
 /** Explicit antonym pairs (either direction implies a conflict). */
 export const ANTONYM_PAIRS: Array<[string, string]> = [
   ["fell", "proceeded"],
+  ["fallen", "proceeded"],
+  ["fallen", "completed"],
+  ["fell", "completed"],
   ["cancelled", "completed"],
   ["canceled", "completed"],
   ["denied", "admitted"],

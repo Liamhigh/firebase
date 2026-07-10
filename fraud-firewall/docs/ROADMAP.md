@@ -62,8 +62,10 @@ whole ruleset is embedded in every seal's hash. Endpoints: `GET /v1/constitution
   PDF/TXT bytes, extracts text per page (`pdf-parse` for PDFs), and ingests them into the
   buffer; `POST /v1/evidence/reset` clears it. The console has a **file picker** (multi-file)
   — files stay on the user's machine; leave the JSON box blank to analyse uploaded files.
-  Note: the deterministic contradiction engine can over-flag on very dense documents
-  (tunable via `minTopicOverlap`).
+  Precision tuning: boilerplate/duplicate atoms are skipped, numeric contradictions
+  require significant figures (>=1000), bare polarity needs a strong shared subject
+  (antonym pair or >=3 shared tokens), and results are ranked by severity/confidence
+  and capped — so dense real documents surface genuine findings without noise.
 
 ### Nine-Brain analysis + consensus ✅ DONE
 - ✅ Added deterministic **B2 Document Forensics** (tamper/forgery), **B3 Communications**

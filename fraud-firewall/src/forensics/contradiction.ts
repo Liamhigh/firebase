@@ -21,7 +21,42 @@ import {
 export interface DetectOptions {
   /** Minimum shared significant topic tokens to consider two atoms related. */
   minTopicOverlap?: number;
+  /** Cap the number of contradictions returned (ranked by severity/confidence). */
+  maxResults?: number;
   now?: string;
+}
+
+/** Minimum value for a number to count as a "significant" figure (not a page/count). */
+const SIGNIFICANT_NUMBER = 1000;
+
+const SEVERITY_RANK: Record<string, number> = {
+  CRITICAL: 5,
+  VERY_HIGH: 4,
+  HIGH: 3,
+  MODERATE: 2,
+  LOW: 1,
+};
+const CONFIDENCE_RANK: Record<string, number> = {
+  VERY_HIGH: 5,
+  HIGH: 4,
+  MODERATE: 3,
+  LOW: 2,
+  INSUFFICIENT: 1,
+};
+
+// Seal chrome / boilerplate that must never generate contradictions.
+const BOILERPLATE = [
+  /VERUM OMNIS SEAL/i,
+  /Page \d+ of \d+/i,
+  /Blockchain timestamping via OpenTimestamps/i,
+  /Forensic Report VO-/i,
+  /CONFIDENTIAL - LAW ENFORCEMENT/i,
+  /Source: .*\.pdf/i,
+  /[0-9a-f]{24,}/i,
+];
+
+function isBoilerplate(content: string): boolean {
+  return BOILERPLATE.some((re) => re.test(content));
 }
 
 type ConflictKind = "POLARITY" | "DATE" | "NUMERIC" | null;
@@ -37,41 +72,57 @@ type ConflictKind = "POLARITY" | "DATE" | "NUMERIC" | null;
 export class ContradictionEngine {
   detect(atoms: EvidenceAtom[], options: DetectOptions = {}): Contradiction[] {
     const minOverlap = options.minTopicOverlap ?? 2;
+    const maxResults = options.maxResults ?? 60;
     const now = options.now ?? new Date().toISOString();
-    const topics = atoms.map((a) => topicTokens(a.content));
+
+    // Drop seal/footer boilerplate and de-duplicate repeated atoms (headers,
+    // footers) so dense documents don't produce spurious contradictions.
+    const seen = new Set<string>();
+    const usable = atoms.filter((a) => {
+      if (isBoilerplate(a.content)) return false;
+      if (seen.has(a.sha512)) return false;
+      seen.add(a.sha512);
+      return true;
+    });
+    const topics = usable.map((a) => topicTokens(a.content));
     const out: Contradiction[] = [];
 
-    for (let i = 0; i < atoms.length; i++) {
-      for (let j = i + 1; j < atoms.length; j++) {
-        const a = atoms[i];
-        const b = atoms[j];
+    for (let i = 0; i < usable.length; i++) {
+      for (let j = i + 1; j < usable.length; j++) {
+        const a = usable[i];
+        const b = usable[j];
         if (a.atom_id === b.atom_id) continue;
         const overlap = intersectionSize(topics[i], topics[j]);
         if (overlap < minOverlap) continue;
 
-        const kind = classifyConflict(a, b);
+        const kind = classifyConflict(a, b, overlap);
         if (!kind) continue;
 
-        out.push(
-          buildContradiction(a, b, kind, overlap, now),
-        );
+        out.push(buildContradiction(a, b, kind, overlap, now));
       }
     }
 
-    // Deterministic ordering by id.
-    out.sort((x, y) => x.contradiction_id.localeCompare(y.contradiction_id));
-    return out;
+    // Rank by severity, then confidence, then id (deterministic); cap results.
+    out.sort(
+      (x, y) =>
+        (SEVERITY_RANK[y.severity] ?? 0) - (SEVERITY_RANK[x.severity] ?? 0) ||
+        (CONFIDENCE_RANK[y.confidence] ?? 0) - (CONFIDENCE_RANK[x.confidence] ?? 0) ||
+        x.contradiction_id.localeCompare(y.contradiction_id),
+    );
+    return out.slice(0, maxResults);
   }
 }
 
-function classifyConflict(a: EvidenceAtom, b: EvidenceAtom): ConflictKind {
+function classifyConflict(a: EvidenceAtom, b: EvidenceAtom, overlap: number): ConflictKind {
+  // Strongest signal: an explicit antonym pair (e.g. fell-through vs proceeded).
+  if (hasAntonymConflict(a.content, b.content)) return "POLARITY";
+  // Otherwise a bare positive/negative difference needs a strong shared subject
+  // (>=3 topic tokens) to avoid over-flagging unrelated sentences in dense text.
   const pa = polarityOf(a.content);
   const pb = polarityOf(b.content);
-  const polarityConflict =
-    hasAntonymConflict(a.content, b.content) ||
-    (pa === "POSITIVE" && pb === "NEGATIVE") ||
-    (pa === "NEGATIVE" && pb === "POSITIVE");
-  if (polarityConflict) return "POLARITY";
+  const polarityDiffer =
+    (pa === "POSITIVE" && pb === "NEGATIVE") || (pa === "NEGATIVE" && pb === "POSITIVE");
+  if (polarityDiffer && overlap >= 3) return "POLARITY";
 
   if (hasDate(a.content) && hasDate(b.content)) {
     const da = extractDates(a.content);
@@ -79,8 +130,10 @@ function classifyConflict(a: EvidenceAtom, b: EvidenceAtom): ConflictKind {
     if (da.length && db.length && da.join("|") !== db.join("|")) return "DATE";
   }
 
-  const na = extractNumbers(a.content);
-  const nb = extractNumbers(b.content);
+  // Only compare "significant" figures (amounts), so page numbers, counts, and
+  // confirmation values don't trigger spurious numeric contradictions.
+  const na = extractNumbers(a.content).filter((n) => n >= SIGNIFICANT_NUMBER);
+  const nb = extractNumbers(b.content).filter((n) => n >= SIGNIFICANT_NUMBER);
   if (na.length && nb.length) {
     const sa = [...new Set(na)].sort((x, y) => x - y).join("|");
     const sb = [...new Set(nb)].sort((x, y) => x - y).join("|");
