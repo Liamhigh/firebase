@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <title>Verum Omnis — Guardian Fraud Firewall</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=JetBrains+Mono:wght@400;500&family=Source+Sans+3:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./css/theme.css" />
+  </head>
+  <body>
+    <div class="scanline" aria-hidden="true"></div>
+
+    <header class="topbar">
+      <div class="shell topbar-inner">
+        <a class="brand" href="/">
+          <img src="./assets/mainlogo.png" alt="Verum Omnis" />
+          <span class="brand-copy">
+            <span class="brand-name">VERUM OMNIS</span>
+            <span class="brand-tag">AI Forensics for Truth</span>
+          </span>
+        </a>
+        <div class="nav-meta">
+          <span class="pill" id="healthPill"><span class="dot"></span> Connecting</span>
+          <span class="pill">Constitution v5.2.7</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="shell">
+      <section class="hero">
+        <p class="eyebrow">Guardian Fraud Firewall</p>
+        <h1>Truth That <em>Cannot</em> Be Erased</h1>
+        <p class="hero-lead">
+          On-premise enterprise monitoring under Constitution v5.2.7. Detect, triple-verify,
+          seal with SHA-512 — and notify Verum with a commission invoice only. Evidence never leaves the bank.
+        </p>
+        <div class="cta-row">
+          <button class="btn btn-primary" id="runDemoBtn" type="button">Run Detection Demo</button>
+          <a class="btn btn-ghost" href="https://www.verumglobal.foundation" target="_blank" rel="noreferrer">
+            verumglobal.foundation
+          </a>
+        </div>
+      </section>
+
+      <section class="panel-grid">
+        <div class="panel">
+          <h2>Live Monitor</h2>
+          <p class="sub">Paste transaction JSON or run the built-in demo cluster.</p>
+
+          <div class="stat-row">
+            <div class="stat">
+              <span class="label">Seal Credits</span>
+              <span class="value" id="creditValue">—</span>
+            </div>
+            <div class="stat">
+              <span class="label">Alert Status</span>
+              <span class="value" id="statusValue">IDLE</span>
+            </div>
+            <div class="stat">
+              <span class="label">Quorum</span>
+              <span class="value" id="quorumValue">—</span>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="txnInput">Transactions (JSON array)</label>
+            <textarea id="txnInput" spellcheck="false"></textarea>
+          </div>
+
+          <div class="cta-row">
+            <button class="btn btn-primary" id="monitorBtn" type="button">Monitor Buffer</button>
+            <button class="btn btn-ghost" id="loadDemoBtn" type="button">Load Demo Txns</button>
+            <button class="btn btn-ghost" id="refreshCreditsBtn" type="button">Refresh Credits</button>
+          </div>
+
+          <div class="result" hidden id="resultBlock">
+            <p class="sub" id="resultMessage"></p>
+            <pre id="resultPre"></pre>
+            <div class="cta-row" id="downloadRow" hidden>
+              <a class="btn btn-ghost" id="downloadSeal" href="#" target="_blank" rel="noreferrer">Download Sealed PDF</a>
+            </div>
+          </div>
+        </div>
+
+        <aside class="panel">
+          <h2>Pipeline</h2>
+          <p class="sub">Same architecture as the enterprise specification.</p>
+          <ol class="pipeline">
+            <li>
+              <span class="step-num">01</span>
+              <div>
+                <div class="step-title">Forensic Input Scan</div>
+                <p class="step-copy">Velocity, amount, and geo rules fingerprint every transaction.</p>
+              </div>
+            </li>
+            <li>
+              <span class="step-num">02</span>
+              <div>
+                <div class="step-title">AI Routing Lockdown</div>
+                <p class="step-copy">Gemma 4 + Mistral agents only — Constitution-bound prompts.</p>
+              </div>
+            </li>
+            <li>
+              <span class="step-num">03</span>
+              <div>
+                <div class="step-title">Triple Verification</div>
+                <p class="step-copy">Gemma 3, Phi-3, and 9-Brain must all CONCUR.</p>
+              </div>
+            </li>
+            <li>
+              <span class="step-num">04</span>
+              <div>
+                <div class="step-title">Silence Ledger</div>
+                <p class="step-copy">Confirmed fraud is sealed. Ignored risk cannot be erased.</p>
+              </div>
+            </li>
+          </ol>
+          <div class="privacy">
+            <strong>Privacy hard rule:</strong> Verum Omnis receives commission invoices only —
+            never customer data, transactions, or sealed evidence.
+          </div>
+        </aside>
+      </section>
+    </main>
+
+    <footer class="shell footer">
+      <span>Verum Omnis · Protocol verum-omnis-seal v1.0 · Patent Pending</span>
+      <a href="https://www.verumglobal.foundation" target="_blank" rel="noreferrer">www.verumglobal.foundation</a>
+    </footer>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script type="module" src="./js/app.js"></script>
+  </body>
+</html>

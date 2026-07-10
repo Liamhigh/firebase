@@ -17,6 +17,7 @@ COPY --from=build /app/package.json ./
 COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/dist ./dist
 COPY config ./config
+COPY web ./web
 
 VOLUME ["/app/vault"]
 EXPOSE 8787

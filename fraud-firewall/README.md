@@ -14,8 +14,11 @@ cd fraud-firewall
 npm install
 npm test
 npm run demo
-npm run dev          # HTTP API on :8787
+npm run dev          # UI + HTTP API on :8787
+# open http://localhost:8787
 ```
+
+The console UI matches the live Verum theme from [www.verumglobal.foundation](https://www.verumglobal.foundation) — Cormorant Garamond / Source Sans 3 / JetBrains Mono, navy `#040D1B`–`#1A2E52`, gold `#D4A843`, blue `#4A7EC7`.
 
 Docker:
 

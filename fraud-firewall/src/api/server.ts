@@ -1,8 +1,27 @@
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
-import { readFileSync, existsSync } from "node:fs";
+import { readFileSync, existsSync, statSync } from "node:fs";
+import { extname, join, normalize, resolve, sep } from "node:path";
+import { fileURLToPath } from "node:url";
 import type { FraudFirewall } from "../pipeline/firewall.js";
 import { TransactionSchema } from "../core/types.js";
 import { z } from "zod";
+
+const WEB_ROOT = resolve(
+  fileURLToPath(new URL("../../web/", import.meta.url)),
+);
+
+const MIME: Record<string, string> = {
+  ".html": "text/html; charset=utf-8",
+  ".css": "text/css; charset=utf-8",
+  ".js": "text/javascript; charset=utf-8",
+  ".png": "image/png",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".svg": "image/svg+xml",
+  ".json": "application/json; charset=utf-8",
+  ".ico": "image/x-icon",
+  ".webp": "image/webp",
+};
 
 async function readBody(req: IncomingMessage): Promise<string> {
   const chunks: Buffer[] = [];
@@ -23,6 +42,35 @@ function sendJson(res: ServerResponse, status: number, body: unknown): void {
 
 function notFound(res: ServerResponse): void {
   sendJson(res, 404, { error: "Not found" });
+}
+
+function safeWebPath(urlPath: string): string | null {
+  const cleaned = decodeURIComponent(urlPath.split("?")[0] || "/");
+  const relative = cleaned === "/" ? "index.html" : cleaned.replace(/^\//, "");
+  const candidate = normalize(join(WEB_ROOT, relative));
+  if (!candidate.startsWith(WEB_ROOT + sep) && candidate !== WEB_ROOT) {
+    return null;
+  }
+  return candidate;
+}
+
+function serveStatic(res: ServerResponse, urlPath: string): boolean {
+  const filePath = safeWebPath(urlPath);
+  if (!filePath || !existsSync(filePath) || !statSync(filePath).isFile()) {
+    return false;
+  }
+  const ext = extname(filePath).toLowerCase();
+  const type = MIME[ext] || "application/octet-stream";
+  const bytes = readFileSync(filePath);
+  res.writeHead(200, {
+    "Content-Type": type,
+    "Cache-Control":
+      ext === ".html" || ext === ".js" || ext === ".css"
+        ? "no-cache, no-store, must-revalidate"
+        : "public, max-age=3600",
+  });
+  res.end(bytes);
+  return true;
 }
 
 export function startServer(firewall: FraudFirewall): {
@@ -136,6 +184,11 @@ export function startServer(firewall: FraudFirewall): {
         return res.end(bytes);
       }
 
+      if (method === "GET") {
+        if (serveStatic(res, url.pathname)) return;
+        if (url.pathname !== "/" && serveStatic(res, "/index.html")) return;
+      }
+
       return notFound(res);
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
@@ -147,13 +200,14 @@ export function startServer(firewall: FraudFirewall): {
   server.listen(config.server.port, config.server.host);
   const url = `http://${config.server.host}:${config.server.port}`;
   console.log(`Verum Omnis Fraud Firewall listening on ${url}`);
+  console.log(`UI theme aligned with www.verumglobal.foundation`);
   console.log(`Constitution v${config.constitution_version} · ${config.institution.name}`);
 
   return {
     url,
     close: () =>
-      new Promise((resolve, reject) => {
-        server.close((err) => (err ? reject(err) : resolve()));
+      new Promise((resolveClose, reject) => {
+        server.close((err) => (err ? reject(err) : resolveClose()));
       }),
   };
 }

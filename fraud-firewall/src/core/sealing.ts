@@ -131,40 +131,42 @@ export class DocumentSealingService {
     // Cover page
     {
       const page = doc.addPage([pageWidth, pageHeight]);
+      // Theme aligned with www.verumglobal.foundation
+      // navy #040D1B, gold #D4A843, blue #4A7EC7, ink #D5D8DD
       page.drawRectangle({
         x: 0,
         y: 0,
         width: pageWidth,
         height: pageHeight,
-        color: rgb(0.05, 0.1, 0.18),
+        color: rgb(0.0157, 0.05098, 0.1059),
       });
       page.drawText("VERUM OMNIS", {
         x: margin,
         y: pageHeight - 120,
         size: 28,
         font: bold,
-        color: rgb(0.95, 0.95, 0.97),
+        color: rgb(0.973, 0.976, 0.98),
       });
       page.drawText("Guardian Fraud Firewall", {
         x: margin,
         y: pageHeight - 155,
         size: 16,
         font,
-        color: rgb(0.7, 0.78, 0.88),
+        color: rgb(0.290, 0.494, 0.780),
       });
       page.drawText("AI FORENSICS FOR TRUTH", {
         x: margin,
         y: pageHeight - 185,
         size: 11,
         font,
-        color: rgb(0.55, 0.65, 0.75),
+        color: rgb(0.831, 0.659, 0.263),
       });
       page.drawText(params.title, {
         x: margin,
         y: pageHeight - 260,
         size: 18,
         font: bold,
-        color: rgb(1, 1, 1),
+        color: rgb(0.973, 0.976, 0.98),
         maxWidth: pageWidth - margin * 2,
       });
       page.drawText(`Document: ${params.documentReference}`, {
@@ -172,21 +174,21 @@ export class DocumentSealingService {
         y: pageHeight - 300,
         size: 10,
         font,
-        color: rgb(0.8, 0.85, 0.9),
+        color: rgb(0.835, 0.847, 0.867),
       });
       page.drawText(`Constitution: v${params.ruleset.version}`, {
         x: margin,
         y: pageHeight - 318,
         size: 10,
         font,
-        color: rgb(0.8, 0.85, 0.9),
+        color: rgb(0.835, 0.847, 0.867),
       });
       page.drawText(`Sealed: ${params.createdAt}`, {
         x: margin,
         y: pageHeight - 336,
         size: 10,
         font,
-        color: rgb(0.8, 0.85, 0.9),
+        color: rgb(0.835, 0.847, 0.867),
       });
       this.drawSealFooter(page, font, params.sealId, params.digest, 1, 2);
     }
@@ -199,7 +201,7 @@ export class DocumentSealingService {
         y: pageHeight - 60,
         size: 14,
         font: bold,
-        color: rgb(0.1, 0.15, 0.25),
+        color: rgb(0.102, 0.180, 0.322),
       });
 
       const lines = wrapText(params.bodyText, 88);
@@ -264,7 +266,7 @@ export class DocumentSealingService {
       y: 28,
       size: 7,
       font,
-      color: rgb(0.25, 0.3, 0.4),
+      color: rgb(0.290, 0.494, 0.780),
       maxWidth: page.getWidth() - 72,
     });
   }
