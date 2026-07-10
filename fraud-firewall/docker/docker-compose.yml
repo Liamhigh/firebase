@@ -1,0 +1,26 @@
+version: "3.8"
+
+# Verum Omnis Guardian Fraud Firewall — on-premise / private cloud
+# Spec: VO-FIREWALL-SPEC-5.2.7-2026
+# Privacy: Verum never receives evidence — only commission invoices.
+
+services:
+  fraud-firewall:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: vo_fraud_firewall
+    ports:
+      - "8787:8787"
+    environment:
+      - VO_FIREWALL_CONFIG=/app/config/firewall.json
+      - NODE_ENV=production
+    volumes:
+      - ../config:/app/config:ro
+      - ../vault:/app/vault
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:8787/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3

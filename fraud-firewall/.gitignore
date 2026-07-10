@@ -1,0 +1,7 @@
+node_modules/
+dist/
+vault/
+*.log
+.env
+.env.*
+!config/firewall.json
