@@ -152,13 +152,20 @@
         </div>
 
         <div class="field">
-          <label for="docInput">Documents (JSON array of forensic documents)</label>
+          <label for="evidenceFiles">Upload evidence files (PDF or TXT) — files stay on your machine</label>
+          <input id="evidenceFiles" type="file" accept=".pdf,.txt,application/pdf,text/plain" multiple />
+        </div>
+        <p class="sub" id="uploadStatus" hidden></p>
+
+        <div class="field">
+          <label for="docInput">…or paste documents (JSON array). Leave blank to analyse uploaded files.</label>
           <textarea id="docInput" spellcheck="false"></textarea>
         </div>
 
         <div class="cta-row">
           <button class="btn btn-primary" id="extractBtn" type="button">Extract &amp; Detect</button>
           <button class="btn btn-ghost" id="loadDemoDocsBtn" type="button">Load Demo Evidence</button>
+          <button class="btn btn-ghost" id="clearEvidenceBtn" type="button">Clear Uploaded</button>
           <label class="seal-toggle"><input type="checkbox" id="sealFindingsChk" /> Seal findings</label>
         </div>
 

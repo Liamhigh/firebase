@@ -6,6 +6,7 @@ import type { FraudFirewall } from "../pipeline/firewall.js";
 import { TransactionSchema } from "../core/types.js";
 import { findingsPath, readJson } from "../storage/vault.js";
 import type { QuoteInput } from "../core/pricing.js";
+import { parseUpload } from "../forensics/ingest.js";
 import { z } from "zod";
 
 const WEB_ROOT = resolve(
@@ -25,12 +26,16 @@ const MIME: Record<string, string> = {
   ".webp": "image/webp",
 };
 
-async function readBody(req: IncomingMessage): Promise<string> {
+async function readRawBody(req: IncomingMessage): Promise<Buffer> {
   const chunks: Buffer[] = [];
   for await (const chunk of req) {
     chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
   }
-  return Buffer.concat(chunks).toString("utf8");
+  return Buffer.concat(chunks);
+}
+
+async function readBody(req: IncomingMessage): Promise<string> {
+  return (await readRawBody(req)).toString("utf8");
 }
 
 function sendJson(res: ServerResponse, status: number, body: unknown): void {
@@ -236,6 +241,32 @@ export function startServer(firewall: FraudFirewall): {
 
       if (method === "GET" && url.pathname === "/v1/evidence") {
         return sendJson(res, 200, { evidence: firewall.listEvidence() });
+      }
+
+      if (method === "POST" && url.pathname === "/v1/evidence/reset") {
+        firewall.resetEvidence();
+        return sendJson(res, 200, { ok: true, message: "Buffered evidence cleared." });
+      }
+
+      if (method === "POST" && url.pathname === "/v1/evidence/upload") {
+        const filename = url.searchParams.get("filename") || `upload-${Date.now()}.txt`;
+        const bytes = await readRawBody(req);
+        if (bytes.length === 0) {
+          return sendJson(res, 400, { error: "empty upload" });
+        }
+        try {
+          const doc = await parseUpload(new Uint8Array(bytes), filename);
+          const receipt = firewall.ingestEvidence(doc);
+          return sendJson(res, 202, {
+            ...receipt,
+            source_file: filename,
+            message: "Evidence ingested. POST /v1/extract to analyse buffered evidence.",
+          });
+        } catch (err) {
+          return sendJson(res, 400, {
+            error: err instanceof Error ? err.message : String(err),
+          });
+        }
       }
 
       if (method === "POST" && url.pathname === "/v1/evidence") {

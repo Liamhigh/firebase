@@ -57,6 +57,14 @@ whole ruleset is embedded in every seal's hash. Endpoints: `GET /v1/constitution
   embedded without hash circularity.
 - Remaining for strict veraPDF PASS: sRGB OutputIntent (ICC) + embedded fonts.
 
+### Evidence file upload ✅ DONE
+- ✅ Load real evidence files directly: `POST /v1/evidence/upload?filename=…` accepts raw
+  PDF/TXT bytes, extracts text per page (`pdf-parse` for PDFs), and ingests them into the
+  buffer; `POST /v1/evidence/reset` clears it. The console has a **file picker** (multi-file)
+  — files stay on the user's machine; leave the JSON box blank to analyse uploaded files.
+  Note: the deterministic contradiction engine can over-flag on very dense documents
+  (tunable via `minTopicOverlap`).
+
 ### Nine-Brain analysis + consensus ✅ DONE
 - ✅ Added deterministic **B2 Document Forensics** (tamper/forgery), **B3 Communications**
   (deletions/gaps), **B4 Linguistics** (evasion/gaslighting) detectors (`forensics/brains.ts`),

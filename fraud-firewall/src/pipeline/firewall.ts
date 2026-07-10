@@ -206,6 +206,11 @@ export class FraudFirewall {
     return this.forensics.listEvidence();
   }
 
+  /** Clear the buffered evidence documents. */
+  resetEvidence(): void {
+    this.forensics.reset();
+  }
+
   /** Extract evidence atoms + contradictions from documents (spec §4.2/§4.3). */
   extractEvidence(opts: { documents?: unknown[]; seal?: boolean } = {}) {
     return this.forensics.extract(opts);

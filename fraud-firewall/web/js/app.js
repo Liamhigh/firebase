@@ -286,15 +286,67 @@ async function runExtract(documents, seal) {
   }
 }
 
+let uploadedCount = 0;
+
+async function uploadEvidenceFiles(files) {
+  const status = $("uploadStatus");
+  status.hidden = false;
+  const names = [];
+  for (const file of files) {
+    status.textContent = `Uploading ${file.name}…`;
+    try {
+      const buf = await file.arrayBuffer();
+      const rec = await api(`/v1/evidence/upload?filename=${encodeURIComponent(file.name)}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/octet-stream" },
+        body: buf,
+      });
+      uploadedCount += 1;
+      names.push(`${rec.source_file || file.name} (${rec.page_count} pg)`);
+    } catch (err) {
+      toast(`Upload failed for ${file.name}: ${err.message}`, "err");
+    }
+  }
+  status.textContent = `Ingested ${uploadedCount} file(s): ${names.join(", ")}. Click "Extract & Detect" to analyse.`;
+  toast(`Ingested ${names.length} file(s)`, "ok");
+}
+
+$("evidenceFiles").addEventListener("change", (e) => {
+  const files = e.target.files;
+  if (files && files.length) uploadEvidenceFiles([...files]);
+});
+
+$("clearEvidenceBtn").addEventListener("click", async () => {
+  try {
+    await api("/v1/evidence/reset", { method: "POST" });
+    uploadedCount = 0;
+    $("evidenceFiles").value = "";
+    $("uploadStatus").hidden = true;
+    toast("Uploaded evidence cleared");
+  } catch (err) {
+    toast(err.message, "err");
+  }
+});
+
 $("loadDemoDocsBtn").addEventListener("click", () => {
   loadDemoDocsIntoEditor();
   toast("Demo evidence loaded");
 });
 
 $("extractBtn").addEventListener("click", async () => {
+  const raw = $("docInput").value.trim();
+  // Empty editor → analyse the uploaded (buffered) evidence on the server.
+  if (!raw) {
+    if (uploadedCount === 0) {
+      toast("Upload a file or paste documents first", "err");
+      return;
+    }
+    await runExtract(undefined, $("sealFindingsChk").checked);
+    return;
+  }
   let documents;
   try {
-    const parsed = JSON.parse($("docInput").value || "[]");
+    const parsed = JSON.parse(raw);
     documents = Array.isArray(parsed) ? parsed : parsed.documents;
     if (!Array.isArray(documents)) throw new Error("Expected a JSON array of documents");
   } catch (err) {
