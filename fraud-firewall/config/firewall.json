@@ -1,0 +1,50 @@
+{
+  "institution": {
+    "name": "Demo Bank of South Africa",
+    "code": "DEMO-BANK",
+    "fraud_department_email": "fraud@demo-bank.local",
+    "jurisdiction": "ZA"
+  },
+  "verum": {
+    "commission_email": "admin@verumglobal.foundation",
+    "commission_percent": 20,
+    "verify_url": "https://verumglobal.foundation/#verify"
+  },
+  "constitution_version": "5.2.7",
+  "nine_brain_version": "1.0",
+  "seal_protocol": "verum-omnis-seal v1.0",
+  "rules": {
+    "velocity": {
+      "max_transactions": 20,
+      "window_seconds": 60
+    },
+    "amount_threshold_zar": 250000,
+    "geo_blocklist": ["KP", "IR", "SY"],
+    "anomaly_score_threshold": 0.72
+  },
+  "ai": {
+    "mode": "deterministic",
+    "models": {
+      "gemma3": { "role": "evidence_sealing", "offline": true },
+      "phi3": { "role": "legal_analysis", "offline": true },
+      "gemma4": { "role": "pattern_detection", "offline": true },
+      "mistral": { "role": "fraud_agents", "offline": true }
+    }
+  },
+  "seal_credits": {
+    "initial_balance": 1000,
+    "low_balance_threshold": 50
+  },
+  "storage": {
+    "vault_dir": "./vault",
+    "ledger_file": "./vault/seal-credit-ledger.json",
+    "audit_log": "./vault/ai-audit.jsonl",
+    "alerts_dir": "./vault/alerts",
+    "invoices_dir": "./vault/invoices",
+    "sealed_dir": "./vault/sealed"
+  },
+  "server": {
+    "host": "0.0.0.0",
+    "port": 8787
+  }
+}

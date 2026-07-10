@@ -2,6 +2,19 @@
 
 Production-ready single-page web chat + evidence pipeline. This repo serves the `/web` app via Firebase Hosting and ships APK/AAB separately. The root `index.html` now **redirects cleanly to** `/web/index.html` (no AI Studio CDN importmaps).
 
+## Guardian Fraud Firewall
+
+Enterprise on-premise fraud detection package (Constitution v5.2.7) lives in [`fraud-firewall/`](./fraud-firewall/):
+
+```bash
+cd fraud-firewall
+npm install
+npm test
+npm run demo
+```
+
+See [`fraud-firewall/README.md`](./fraud-firewall/README.md) for the full API, Docker deploy, seal credits, and privacy guarantees.
+
 ---
 
 <p align="center">
@@ -23,3 +36,4 @@ Production-ready single-page web chat + evidence pipeline. This repo serves the 
 npm i
 npm run dev
 # open http://localhost:5173 or whatever Vite prints
+```
