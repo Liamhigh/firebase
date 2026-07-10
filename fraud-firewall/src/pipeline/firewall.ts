@@ -89,7 +89,7 @@ export class FraudFirewall {
     sealId?: string;
     sha512?: string;
     pdfBase64?: string;
-  }): SealVerification {
+  }): Promise<SealVerification> {
     return verifySeal(this.config, input);
   }
 

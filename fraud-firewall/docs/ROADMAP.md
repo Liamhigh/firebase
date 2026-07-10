@@ -19,7 +19,7 @@ reconstruction, offence matrix, and financial analysis remain in scope because
 | Commission (20%) + code-enforced privacy | V, VIII | ✅ |
 | Data models & HTTP API | X | ✅ |
 | Evidence atoms + structured contradictions | (report content) | ✅ |
-| OpenTimestamps anchoring | IV, §6.2 | 🟡 deterministic mock + `.ots` proof |
+| OpenTimestamps anchoring | IV, §6.2 | ✅ real calendar stamping + Bitcoin confirmation (mock fallback) |
 | Email delivery | V | 🟡 writes queued JSON (no SMTP) |
 | Real local LLMs (Gemma/Phi/Mistral) | II | 🟡 deterministic heuristics |
 | Sealed-report content: timeline, offence matrix, financial analysis | V §5.3 | 🟡 Phase 1 |
@@ -37,9 +37,13 @@ reconstruction, offence matrix, and financial analysis remain in scope because
 - Broaden detection heuristics across `FraudType`s.
 - Touches: `forensics/`, `pipeline/`, `core/verification.ts`, `api/server.ts`, `web/`. Risk: low.
 
-### Phase 2 — Real blockchain anchoring
-- Real OpenTimestamps submit/upgrade + Bitcoin confirmation lookup; offline fallback flag.
-- Optional PDF/A-3B conformance + embed original evidence (§5.3).
+### Phase 2 — Real blockchain anchoring ✅ DONE
+- ✅ Real OpenTimestamps stamping to public calendars on seal (`core/opentimestamps.ts`),
+  storing a real binary `.ots` proof; `config.ots.mode` (`live`/`mock`) with automatic
+  offline fallback to the deterministic mock.
+- ✅ Verification upgrades the proof and detects the Bitcoin attestation: genuine
+  PENDING until confirmation, CONFIRMED with real block height once anchored.
+- ⛔ (remaining) Optional PDF/A-3B conformance + embed original evidence (§5.3).
 - Dep: OTS network egress. Risk: medium.
 
 ### Phase 3 — Notifications + licensing/pricing

@@ -31,6 +31,9 @@
       "mistral": { "role": "fraud_agents", "offline": true }
     }
   },
+  "ots": {
+    "mode": "live"
+  },
   "seal_credits": {
     "initial_balance": 1000,
     "low_balance_threshold": 50

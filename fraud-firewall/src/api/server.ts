@@ -239,7 +239,7 @@ export function startServer(firewall: FraudFirewall): {
             error: "provide seal_id, sha512, or pdf_base64",
           });
         }
-        const verification = firewall.verifySeal({
+        const verification = await firewall.verifySeal({
           sealId: body.seal_id,
           sha512: body.sha512,
           pdfBase64: body.pdf_base64,
@@ -250,7 +250,7 @@ export function startServer(firewall: FraudFirewall): {
 
       if (method === "GET" && url.pathname.startsWith("/v1/verify/")) {
         const sealId = url.pathname.replace("/v1/verify/", "");
-        const verification = firewall.verifySeal({ sealId });
+        const verification = await firewall.verifySeal({ sealId });
         return sendJson(res, 200, verification);
       }
 

@@ -50,6 +50,8 @@ export const SealRecordSchema = z.object({
   sha512: z.string(),
   /** Alias of sha512 — the document fingerprint anchored to the blockchain. */
   document_sha512: z.string().optional(),
+  /** SHA-256 of the sealed PDF — the digest committed to OpenTimestamps. */
+  document_sha256: z.string().optional(),
   constitution_version: z.string(),
   created_at: z.string(),
   document_reference: z.string(),
@@ -203,6 +205,10 @@ export interface FirewallConfig {
   ai: {
     mode: "deterministic" | "external";
     models: Record<string, { role: string; offline: boolean }>;
+  };
+  /** OpenTimestamps anchoring: "live" submits to real calendars, "mock" is offline. */
+  ots?: {
+    mode: "live" | "mock";
   };
   seal_credits: {
     initial_balance: number;

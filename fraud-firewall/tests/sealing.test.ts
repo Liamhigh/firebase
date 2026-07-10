@@ -17,6 +17,7 @@ function isolatedConfig(): FirewallConfig {
   const base = loadConfig(join(process.cwd(), "config/firewall.json"));
   return {
     ...base,
+    ots: { mode: "mock" },
     seal_credits: { initial_balance: 100, low_balance_threshold: 5 },
     storage: {
       vault_dir: root,
@@ -68,7 +69,7 @@ describe("seal verification (spec §6.4)", () => {
   it("matches SHA-512 but reports PENDING immediately after sealing", async () => {
     const config = isolatedConfig();
     const sealed = await sealOne(config);
-    const v = verifySeal(config, {
+    const v = await verifySeal(config, {
       sealId: sealed.seal.seal_id,
       sha512: sealed.seal.sha512,
       now: CREATED,
@@ -83,7 +84,7 @@ describe("seal verification (spec §6.4)", () => {
     const config = isolatedConfig();
     const sealed = await sealOne(config);
     const later = new Date(new Date(CREATED).getTime() + OTS_CONFIRM_WINDOW_MS + 1000).toISOString();
-    const v = verifySeal(config, {
+    const v = await verifySeal(config, {
       sealId: sealed.seal.seal_id,
       sha512: sealed.seal.sha512,
       now: later,
@@ -98,7 +99,7 @@ describe("seal verification (spec §6.4)", () => {
   it("flags a tampered document", async () => {
     const config = isolatedConfig();
     const sealed = await sealOne(config);
-    const v = verifySeal(config, {
+    const v = await verifySeal(config, {
       sealId: sealed.seal.seal_id,
       sha512: "0".repeat(128),
       now: CREATED,
@@ -111,15 +112,15 @@ describe("seal verification (spec §6.4)", () => {
   it("re-hashes the stored PDF when no hash is supplied", async () => {
     const config = isolatedConfig();
     const sealed = await sealOne(config);
-    const v = verifySeal(config, { sealId: sealed.seal.seal_id, now: CREATED });
+    const v = await verifySeal(config, { sealId: sealed.seal.seal_id, now: CREATED });
     assert.equal(v.integrity, true);
     assert.equal(v.computed_sha512, sealed.seal.sha512);
     rmSync(config.storage.vault_dir, { recursive: true, force: true });
   });
 
-  it("returns NOT_FOUND for an unknown seal", () => {
+  it("returns NOT_FOUND for an unknown seal", async () => {
     const config = isolatedConfig();
-    const v = verifySeal(config, { sealId: "seal-does-not-exist" });
+    const v = await verifySeal(config, { sealId: "seal-does-not-exist" });
     assert.equal(v.result, "NOT_FOUND");
     rmSync(config.storage.vault_dir, { recursive: true, force: true });
   });

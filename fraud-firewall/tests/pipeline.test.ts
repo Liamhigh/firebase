@@ -14,6 +14,7 @@ function isolatedConfig(): FirewallConfig {
   const base = loadConfig(join(process.cwd(), "config/firewall.json"));
   return {
     ...base,
+    ots: { mode: "mock" },
     seal_credits: { initial_balance: 100, low_balance_threshold: 5 },
     storage: {
       vault_dir: root,

@@ -15,6 +15,7 @@ import {
 import type { FirewallConfig, SealRecord } from "./types.js";
 import { SealCreditLedgerService } from "./sealCredits.js";
 import { hashPointerPath, sealedPath, writeJson } from "../storage/vault.js";
+import { otsStamp } from "./opentimestamps.js";
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
@@ -130,24 +131,42 @@ export class DocumentSealingService {
     // value re-computed at verification time.
     const documentSha512 = sha512(Buffer.from(pdfBytes));
 
-    // Write the (mock) OpenTimestamps proof committing to the document hash.
-    // status stays PENDING until Bitcoin confirmation (see verification.ts).
+    // OpenTimestamps: submit the document hash to real Bitcoin calendars when
+    // live; otherwise write an offline mock proof. Status stays PENDING until
+    // Bitcoin confirmation (a few hours) — see verification.ts.
     const otsProofFile = `${sealId}.ots`;
-    writeJson(sealedPath(this.config, sealId).replace(/\.pdf$/, ".ots"), {
-      version: 1,
-      provider: "OpenTimestamps",
-      file_sha512: documentSha512,
-      seal_id: sealId,
-      calendar_urls: OTS_CALENDARS,
-      submitted_at: createdAt,
-      status: "PENDING",
-      note: "Bitcoin confirmation can take a few hours; verify page shows PENDING until anchored.",
-    });
+    const otsPath = sealedPath(this.config, sealId).replace(/\.pdf$/, ".ots");
+    let documentSha256: string | undefined;
+    let liveAnchored = false;
+    if (this.config.ots?.mode === "live") {
+      try {
+        const res = await otsStamp(pdfBytes);
+        writeFileSync(otsPath, Buffer.from(res.otsBytes)); // real binary .ots proof
+        documentSha256 = res.sha256;
+        liveAnchored = true;
+      } catch {
+        liveAnchored = false; // fall through to mock proof
+      }
+    }
+    if (!liveAnchored) {
+      writeJson(otsPath, {
+        version: 1,
+        provider: "OpenTimestamps",
+        file_sha512: documentSha512,
+        seal_id: sealId,
+        calendar_urls: OTS_CALENDARS,
+        submitted_at: createdAt,
+        status: "PENDING",
+        mode: "mock",
+        note: "Offline mock proof; enable ots.mode=live for real Bitcoin anchoring.",
+      });
+    }
 
     const seal: SealRecord = {
       seal_id: sealId,
       sha512: documentSha512,
       document_sha512: documentSha512,
+      document_sha256: documentSha256,
       constitution_version: this.constitution.version,
       created_at: createdAt,
       document_reference: input.documentReference,
@@ -159,7 +178,7 @@ export class DocumentSealingService {
         submitted_at: createdAt,
         calendar_urls: OTS_CALENDARS,
         confirmations: 0,
-        ots_receipt: `ots-${shortCode(documentSha512, 16)}`,
+        ots_receipt: `ots-${shortCode(documentSha256 ?? documentSha512, 16)}`,
       },
     };
 

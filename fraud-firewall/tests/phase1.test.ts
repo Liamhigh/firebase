@@ -25,6 +25,7 @@ function isolatedConfig(): FirewallConfig {
   const base = loadConfig(join(process.cwd(), "config/firewall.json"));
   return {
     ...base,
+    ots: { mode: "mock" },
     seal_credits: { initial_balance: 100, low_balance_threshold: 5 },
     storage: {
       vault_dir: root,
@@ -132,13 +133,13 @@ describe("verify-by-hash (seal id resolved from the file)", () => {
       createdAt: NOW,
     });
     // No sealId supplied — resolved from the document hash pointer.
-    const v = verifySeal(config, { sha512: sealed.seal.sha512, now: NOW });
+    const v = await verifySeal(config, { sha512: sealed.seal.sha512, now: NOW });
     assert.equal(v.seal_id, sealed.seal.seal_id);
     assert.equal(v.integrity, true);
     assert.equal(v.result, "SEAL_FOUND_PENDING_CHAIN");
 
     // Unknown hash -> NOT_FOUND.
-    const miss = verifySeal(config, { sha512: "f".repeat(128), now: NOW });
+    const miss = await verifySeal(config, { sha512: "f".repeat(128), now: NOW });
     assert.equal(miss.result, "NOT_FOUND");
     rmSync(config.storage.vault_dir, { recursive: true, force: true });
   });

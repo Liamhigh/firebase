@@ -1,7 +1,8 @@
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import type { FirewallConfig, SealRecord } from "./types.js";
 import { sha512, shortCode } from "./crypto.js";
 import { mockBlockHeight } from "./sealing.js";
+import { otsUpgradeCheck } from "./opentimestamps.js";
 import { hashPointerPath, sealedPath } from "../storage/vault.js";
 import { readJson } from "../storage/vault.js";
 
@@ -38,13 +39,6 @@ export interface SealVerification {
   expected_sha512: string | null;
   blockchain: BlockchainStatus | null;
   message: string;
-}
-
-interface OtsProof {
-  file_sha512?: string;
-  submitted_at?: string;
-  calendar_urls?: string[];
-  status?: string;
 }
 
 export interface VerifyInput {
@@ -87,15 +81,72 @@ function blockchainStatus(
 }
 
 /**
+ * Resolve blockchain status from the stored `.ots` proof. A binary proof is a
+ * real OpenTimestamps commitment (we attempt to upgrade + detect a Bitcoin
+ * attestation); a JSON proof is the offline mock (deterministic, time-based).
+ */
+async function resolveBlockchain(
+  otsPath: string,
+  seal: SealRecord,
+  fileHash: string,
+  now: Date,
+): Promise<BlockchainStatus> {
+  const submittedAt = seal.blockchain?.submitted_at ?? seal.created_at;
+  const calendars = seal.blockchain?.calendar_urls;
+  if (!existsSync(otsPath)) {
+    const bc = blockchainStatus(submittedAt, fileHash, now);
+    bc.calendar_urls = calendars;
+    return bc;
+  }
+  const bytes = readFileSync(otsPath);
+  // JSON mock proof (starts with '{') → deterministic time-based status.
+  if (bytes.length > 0 && bytes[0] === 0x7b) {
+    const bc = blockchainStatus(submittedAt, fileHash, now);
+    bc.calendar_urls = calendars;
+    return bc;
+  }
+  // Real OpenTimestamps binary proof → upgrade + detect Bitcoin attestation.
+  try {
+    const check = await otsUpgradeCheck(new Uint8Array(bytes));
+    if (check.upgradedOtsBytes) {
+      writeFileSync(otsPath, Buffer.from(check.upgradedOtsBytes));
+    }
+    if (check.status === "CONFIRMED") {
+      return {
+        provider: "OpenTimestamps",
+        status: "CONFIRMED",
+        message: "Anchored to the Bitcoin blockchain via OpenTimestamps.",
+        submitted_at: submittedAt,
+        confirmations: 6,
+        block_height: check.block_height,
+        calendar_urls: calendars,
+      };
+    }
+  } catch {
+    // Fall through to PENDING on any calendar/network error.
+  }
+  return {
+    provider: "OpenTimestamps",
+    status: "PENDING",
+    message:
+      "Blockchain timestamping via OpenTimestamps is in progress. Bitcoin " +
+      "confirmation can take a few hours; registration is PENDING.",
+    submitted_at: submittedAt,
+    confirmations: 0,
+    calendar_urls: calendars,
+  };
+}
+
+/**
  * Verify a sealed document (spec §6.4):
  *   1. Look up the seal record by id.
  *   2. Re-compute the PDF SHA-512 and compare it to the anchored hash.
  *   3. Check the OpenTimestamps anchor — PENDING until Bitcoin confirmation.
  */
-export function verifySeal(
+export async function verifySeal(
   config: FirewallConfig,
   input: VerifyInput,
-): SealVerification {
+): Promise<SealVerification> {
   const now = input.now ? new Date(input.now) : new Date();
 
   // Pre-compute the candidate hash so we can resolve a seal id by file alone.
@@ -150,11 +201,7 @@ export function verifySeal(
     computed = sha512(readFileSync(pdfPath));
   }
 
-  const ots = readJson<OtsProof>(otsPath) ?? {};
-  const submittedAt =
-    ots.submitted_at ?? stored.seal.blockchain?.submitted_at ?? stored.seal.created_at;
-  const blockchain = blockchainStatus(submittedAt, expected, now);
-  blockchain.calendar_urls = ots.calendar_urls ?? stored.seal.blockchain?.calendar_urls;
+  const blockchain = await resolveBlockchain(otsPath, stored.seal, expected, now);
 
   if (!computed) {
     return {
