@@ -4,6 +4,7 @@ import { extname, join, normalize, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { FraudFirewall } from "../pipeline/firewall.js";
 import { TransactionSchema } from "../core/types.js";
+import { findingsPath, readJson } from "../storage/vault.js";
 import { z } from "zod";
 
 const WEB_ROOT = resolve(
@@ -170,6 +171,61 @@ export function startServer(firewall: FraudFirewall): {
           constitution_hash: sealed.constitutionEmbedded.hash,
           low_balance_warning: sealed.lowBalanceWarning,
         });
+      }
+
+      if (method === "GET" && url.pathname === "/v1/evidence") {
+        return sendJson(res, 200, { evidence: firewall.listEvidence() });
+      }
+
+      if (method === "POST" && url.pathname === "/v1/evidence") {
+        const raw = JSON.parse(await readBody(req));
+        const docs = Array.isArray(raw)
+          ? raw
+          : Array.isArray(raw?.documents)
+            ? raw.documents
+            : [raw];
+        try {
+          const receipts = docs.map((d: unknown) => firewall.ingestEvidence(d));
+          return sendJson(res, 202, {
+            ingested: receipts.length,
+            receipts,
+          });
+        } catch (err) {
+          return sendJson(res, 400, {
+            error: err instanceof Error ? err.message : String(err),
+          });
+        }
+      }
+
+      if (method === "POST" && url.pathname === "/v1/extract") {
+        const rawText = await readBody(req);
+        let documents: unknown[] | undefined;
+        let seal = false;
+        if (rawText.trim()) {
+          const raw = JSON.parse(rawText);
+          if (Array.isArray(raw)) {
+            documents = raw;
+          } else {
+            documents = Array.isArray(raw?.documents) ? raw.documents : undefined;
+            seal = Boolean(raw?.seal);
+          }
+        }
+        try {
+          const result = await firewall.extractEvidence({ documents, seal });
+          return sendJson(res, 200, result);
+        } catch (err) {
+          return sendJson(res, 400, {
+            error: err instanceof Error ? err.message : String(err),
+          });
+        }
+      }
+
+      if (method === "GET" && url.pathname === "/v1/findings") {
+        const atoms = readJson<unknown[]>(findingsPath(config, "evidence_atoms.json")) ?? [];
+        const contradictions =
+          readJson<unknown[]>(findingsPath(config, "contradictions.json")) ?? [];
+        const manifest = readJson<unknown>(findingsPath(config, "manifest.json"));
+        return sendJson(res, 200, { manifest, atoms, contradictions });
       }
 
       if (method === "GET" && url.pathname.startsWith("/v1/sealed/")) {
