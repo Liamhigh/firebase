@@ -189,6 +189,15 @@ select {
   animation: rise 0.8s ease both;
 }
 
+.hero-logo {
+  display: block;
+  width: 260px;
+  max-width: 60%;
+  height: auto;
+  margin: 0 0 1.5rem;
+  filter: drop-shadow(0 6px 24px rgba(74, 158, 226, 0.28));
+}
+
 .eyebrow {
   margin: 0 0 0.85rem;
   font-size: 0.72rem;

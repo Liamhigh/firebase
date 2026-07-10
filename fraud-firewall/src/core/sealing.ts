@@ -29,9 +29,14 @@ import { otsStamp } from "./opentimestamps.js";
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
-// Candidate company-logo files, in priority order. A dedicated seal-logo.png
-// (if a valid PNG is supplied) is embedded; otherwise a vector emblem is drawn.
-const LOGO_CANDIDATES = ["seal-logo.png", "mainlogo.png"].map((f) =>
+// Candidate company-logo files, in priority order. The Verum Omnis globe mark
+// is the official brand; a supplied seal-logo.png overrides it. If none is a
+// valid PNG, a vector emblem is drawn instead.
+const LOGO_CANDIDATES = ["seal-logo.png", "verum-globe-mark.png", "mainlogo.png"].map((f) =>
+  fileURLToPath(new URL(`../../web/assets/${f}`, import.meta.url)),
+);
+// Full-page "two globe" watermark (globe + VERUM OMNIS FORENSIC AI + corner globe).
+const WATERMARK_CANDIDATES = ["seal-watermark.png", "verum-watermark.png"].map((f) =>
   fileURLToPath(new URL(`../../web/assets/${f}`, import.meta.url)),
 );
 const OTS_CALENDARS = [
@@ -44,8 +49,8 @@ const OTS_CALENDARS = [
  * first is essential: pdf-lib's PNG decoder can hang (not throw) on a corrupt
  * PNG, so we never hand it an undecodable file.
  */
-function loadValidLogoBytes(): Buffer | null {
-  for (const path of LOGO_CANDIDATES) {
+function loadFirstValidPng(candidates: string[]): Buffer | null {
+  for (const path of candidates) {
     if (!existsSync(path)) continue;
     try {
       const bytes = readFileSync(path);
@@ -265,12 +270,23 @@ export class DocumentSealingService {
     // Company logo (embedded on the cover + content headers) — only if a valid
     // PNG is available; otherwise a vector Verum Omnis emblem is drawn instead.
     let logo: Awaited<ReturnType<typeof doc.embedPng>> | null = null;
-    const logoBytes = loadValidLogoBytes();
+    const logoBytes = loadFirstValidPng(LOGO_CANDIDATES);
     if (logoBytes) {
       try {
         logo = await doc.embedPng(logoBytes);
       } catch {
         logo = null;
+      }
+    }
+
+    // Two-globe watermark image (validated first — pdf-lib can hang on bad PNGs).
+    let watermark: Awaited<ReturnType<typeof doc.embedPng>> | null = null;
+    const wmBytes = loadFirstValidPng(WATERMARK_CANDIDATES);
+    if (wmBytes) {
+      try {
+        watermark = await doc.embedPng(wmBytes);
+      } catch {
+        watermark = null;
       }
     }
 
@@ -307,8 +323,23 @@ export class DocumentSealingService {
     });
     const qr = await doc.embedPng(qrPng);
 
-    // Subtle "VERUM OMNIS SEALED" watermark drawn on every page.
+    // Two-globe watermark on every page. When the globe watermark PNG is present
+    // it is drawn full-page ("cover" fit) at low opacity so it sits behind the
+    // text exactly like the reference report; otherwise a text watermark is used.
     const drawWatermark = (p: PDFPage, dark: boolean): void => {
+      if (watermark) {
+        const scale = Math.max(pageWidth / watermark.width, pageHeight / watermark.height);
+        const w = watermark.width * scale;
+        const h = watermark.height * scale;
+        p.drawImage(watermark, {
+          x: (pageWidth - w) / 2,
+          y: (pageHeight - h) / 2,
+          width: w,
+          height: h,
+          opacity: dark ? 0.1 : 0.08,
+        });
+        return;
+      }
       const wmColor = dark ? rgb(0.29, 0.494, 0.78) : rgb(0.45, 0.5, 0.58);
       const opacity = dark ? 0.06 : 0.05;
       for (let row = 0; row < 4; row++) {
