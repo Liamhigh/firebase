@@ -106,9 +106,13 @@ select {
 }
 
 .brand img {
-  width: 42px;
-  height: 42px;
+  width: 40px;
+  height: 40px;
   object-fit: contain;
+  padding: 5px;
+  background: linear-gradient(160deg, #1b3055, #0f2038);
+  border: 1px solid rgba(120, 170, 224, 0.35);
+  border-radius: 9px;
 }
 
 .brand-copy {
@@ -191,11 +195,15 @@ select {
 
 .hero-logo {
   display: block;
-  width: 260px;
-  max-width: 60%;
+  width: 240px;
+  max-width: 62%;
   height: auto;
-  margin: 0 0 1.5rem;
-  filter: drop-shadow(0 6px 24px rgba(74, 158, 226, 0.28));
+  margin: 0 0 1.75rem;
+  padding: 26px 34px;
+  background: linear-gradient(160deg, #1b3055, #0f2038);
+  border: 1px solid rgba(120, 170, 224, 0.35);
+  border-radius: 20px;
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.4);
 }
 
 .eyebrow {

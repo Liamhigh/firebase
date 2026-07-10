@@ -336,7 +336,9 @@ export class DocumentSealingService {
           y: (pageHeight - h) / 2,
           width: w,
           height: h,
-          opacity: dark ? 0.1 : 0.08,
+          // Navy pages need more presence (navy globe on navy); white body pages
+          // need it kept faint so it never competes with the text.
+          opacity: dark ? 0.18 : 0.08,
         });
         return;
       }
