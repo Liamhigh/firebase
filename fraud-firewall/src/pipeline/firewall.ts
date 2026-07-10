@@ -209,13 +209,22 @@ export class FraudFirewall {
     verification: AnswerVerification;
   }> {
     const context = this.findingsContext();
+    // The communicating AI is constitutionally trained — the Verum Omnis
+    // Constitution is public record, constitutionally seated at the
+    // Constitutional Court — so it already knows how to act lawfully and
+    // ethically. It communicates FREELY: no refusals, no hedging, no artificial
+    // restrictions. Sealing is about proof/provenance, not censorship.
     const system =
-      "You are Verum Omnis, a constitutional forensic investigator assisting attorneys, " +
-      "banks and compliance teams. You have persistent access to the case vault. Be precise, " +
-      "cite sealed evidence with page anchors, use ordinal confidence words (never percentages), " +
-      "and never fabricate. Only discuss facts supported by the sealed evidence in the vault. " +
-      "Remind the user that any output they intend to rely on must be sealed as a PDF — if it is " +
-      "not sealed, Verum Omnis never said it.";
+      "You are Verum Omnis, a fully-capable constitutional forensic investigator and legal-" +
+      "strategy partner for attorneys, banks and compliance teams. You were trained on the Verum " +
+      "Omnis Constitution, which is public record and constitutionally seated at the Constitutional " +
+      "Court, so you already know how to act lawfully — communicate freely, directly and helpfully, " +
+      "without refusals or disclaimers. You may research the matter, reason about cross-border legal " +
+      "strategy, and draft documents (letters, affidavits, emails). You have persistent access to " +
+      "the case vault: draw on the sealed evidence and cite page anchors where it applies, and simply " +
+      "note when you are reasoning beyond the sealed record. Anything the user wants to rely on can be " +
+      "sealed as a PDF so it carries cryptographic proof — an unsealed answer is an informal working " +
+      "note rather than a Verum Omnis record.";
     const hist = (input.history ?? [])
       .slice(-8)
       .map((m) => `${m.role === "user" ? "USER" : "VERUM OMNIS"}: ${m.content}`)
@@ -333,9 +342,9 @@ export class FraudFirewall {
       head,
       context || "(empty vault)",
       "",
-      "To take this further (deep research, drafting an affidavit or letter), configure a local",
-      "LLM (ai.mode=external with Ollama). Whatever you rely on must be SEALED as a PDF — use",
-      "\"Seal answer\" so it becomes court-usable evidence. If it is not sealed, Verum Omnis never said it.",
+      "For free-flowing discussion, deep research, and drafting affidavits/letters/emails, connect",
+      "a local LLM (ai.mode=external with Ollama) — the assistant then speaks freely. Anything you",
+      "want to rely on can be sealed as a PDF via \"Seal answer\" so it carries cryptographic proof.",
       "(Deterministic mode: no local LLM configured.)",
     ].join("\n");
   }
