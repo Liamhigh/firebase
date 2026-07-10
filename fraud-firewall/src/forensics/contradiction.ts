@@ -84,7 +84,20 @@ export class ContradictionEngine {
       seen.add(a.sha512);
       return true;
     });
-    const topics = usable.map((a) => topicTokens(a.content));
+
+    // Document-frequency filter: on large documents, ignore tokens that recur
+    // across a big fraction of atoms (repeated page footers/headers, boilerplate,
+    // ubiquitous domain words) so pairs must share DISTINCTIVE subject words.
+    const rawTopics = usable.map((a) => topicTokens(a.content));
+    const df = new Map<string, number>();
+    for (const set of rawTopics) for (const tok of set) df.set(tok, (df.get(tok) ?? 0) + 1);
+    const dfThreshold = Math.max(12, Math.floor(usable.length * 0.1));
+    const common = new Set(
+      [...df].filter(([, c]) => c >= dfThreshold).map(([tok]) => tok),
+    );
+    const topics = rawTopics.map(
+      (set) => new Set([...set].filter((tok) => !common.has(tok))),
+    );
     const out: Contradiction[] = [];
 
     for (let i = 0; i < usable.length; i++) {
