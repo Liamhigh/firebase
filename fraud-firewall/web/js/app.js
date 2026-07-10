@@ -1,4 +1,9 @@
+import { mountParticleNetwork } from "./particle-network.js";
+
 const $ = (id) => document.getElementById(id);
+
+const particleCanvas = $("particleNetwork");
+if (particleCanvas) mountParticleNetwork(particleCanvas);
 
 const DEMO_TXNS = (() => {
   const base = Date.parse("2026-07-06T14:30:00Z");
