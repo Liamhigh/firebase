@@ -149,16 +149,23 @@ export async function verifySeal(
 ): Promise<SealVerification> {
   const now = input.now ? new Date(input.now) : new Date();
 
+  // Defense-in-depth: only well-formed ids/hashes are ever used to build vault
+  // paths, so a traversal payload can never reach the filesystem here.
+  const SEAL_ID_RE = /^seal-[a-f0-9]{24}$/;
+  const SHA512_RE = /^[a-f0-9]{128}$/;
+
   // Pre-compute the candidate hash so we can resolve a seal id by file alone.
   let computed: string | null = null;
   if (input.sha512) {
-    computed = input.sha512.trim().toLowerCase();
+    const s = input.sha512.trim().toLowerCase();
+    computed = SHA512_RE.test(s) ? s : null;
   } else if (input.pdfBase64) {
     computed = sha512(Buffer.from(input.pdfBase64, "base64"));
   }
 
   // Resolve the seal id: explicit, or looked up from the document hash pointer.
   let sealId = input.sealId?.trim();
+  if (sealId && !SEAL_ID_RE.test(sealId)) sealId = undefined;
   if (!sealId && computed) {
     const pointer = readJson<{ seal_id: string }>(hashPointerPath(config, computed));
     sealId = pointer?.seal_id;

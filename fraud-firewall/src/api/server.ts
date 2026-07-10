@@ -26,10 +26,30 @@ const MIME: Record<string, string> = {
   ".webp": "image/webp",
 };
 
+// Reject oversized bodies early to bound memory/CPU (DoS hardening).
+const MAX_BODY_BYTES = 64 * 1024 * 1024; // 64 MB
+const PAYLOAD_TOO_LARGE = "PAYLOAD_TOO_LARGE";
+
+// Strict identifier formats — seal IDs and SHA-512 hashes are the only values
+// ever interpolated into vault file paths. Anything else is rejected so no
+// path traversal (../, %2f, CR/LF) can reach the filesystem or headers.
+const SEAL_ID_RE = /^seal-[a-f0-9]{24}$/;
+const SHA512_RE = /^[a-f0-9]{128}$/;
+export const isSealId = (s: string): boolean => SEAL_ID_RE.test(s);
+export const isSha512 = (s: string): boolean => SHA512_RE.test(s);
+
 async function readRawBody(req: IncomingMessage): Promise<Buffer> {
+  const declared = Number(req.headers["content-length"]);
+  if (Number.isFinite(declared) && declared > MAX_BODY_BYTES) {
+    throw new Error(PAYLOAD_TOO_LARGE);
+  }
   const chunks: Buffer[] = [];
+  let total = 0;
   for await (const chunk of req) {
-    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+    const buf = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+    total += buf.length;
+    if (total > MAX_BODY_BYTES) throw new Error(PAYLOAD_TOO_LARGE);
+    chunks.push(buf);
   }
   return Buffer.concat(chunks);
 }
@@ -376,6 +396,14 @@ export function startServer(firewall: FraudFirewall): {
             error: "provide seal_id, sha512, or pdf_base64",
           });
         }
+        // Reject anything that isn't a well-formed id/hash — these are the only
+        // values used to build vault file paths (blocks traversal).
+        if (body.seal_id && !isSealId(body.seal_id)) {
+          return sendJson(res, 400, { error: "invalid seal_id format" });
+        }
+        if (body.sha512 && !isSha512(body.sha512)) {
+          return sendJson(res, 400, { error: "invalid sha512 format" });
+        }
         const verification = await firewall.verifySeal({
           sealId: body.seal_id,
           sha512: body.sha512,
@@ -386,15 +414,22 @@ export function startServer(firewall: FraudFirewall): {
       }
 
       if (method === "GET" && url.pathname.startsWith("/v1/verify/")) {
-        const sealId = url.pathname.replace("/v1/verify/", "");
+        const sealId = decodeURIComponent(url.pathname.replace("/v1/verify/", ""));
+        if (!isSealId(sealId)) return sendJson(res, 400, { error: "invalid seal_id format" });
         const verification = await firewall.verifySeal({ sealId });
         return sendJson(res, 200, verification);
       }
 
       if (method === "GET" && url.pathname.startsWith("/v1/sealed/")) {
-        const sealId = url.pathname.replace("/v1/sealed/", "");
-        const path = `${config.storage.sealed_dir}/${sealId}.pdf`;
-        if (!existsSync(path)) return notFound(res);
+        const sealId = decodeURIComponent(url.pathname.replace("/v1/sealed/", ""));
+        // Strict seal-ID allowlist blocks path traversal AND header injection
+        // (the id is the only thing placed into the path and the header).
+        if (!isSealId(sealId)) return notFound(res);
+        const sealedRoot = resolve(config.storage.sealed_dir);
+        const path = resolve(sealedRoot, `${sealId}.pdf`);
+        if (path !== join(sealedRoot, `${sealId}.pdf`) || !existsSync(path)) {
+          return notFound(res);
+        }
         const bytes = readFileSync(path);
         // inline=1 lets the console embed the report on screen for review; the
         // default remains attachment so direct links download the sealed PDF.
@@ -415,8 +450,14 @@ export function startServer(firewall: FraudFirewall): {
       return notFound(res);
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
-      const status = message.includes("PRIVACY VIOLATION") ? 403 : 500;
-      return sendJson(res, status, { error: message });
+      const status = message === PAYLOAD_TOO_LARGE
+        ? 413
+        : message.includes("PRIVACY VIOLATION")
+          ? 403
+          : 500;
+      return sendJson(res, status, {
+        error: status === 413 ? "Request body too large" : message,
+      });
     }
   });
 
