@@ -43,10 +43,13 @@ export class NotificationService {
     const smtp = this.smtp();
     if (!smtp?.host) return null;
     if (!this.transporter) {
+      const secure = smtp.secure ?? false;
       this.transporter = nodemailer.createTransport({
         host: smtp.host,
         port: smtp.port,
-        secure: smtp.secure ?? false,
+        secure,
+        // Enforce STARTTLS on non-secure ports unless explicitly disabled.
+        requireTLS: smtp.requireTLS ?? !secure,
         auth: smtp.user ? { user: smtp.user, pass: smtp.pass } : undefined,
       });
     }

@@ -71,7 +71,7 @@ describe("SMTP delivery", () => {
   it("sends a bank evidence email WITH its sealed-PDF attachment", async () => {
     const root = mkdtempSync(join(tmpdir(), "vo-smtp-"));
     const config = baseConfig(root);
-    config.email = { from: "firewall@bank.local", smtp: { host: "127.0.0.1", port, secure: false } };
+    config.email = { from: "firewall@bank.local", smtp: { host: "127.0.0.1", port, secure: false, requireTLS: false } };
 
     const pdfPath = join(root, "sealed-evidence.pdf");
     writeFileSync(pdfPath, "%PDF-1.7 fake sealed evidence\n");
@@ -97,7 +97,7 @@ describe("SMTP delivery", () => {
   it("sends a Verum commission email with NO attachment (privacy)", async () => {
     const root = mkdtempSync(join(tmpdir(), "vo-smtp-"));
     const config = baseConfig(root);
-    config.email = { from: "firewall@bank.local", smtp: { host: "127.0.0.1", port, secure: false } };
+    config.email = { from: "firewall@bank.local", smtp: { host: "127.0.0.1", port, secure: false, requireTLS: false } };
 
     const svc = new NotificationService(config);
     const result = await svc.dispatch({

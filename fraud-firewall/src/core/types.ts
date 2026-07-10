@@ -221,6 +221,8 @@ export interface FirewallConfig {
       host: string;
       port: number;
       secure?: boolean;
+      /** Enforce STARTTLS on non-secure ports (default true) so AUTH is never cleartext. */
+      requireTLS?: boolean;
       user?: string;
       pass?: string;
     };
