@@ -1,153 +1,9 @@
-const $ = (id) => document.getElementById(id);
+import { $, toast, api, escapeHtml, sha512Hex, row, refreshHealth, refreshCredits } from "./common.js";
 
-const DEMO_TXNS = (() => {
-  const base = Date.parse("2026-07-06T14:30:00Z");
-  const txns = [];
-  for (let i = 0; i < 25; i++) {
-    txns.push({
-      txn_id: `TXN-20260706-${884300 + i}`,
-      account_id: "AC-7843",
-      amount: i === 20 ? 1500000 : 12000 + i * 500,
-      currency: "ZAR",
-      timestamp: new Date(base + i * 2000).toISOString(),
-      country: i === 22 ? "KP" : "ZA",
-      channel: "EFT",
-      counterparty: `CP-${(i % 9) + 1}`,
-      metadata: i === 21 ? { internal_note: "urgent override" } : undefined,
-    });
-  }
-  return txns;
-})();
-
-function toast(message, kind = "ok") {
-  const el = $("toast");
-  el.textContent = message;
-  el.className = `toast show ${kind}`;
-  clearTimeout(toast._t);
-  toast._t = setTimeout(() => {
-    el.classList.remove("show");
-  }, 3200);
-}
-
-async function api(path, options = {}) {
-  const res = await fetch(path, {
-    headers: { "Content-Type": "application/json", ...(options.headers || {}) },
-    ...options,
-  });
-  const text = await res.text();
-  let data;
-  try {
-    data = text ? JSON.parse(text) : null;
-  } catch {
-    data = { raw: text };
-  }
-  if (!res.ok) {
-    throw new Error(data?.error || res.statusText || "Request failed");
-  }
-  return data;
-}
-
-async function refreshHealth() {
-  const pill = $("healthPill");
-  try {
-    const health = await api("/health");
-    pill.className = "pill";
-    pill.innerHTML = `<span class="dot"></span> ${health.institution || "Online"}`;
-  } catch {
-    pill.className = "pill err";
-    pill.innerHTML = `<span class="dot"></span> Offline`;
-  }
-}
-
-async function refreshCredits() {
-  try {
-    const ledger = await api("/v1/credits");
-    $("creditValue").textContent = String(ledger.credits.remaining);
-    if (ledger.credits.remaining <= 50) {
-      $("creditValue").classList.add("bad");
-    } else {
-      $("creditValue").classList.remove("bad");
-      $("creditValue").classList.add("ok");
-    }
-  } catch (err) {
-    $("creditValue").textContent = "—";
-    toast(err.message, "err");
-  }
-}
-
-function showResult(result) {
-  const block = $("resultBlock");
-  block.hidden = false;
-  $("resultMessage").textContent = result.message || "";
-  $("resultPre").textContent = JSON.stringify(result.alert || result, null, 2);
-
-  const status = result.alert?.status || "NONE";
-  $("statusValue").textContent = status;
-  $("statusValue").className =
-    "value " + (status === "CONFIRMED" ? "ok" : status === "REJECTED" ? "bad" : "");
-
-  const quorum = result.alert?.verification?.quorum;
-  $("quorumValue").textContent = quorum == null ? "—" : quorum ? "YES" : "NO";
-  $("quorumValue").className = "value " + (quorum ? "ok" : quorum === false ? "bad" : "");
-
-  const sealId = result.alert?.seal?.seal_id;
-  const row = $("downloadRow");
-  const link = $("downloadSeal");
-  if (sealId) {
-    row.hidden = false;
-    link.href = `/v1/sealed/${sealId}`;
-  } else {
-    row.hidden = true;
-  }
-}
-
-async function runMonitor(transactions) {
-  $("monitorBtn").disabled = true;
-  $("runDemoBtn").disabled = true;
-  try {
-    const result = await api("/v1/monitor", {
-      method: "POST",
-      body: JSON.stringify({ transactions }),
-    });
-    showResult(result);
-    await refreshCredits();
-    toast(result.message || "Monitor complete", result.alert?.status === "CONFIRMED" ? "ok" : "err");
-  } catch (err) {
-    toast(err.message, "err");
-  } finally {
-    $("monitorBtn").disabled = false;
-    $("runDemoBtn").disabled = false;
-  }
-}
-
-function loadDemoIntoEditor() {
-  $("txnInput").value = JSON.stringify(DEMO_TXNS, null, 2);
-}
-
-$("loadDemoBtn").addEventListener("click", () => {
-  loadDemoIntoEditor();
-  toast("Demo transactions loaded");
-});
-
-$("refreshCreditsBtn").addEventListener("click", () => refreshCredits());
-
-$("runDemoBtn").addEventListener("click", async () => {
-  loadDemoIntoEditor();
-  await runMonitor(DEMO_TXNS);
-});
-
-$("monitorBtn").addEventListener("click", async () => {
-  let transactions;
-  try {
-    const parsed = JSON.parse($("txnInput").value || "[]");
-    transactions = Array.isArray(parsed) ? parsed : parsed.transactions;
-    if (!Array.isArray(transactions)) throw new Error("Expected a JSON array");
-  } catch (err) {
-    toast(`Invalid JSON: ${err.message}`, "err");
-    return;
-  }
-  await runMonitor(transactions);
-});
+/* ============================================================
+   Verum Omnis — Investigator workspace (front page)
+   Load & seal evidence  →  read the sealed report  →  ask the AI.
+   ============================================================ */
 
 /* ---------------- Evidence extraction ---------------- */
 
@@ -197,17 +53,6 @@ const DEMO_DOCS = [
   },
 ];
 
-function loadDemoDocsIntoEditor() {
-  $("docInput").value = JSON.stringify(DEMO_DOCS, null, 2);
-}
-
-function escapeHtml(str) {
-  return String(str)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
-}
-
 function renderFindings(result) {
   const findings = result.findings || result;
   const contradictions = findings.contradictions || [];
@@ -220,15 +65,12 @@ function renderFindings(result) {
 
   const tl = findings.timeline?.length ?? 0;
   const off = findings.offences?.length ?? 0;
-  const bf = findings.brain_findings?.length ?? 0;
   const ent = findings.entities?.length ?? 0;
   const consensus = findings.consensus;
-  const consensusStr = consensus
-    ? ` · consensus ${consensus.verdict} (${consensus.count} brains)`
-    : "";
+  const consensusStr = consensus ? ` · consensus ${consensus.verdict} (${consensus.count} brains)` : "";
   $("extractMessage").textContent =
     `${findings.atom_count} evidence atom(s) · ${contradictions.length} contradiction(s) · ` +
-    `${tl} timeline event(s) · ${off} offence(s) · ${bf} brain finding(s) · ${ent} part(y/ies)${consensusStr}.`;
+    `${tl} timeline event(s) · ${off} offence(s) · ${ent} part(y/ies)${consensusStr}.`;
 
   const idxCount = $("contraIndexCount");
   if (idxCount) idxCount.textContent = String(contradictions.length);
@@ -260,22 +102,21 @@ function renderFindings(result) {
 
   // The forensic PDF report comes out ON SCREEN (raw JSON stays in the vault).
   const reportBlock = $("sealedReport");
-  const row = $("extractDownloadRow");
+  const rowEl = $("extractDownloadRow");
   const link = $("downloadFindingsSeal");
   const frame = $("sealedFrame");
   if (result.seal?.seal_id) {
     reportBlock.hidden = false;
-    row.hidden = false;
+    rowEl.hidden = false;
     frame.src = `/v1/sealed/${result.seal.seal_id}?inline=1`;
     link.href = `/v1/sealed/${result.seal.seal_id}`;
   } else {
     reportBlock.hidden = true;
-    row.hidden = true;
+    rowEl.hidden = true;
     frame.src = "about:blank";
   }
 }
 
-// Print the on-screen sealed report directly from the embedded viewer.
 $("printFindingsSeal")?.addEventListener("click", () => {
   const frame = $("sealedFrame");
   try {
@@ -324,11 +165,8 @@ async function uploadEvidenceFiles(files) {
   const status = $("uploadStatus");
   status.hidden = false;
   const names = [];
-  // Capture upload location once (approximate on laptops; permission-based).
   const coords = await getGeo();
-  const geoQs = coords
-    ? `&lat=${coords.latitude}&lon=${coords.longitude}&acc=${coords.accuracy ?? ""}`
-    : "";
+  const geoQs = coords ? `&lat=${coords.latitude}&lon=${coords.longitude}&acc=${coords.accuracy ?? ""}` : "";
   for (const file of files) {
     status.textContent = `Uploading ${file.name}…`;
     try {
@@ -344,16 +182,16 @@ async function uploadEvidenceFiles(files) {
       toast(`Upload failed for ${file.name}: ${err.message}`, "err");
     }
   }
-  status.textContent = `Ingested ${uploadedCount} file(s): ${names.join(", ")}. Click "Extract & Detect" to analyse.`;
+  status.textContent = `Sealed ${uploadedCount} file(s) into the vault: ${names.join(", ")}. Click "Extract & Seal" to analyse.`;
   toast(`Ingested ${names.length} file(s)`, "ok");
 }
 
-$("evidenceFiles").addEventListener("change", (e) => {
+$("evidenceFiles")?.addEventListener("change", (e) => {
   const files = e.target.files;
   if (files && files.length) uploadEvidenceFiles([...files]);
 });
 
-$("clearEvidenceBtn").addEventListener("click", async () => {
+$("clearEvidenceBtn")?.addEventListener("click", async () => {
   try {
     await api("/v1/evidence/reset", { method: "POST" });
     uploadedCount = 0;
@@ -365,14 +203,13 @@ $("clearEvidenceBtn").addEventListener("click", async () => {
   }
 });
 
-$("loadDemoDocsBtn").addEventListener("click", () => {
-  loadDemoDocsIntoEditor();
+$("loadDemoDocsBtn")?.addEventListener("click", () => {
+  $("docInput").value = JSON.stringify(DEMO_DOCS, null, 2);
   toast("Demo evidence loaded");
 });
 
-$("extractBtn").addEventListener("click", async () => {
+$("extractBtn")?.addEventListener("click", async () => {
   const raw = $("docInput").value.trim();
-  // Empty editor → analyse the uploaded (buffered) evidence on the server.
   if (!raw) {
     if (uploadedCount === 0) {
       toast("Upload a file or paste documents first", "err");
@@ -393,14 +230,106 @@ $("extractBtn").addEventListener("click", async () => {
   await runExtract(documents, $("sealFindingsChk").checked);
 });
 
-/* ---------------- Seal verification ---------------- */
+/* ---------------- Ask Verum Omnis (chat) ---------------- */
 
-async function sha512Hex(buffer) {
-  const digest = await crypto.subtle.digest("SHA-512", buffer);
-  return [...new Uint8Array(digest)]
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
+const chatHistory = [];
+
+function appendMessage(role, text, { sealable = false } = {}) {
+  const log = $("chatLog");
+  if (!log) return null;
+  const wrap = document.createElement("div");
+  wrap.className = `chat-msg ${role}`;
+  const who = role === "user" ? "You" : "Verum Omnis";
+  wrap.innerHTML = `<div class="chat-who">${who}</div><div class="chat-body">${escapeHtml(text)}</div>`;
+  if (sealable) {
+    const actions = document.createElement("div");
+    actions.className = "chat-actions";
+    const btn = document.createElement("button");
+    btn.className = "btn btn-ghost btn-small";
+    btn.textContent = "Seal answer as PDF";
+    btn.addEventListener("click", () => sealAnswer(text, btn));
+    actions.appendChild(btn);
+    wrap.appendChild(actions);
+  }
+  log.appendChild(wrap);
+  log.scrollTop = log.scrollHeight;
+  return wrap;
 }
+
+async function sealAnswer(text, btn) {
+  btn.disabled = true;
+  btn.textContent = "Sealing…";
+  try {
+    const stamp = new Date().toISOString().replace(/[:.]/g, "").slice(0, 15);
+    const result = await api("/v1/seal", {
+      method: "POST",
+      body: JSON.stringify({
+        document_reference: `VO-CHAT-${stamp}`,
+        title: "Verum Omnis — Sealed AI Response",
+        body: text,
+      }),
+    });
+    await refreshCredits();
+    const id = result.seal?.seal_id;
+    if (id) {
+      const link = document.createElement("a");
+      link.className = "btn btn-ghost btn-small";
+      link.href = `/v1/sealed/${id}?inline=1`;
+      link.target = "_blank";
+      link.rel = "noreferrer";
+      link.textContent = "Open sealed PDF";
+      btn.replaceWith(link);
+      toast("Answer sealed — it is now court-usable evidence", "ok");
+    } else {
+      btn.textContent = "Seal answer as PDF";
+      btn.disabled = false;
+    }
+  } catch (err) {
+    toast(err.message, "err");
+    btn.textContent = "Seal answer as PDF";
+    btn.disabled = false;
+  }
+}
+
+async function sendChat() {
+  const input = $("chatInput");
+  const msg = input.value.trim();
+  if (!msg) return;
+  const deep = $("chatDeepChk")?.checked;
+  const outbound = deep ? `[DEEP RESEARCH] ${msg}` : msg;
+  input.value = "";
+  appendMessage("user", msg);
+  chatHistory.push({ role: "user", content: outbound });
+  $("chatSendBtn").disabled = true;
+  const thinking = appendMessage("assistant", "…thinking");
+  try {
+    const res = await api("/v1/ai/chat", {
+      method: "POST",
+      body: JSON.stringify({ message: outbound, history: chatHistory.slice(0, -1) }),
+    });
+    thinking?.remove();
+    appendMessage("assistant", res.reply, { sealable: true });
+    chatHistory.push({ role: "assistant", content: res.reply });
+    const src = $("chatSource");
+    if (src) src.textContent = `Source: ${res.source} (${res.provider})`;
+  } catch (err) {
+    thinking?.remove();
+    appendMessage("assistant", `Error: ${err.message}`);
+  } finally {
+    $("chatSendBtn").disabled = false;
+    input.focus();
+  }
+}
+
+$("chatSendBtn")?.addEventListener("click", sendChat);
+$("chatInput")?.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    sendChat();
+  }
+});
+
+/* ---------------- Seal verification ---------------- */
 
 const VERIFY_BANNER = {
   VERIFIED: { cls: "verified", text: "VERIFIED — sealed & anchored" },
@@ -410,10 +339,6 @@ const VERIFY_BANNER = {
   INDETERMINATE: { cls: "pending", text: "SEAL FOUND — supply the PDF to verify" },
 };
 
-function row(k, v) {
-  return `<div class="k">${escapeHtml(k)}</div><div class="v">${escapeHtml(v)}</div>`;
-}
-
 function renderVerification(res) {
   $("verifyResultBlock").hidden = false;
   const banner = VERIFY_BANNER[res.result] || { cls: "notfound", text: res.result };
@@ -421,7 +346,6 @@ function renderVerification(res) {
   bEl.className = "verify-banner " + banner.cls;
   bEl.textContent = banner.text;
   $("verifyMessage").textContent = res.message || "";
-
   const bc = res.blockchain || {};
   const rows = [
     row("Seal ID", res.seal_id || "—"),
@@ -444,9 +368,7 @@ async function runVerify() {
   $("verifyBtn").disabled = true;
   try {
     let sha512;
-    if (file) {
-      sha512 = await sha512Hex(await file.arrayBuffer());
-    }
+    if (file) sha512 = await sha512Hex(await file.arrayBuffer());
     const res = await api("/v1/verify", {
       method: "POST",
       body: JSON.stringify({ seal_id: sealId || undefined, sha512 }),
@@ -455,132 +377,15 @@ async function runVerify() {
     const ok = res.result === "VERIFIED" || res.result === "SEAL_FOUND_PENDING_CHAIN";
     toast(res.result.replace(/_/g, " "), ok ? "ok" : "err");
   } catch (err) {
-    // A 404 from the API still returns a JSON body; surface it if present.
     toast(err.message, "err");
   } finally {
     $("verifyBtn").disabled = false;
   }
 }
 
-$("verifyBtn").addEventListener("click", runVerify);
+$("verifyBtn")?.addEventListener("click", runVerify);
 
-/* ---------------- Pricing & licensing ---------------- */
-
-const AMOUNT_LABELS = {
-  fraud_recovery: "Value prevented (ZAR)",
-  ai_subscription: "AI company annual turnover (ZAR)",
-  commercial: "Commercial engagement value (ZAR)",
-  legal_services: "Explicit lawyer fee (optional — leave blank to benchmark)",
-};
-
-function fmtMoney(n, currency) {
-  return `${currency} ${Number(n).toLocaleString("en-ZA", { maximumFractionDigits: 2 })}`;
-}
-
-async function loadPricing() {
-  try {
-    const p = await api("/v1/pricing");
-    const cards = [
-      { t: "Fraud recovery", c: p.streams.fraud_recovery, free: false },
-      { t: "Legal services", c: p.streams.legal_services, free: false },
-      { t: "AI subscription", c: p.streams.ai_subscription, free: false },
-      { t: "Commercial", c: p.streams.commercial, free: false },
-      { t: "Private individuals", c: p.free.individuals, free: true },
-      { t: "SAPS", c: p.free.saps, free: true },
-    ];
-    $("priceStreams").innerHTML = cards
-      .map(
-        (x) =>
-          `<div class="price-card ${x.free ? "free" : ""}"><div class="pc-title">${escapeHtml(x.t)}</div><p class="pc-copy">${escapeHtml(x.c)}</p></div>`,
-      )
-      .join("");
-  } catch {
-    /* pricing is best-effort */
-  }
-}
-
-function syncQuoteForm() {
-  const cat = $("quoteCategory").value;
-  $("quoteAmountLabel").textContent = AMOUNT_LABELS[cat];
-  const legal = cat === "legal_services";
-  $("quoteJurisdictionField").hidden = !legal;
-  $("quoteComplexityField").hidden = !legal;
-}
-
-async function runQuote() {
-  const category = $("quoteCategory").value;
-  const userType = $("quoteUserType").value;
-  const amount = parseFloat($("quoteAmount").value) || 0;
-  const payload = { category, user_type: userType };
-  if (category === "fraud_recovery") payload.recovered_value = amount;
-  else if (category === "ai_subscription") payload.annual_turnover = amount;
-  else if (category === "commercial") payload.commercial_value = amount;
-  else if (category === "legal_services") {
-    if (amount > 0) payload.lawyer_fee = amount;
-    payload.jurisdiction = $("quoteJurisdiction").value;
-    payload.complexity = $("quoteComplexity").value;
-  }
-  $("quoteBtn").disabled = true;
-  try {
-    const q = await api("/v1/pricing/quote", { method: "POST", body: JSON.stringify(payload) });
-    $("quoteResultBlock").hidden = false;
-    const out = $("quoteAmountOut");
-    if (q.billable) {
-      out.className = "quote-amount";
-      out.textContent = `${fmtMoney(q.charge, q.currency)}  (20% of ${fmtMoney(q.base_amount, q.currency)})`;
-    } else {
-      out.className = "quote-amount free";
-      out.textContent = "FREE";
-    }
-    const rows = [
-      row("Category", q.category),
-      row("User type", q.user_type),
-      row("Billable", q.billable ? "YES (20%)" : "NO — free"),
-      row(q.base_label, fmtMoney(q.base_amount, q.currency)),
-      row("Verum 20% share", fmtMoney(q.charge, q.currency)),
-    ];
-    if (q.benchmark) {
-      rows.push(row("Lawyer benchmark", `${q.benchmark.hourly_rate}/hr x ${q.benchmark.hours}h x ${q.benchmark.entity_multiplier}`));
-    }
-    rows.push(row("Notes", q.notes.join(" ")));
-    $("quoteGrid").innerHTML = rows.join("");
-  } catch (err) {
-    toast(err.message, "err");
-  } finally {
-    $("quoteBtn").disabled = false;
-  }
-}
-
-$("quoteCategory").addEventListener("change", syncQuoteForm);
-$("quoteBtn").addEventListener("click", runQuote);
-syncQuoteForm();
-loadPricing();
-
-/* ---------------- AI assist ---------------- */
-
-async function runAiSummary() {
-  $("aiBtn").disabled = true;
-  try {
-    const prompt = $("aiPrompt").value.trim();
-    const res = await api("/v1/ai/summary", {
-      method: "POST",
-      body: JSON.stringify({ prompt: prompt || undefined, use_findings: true }),
-    });
-    $("aiResultBlock").hidden = false;
-    $("aiSource").textContent = `Source: ${res.source} (${res.provider})`;
-    $("aiSummary").textContent = res.summary;
-    toast(res.source === "llm" ? "LLM summary generated" : "Deterministic summary", "ok");
-  } catch (err) {
-    toast(err.message, "err");
-  } finally {
-    $("aiBtn").disabled = false;
-  }
-}
-
-$("aiBtn").addEventListener("click", runAiSummary);
-
-loadDemoIntoEditor();
-loadDemoDocsIntoEditor();
+/* ---------------- Boot ---------------- */
 refreshHealth();
 refreshCredits();
 setInterval(refreshHealth, 15000);

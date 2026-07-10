@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-    <title>Verum Omnis — Guardian Fraud Firewall</title>
+    <title>Verum Omnis — Forensic Investigator</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -26,6 +26,7 @@
           </span>
         </a>
         <div class="nav-meta">
+          <a class="nav-link" href="./firewall.html">Fraud Firewall</a>
           <span class="pill" id="healthPill"><span class="dot"></span> Connecting</span>
           <span class="pill">Constitution v5.2.7</span>
         </div>
@@ -35,17 +36,17 @@
     <main class="shell">
       <section class="hero">
         <div class="hero-text">
-          <p class="eyebrow">Guardian Fraud Firewall</p>
-          <h1>Truth That <em>Cannot</em> Be Erased</h1>
+          <p class="eyebrow">Forensic Investigator Workspace</p>
+          <h1>Truth for <em>All</em></h1>
           <p class="hero-lead">
-            On-premise enterprise monitoring under Constitution v5.2.7. Detect, triple-verify,
-            seal with SHA-512 — and notify Verum with a commission invoice only. Evidence never leaves the bank.
+            For attorneys, banks and compliance teams. Load evidence, read a sealed forensic
+            report, and talk to Verum Omnis about your case. Everything that enters or leaves
+            is cryptographically sealed — if it isn't sealed, Verum Omnis never said it.
           </p>
           <div class="cta-row">
-            <button class="btn btn-primary" id="runDemoBtn" type="button">Run Detection Demo</button>
-            <a class="btn btn-ghost" href="https://www.verumglobal.foundation" target="_blank" rel="noreferrer">
-              verumglobal.foundation
-            </a>
+            <a class="btn btn-primary" href="#evidencePanel">Load evidence</a>
+            <a class="btn btn-ghost" href="#chatPanel">Ask Verum Omnis</a>
+            <a class="btn btn-ghost" href="./firewall.html">Fraud Firewall</a>
           </div>
         </div>
         <div class="hero-art">
@@ -53,111 +54,22 @@
         </div>
       </section>
 
-      <section class="panel-grid">
-        <div class="panel">
-          <h2>Live Monitor</h2>
-          <p class="sub">Paste transaction JSON or run the built-in demo cluster.</p>
-
-          <div class="stat-row">
-            <div class="stat">
-              <span class="label">Seal Credits</span>
-              <span class="value" id="creditValue">—</span>
-            </div>
-            <div class="stat">
-              <span class="label">Alert Status</span>
-              <span class="value" id="statusValue">IDLE</span>
-            </div>
-            <div class="stat">
-              <span class="label">Quorum</span>
-              <span class="value" id="quorumValue">—</span>
-            </div>
-          </div>
-
-          <div class="field">
-            <label for="txnInput">Transactions (JSON array)</label>
-            <textarea id="txnInput" spellcheck="false"></textarea>
-          </div>
-
-          <div class="cta-row">
-            <button class="btn btn-primary" id="monitorBtn" type="button">Monitor Buffer</button>
-            <button class="btn btn-ghost" id="loadDemoBtn" type="button">Load Demo Txns</button>
-            <button class="btn btn-ghost" id="refreshCreditsBtn" type="button">Refresh Credits</button>
-          </div>
-
-          <div class="result" hidden id="resultBlock">
-            <p class="sub" id="resultMessage"></p>
-            <pre id="resultPre"></pre>
-            <div class="cta-row" id="downloadRow" hidden>
-              <a class="btn btn-ghost" id="downloadSeal" href="#" target="_blank" rel="noreferrer">Download Sealed PDF</a>
-            </div>
-          </div>
-        </div>
-
-        <aside class="panel">
-          <h2>Pipeline</h2>
-          <p class="sub">Same architecture as the enterprise specification.</p>
-          <ol class="pipeline">
-            <li>
-              <span class="step-num">01</span>
-              <div>
-                <div class="step-title">Forensic Input Scan</div>
-                <p class="step-copy">Velocity, amount, and geo rules fingerprint every transaction.</p>
-              </div>
-            </li>
-            <li>
-              <span class="step-num">02</span>
-              <div>
-                <div class="step-title">AI Routing Lockdown</div>
-                <p class="step-copy">Gemma 4 + Mistral agents only — Constitution-bound prompts.</p>
-              </div>
-            </li>
-            <li>
-              <span class="step-num">03</span>
-              <div>
-                <div class="step-title">Triple Verification</div>
-                <p class="step-copy">Gemma 3, Phi-3, and 9-Brain must all CONCUR.</p>
-              </div>
-            </li>
-            <li>
-              <span class="step-num">04</span>
-              <div>
-                <div class="step-title">Silence Ledger</div>
-                <p class="step-copy">Confirmed fraud is sealed. Ignored risk cannot be erased.</p>
-              </div>
-            </li>
-          </ol>
-          <div class="privacy">
-            <strong>Privacy hard rule:</strong> Verum Omnis receives commission invoices only —
-            never customer data, transactions, or sealed evidence.
-          </div>
-        </aside>
-      </section>
-
-      <section class="panel extraction" id="extractionPanel">
-        <h2>Evidence Extraction</h2>
+      <section class="panel extraction" id="evidencePanel">
+        <h2>1 · Load &amp; Seal Evidence</h2>
         <p class="sub">
-          Ingest documents, extract anchored evidence atoms (SHA-512 + page/line), and detect
-          structured contradictions across the Nine-Brain roles. Deterministic and offline
-          (spec §4.2 / §4.3 / §12.1 / §12.2).
+          Upload documents (PDF/TXT). Each file is sealed into the vault (SHA-512 chain of
+          custody) on upload, then analysed into anchored evidence atoms and contradictions.
+          Deterministic and offline — nothing leaves your machine.
         </p>
 
         <div class="stat-row">
-          <div class="stat">
-            <span class="label">Documents</span>
-            <span class="value" id="docCountValue">—</span>
-          </div>
-          <div class="stat">
-            <span class="label">Evidence Atoms</span>
-            <span class="value" id="atomCountValue">—</span>
-          </div>
-          <div class="stat">
-            <span class="label">Contradictions</span>
-            <span class="value" id="contraCountValue">—</span>
-          </div>
+          <div class="stat"><span class="label">Documents</span><span class="value" id="docCountValue">—</span></div>
+          <div class="stat"><span class="label">Evidence Atoms</span><span class="value" id="atomCountValue">—</span></div>
+          <div class="stat"><span class="label">Contradictions</span><span class="value" id="contraCountValue">—</span></div>
         </div>
 
         <div class="field">
-          <label for="evidenceFiles">Upload evidence files (PDF or TXT) — files stay on your machine</label>
+          <label for="evidenceFiles">Upload evidence files (PDF or TXT)</label>
           <input id="evidenceFiles" type="file" accept=".pdf,.txt,application/pdf,text/plain" multiple />
         </div>
         <p class="sub" id="uploadStatus" hidden></p>
@@ -168,10 +80,10 @@
         </div>
 
         <div class="cta-row">
-          <button class="btn btn-primary" id="extractBtn" type="button">Extract &amp; Detect</button>
+          <button class="btn btn-primary" id="extractBtn" type="button">Extract &amp; Seal</button>
           <button class="btn btn-ghost" id="loadDemoDocsBtn" type="button">Load Demo Evidence</button>
           <button class="btn btn-ghost" id="clearEvidenceBtn" type="button">Clear Uploaded</button>
-          <label class="seal-toggle"><input type="checkbox" id="sealFindingsChk" checked /> Seal findings (produce sealed PDF)</label>
+          <label class="seal-toggle"><input type="checkbox" id="sealFindingsChk" checked /> Seal report (produce sealed PDF)</label>
         </div>
 
         <div class="result" hidden id="extractResultBlock">
@@ -179,7 +91,7 @@
 
           <div class="sealed-report" id="sealedReport" hidden>
             <div class="sealed-report-head">
-              <span class="sr-title">Sealed forensic report — displayed for review</span>
+              <span class="sr-title">2 · Sealed forensic report — displayed for review</span>
               <div class="cta-row" id="extractDownloadRow" hidden>
                 <button class="btn btn-ghost" id="printFindingsSeal" type="button">Print</button>
                 <a class="btn btn-ghost" id="downloadFindingsSeal" href="#" target="_blank" rel="noreferrer">Open / Download PDF</a>
@@ -187,9 +99,9 @@
             </div>
             <iframe id="sealedFrame" title="Sealed forensic report" src="about:blank"></iframe>
             <p class="sr-note">
-              The raw findings JSON and the sealed PDF are saved to the vault
-              (<code>vault/findings/</code> and <code>vault/sealed/</code>). This on-screen
-              copy closes when you leave the page.
+              Raw findings JSON and the sealed PDF are saved to the vault
+              (<code>vault/findings/</code>, <code>vault/sealed/</code>). This on-screen copy
+              closes when you leave the page.
             </p>
           </div>
 
@@ -200,12 +112,31 @@
         </div>
       </section>
 
-      <section class="panel verify" id="verifyPanel">
-        <h2>Verify Seal</h2>
+      <section class="panel chat" id="chatPanel">
+        <h2>3 · Ask Verum Omnis</h2>
         <p class="sub">
-          Re-compute the SHA-512 of a sealed PDF and check it against the anchored fingerprint,
-          then confirm the OpenTimestamps Bitcoin anchor. Fresh seals show <em>pending</em> until
-          the blockchain confirms (can take a few hours).
+          A forensic-investigator assistant with persistent case memory — it reads the sealed
+          vault every turn, so it always knows your case. Ask about the evidence, research the
+          issue, or draft a letter. Seal any answer you want to rely on: an unsealed answer is
+          not Verum Omnis speaking. Uses a local LLM (Ollama) when configured; deterministic otherwise.
+        </p>
+
+        <div class="chat-log" id="chatLog"></div>
+        <p class="sub" id="chatSource"></p>
+
+        <div class="chat-input-row">
+          <textarea id="chatInput" rows="2" placeholder="Ask about the case, or request a draft… (Enter to send, Shift+Enter for a new line)" spellcheck="false"></textarea>
+          <button class="btn btn-primary" id="chatSendBtn" type="button">Send</button>
+        </div>
+        <label class="seal-toggle"><input type="checkbox" id="chatDeepChk" /> Deep research (in-depth analysis; internet search when a research provider is configured)</label>
+      </section>
+
+      <section class="panel verify" id="verifyPanel">
+        <h2>Verify a Sealed Document</h2>
+        <p class="sub">
+          Re-compute the SHA-512 of any sealed PDF and check it against the anchored fingerprint,
+          then confirm the OpenTimestamps anchor. Fresh seals show <em>pending</em> until the
+          blockchain confirms.
         </p>
 
         <div class="field">
@@ -213,7 +144,7 @@
           <input id="verifyFile" type="file" accept="application/pdf" />
         </div>
         <div class="field">
-          <label for="verifySealId">Seal ID (optional if a PDF is selected — from the cover / QR code)</label>
+          <label for="verifySealId">Seal ID (optional if a PDF is selected)</label>
           <input id="verifySealId" type="text" placeholder="seal-…" spellcheck="false" />
         </div>
 
@@ -225,92 +156,6 @@
           <div class="verify-banner" id="verifyBanner"></div>
           <p class="sub" id="verifyMessage"></p>
           <div class="verify-grid" id="verifyGrid"></div>
-        </div>
-      </section>
-
-      <section class="panel pricing" id="pricingPanel">
-        <h2>Pricing &amp; Licensing</h2>
-        <p class="sub">
-          One rule: Verum Omnis takes <strong>20%</strong> of value. Private individuals and
-          SAPS are permanently free. Data is never sold.
-        </p>
-
-        <div class="price-streams" id="priceStreams"></div>
-
-        <div class="quote-form">
-          <div class="field">
-            <label for="quoteCategory">Category</label>
-            <select id="quoteCategory">
-              <option value="fraud_recovery">Fraud recovery — 20% of value prevented</option>
-              <option value="legal_services">Legal services — 20% of local lawyer fees</option>
-              <option value="ai_subscription">AI subscription — 20% of turnover</option>
-              <option value="commercial">Commercial engagement — 20%</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="quoteUserType">User type</label>
-            <select id="quoteUserType">
-              <option value="bank">Bank</option>
-              <option value="ai_company">AI company</option>
-              <option value="institution">Institution</option>
-              <option value="commercial">Commercial</option>
-              <option value="individual">Private individual (free)</option>
-              <option value="saps">SAPS (free)</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="quoteAmount" id="quoteAmountLabel">Value prevented (ZAR)</label>
-            <input id="quoteAmount" type="number" min="0" step="1000" placeholder="1500000" />
-          </div>
-          <div class="field legal-only" id="quoteJurisdictionField" hidden>
-            <label for="quoteJurisdiction">Jurisdiction</label>
-            <select id="quoteJurisdiction">
-              <option value="ZA-KZN">ZA-KZN</option>
-              <option value="ZA-GP">ZA-GP</option>
-              <option value="ZA-WC">ZA-WC</option>
-              <option value="UAE">UAE</option>
-              <option value="US">US</option>
-              <option value="UK">UK</option>
-              <option value="EU">EU</option>
-            </select>
-          </div>
-          <div class="field legal-only" id="quoteComplexityField" hidden>
-            <label for="quoteComplexity">Matter complexity</label>
-            <select id="quoteComplexity">
-              <option value="simple">Simple</option>
-              <option value="moderate" selected>Moderate</option>
-              <option value="complex">Complex</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="cta-row">
-          <button class="btn btn-primary" id="quoteBtn" type="button">Calculate 20% share</button>
-        </div>
-
-        <div class="result" hidden id="quoteResultBlock">
-          <div class="quote-amount" id="quoteAmountOut"></div>
-          <div class="verify-grid" id="quoteGrid"></div>
-        </div>
-      </section>
-
-      <section class="panel ai-assist" id="aiPanel">
-        <h2>AI Assist</h2>
-        <p class="sub">
-          Plain-English narrative of the latest findings. Uses a local LLM (Ollama) when
-          configured (<code>ai.mode: external</code>), otherwise a deterministic summary.
-          Detection, contradictions, and sealing always stay deterministic.
-        </p>
-        <div class="field">
-          <label for="aiPrompt">Ask (optional)</label>
-          <input id="aiPrompt" type="text" placeholder="Summarise the findings for a fraud officer" spellcheck="false" />
-        </div>
-        <div class="cta-row">
-          <button class="btn btn-primary" id="aiBtn" type="button">Generate summary</button>
-        </div>
-        <div class="result" hidden id="aiResultBlock">
-          <p class="sub" id="aiSource"></p>
-          <pre id="aiSummary"></pre>
         </div>
       </section>
     </main>

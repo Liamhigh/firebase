@@ -25,6 +25,8 @@ import { offenceFromFraud } from "../forensics/offences.js";
 import { computeQuote, revenueModel, type QuoteInput } from "../core/pricing.js";
 import { createLlmProvider, type LlmProvider } from "../ai/llm.js";
 import { findingsPath, readJson } from "../storage/vault.js";
+import { readdirSync, readFileSync, existsSync } from "node:fs";
+import { join } from "node:path";
 import type { Contradiction, Offence, TimelineEvent } from "../core/types.js";
 import {
   assertConstitutionIntegrity,
@@ -180,6 +182,110 @@ export class FraudFirewall {
       ...offences.slice(0, 5).map((o) => `- ${o.title} (${o.severity}, ${o.confidence})`),
     ];
     return lines.join("\n");
+  }
+
+  /**
+   * Conversational assistant for attorneys / compliance. It has persistent case
+   * memory: it re-reads the sealed vault findings on every turn (the vault is
+   * never wiped unless the user clears it). Uses the local LLM when reachable,
+   * else a deterministic reply. Any output the user wants to rely on must be
+   * sealed via `/v1/seal` — if it isn't on a sealed PDF, Verum Omnis never said it.
+   */
+  async chat(input: {
+    message: string;
+    history?: Array<{ role: "user" | "assistant"; content: string }>;
+  }): Promise<{ provider: string; source: "llm" | "deterministic"; reply: string }> {
+    const context = this.findingsContext();
+    const system =
+      "You are Verum Omnis, a constitutional forensic investigator assisting attorneys, " +
+      "banks and compliance teams. You have persistent access to the case vault. Be precise, " +
+      "cite sealed evidence with page anchors, use ordinal confidence words (never percentages), " +
+      "and never fabricate. Remind the user that any output they intend to rely on must be sealed " +
+      "as a PDF — if it is not sealed, Verum Omnis never said it.";
+    const hist = (input.history ?? [])
+      .slice(-8)
+      .map((m) => `${m.role === "user" ? "USER" : "VERUM OMNIS"}: ${m.content}`)
+      .join("\n");
+    const prompt = [
+      context ? `CASE VAULT CONTEXT:\n${context}` : "The case vault has no sealed findings yet.",
+      hist ? `CONVERSATION SO FAR:\n${hist}` : "",
+      `USER: ${input.message}`,
+      "VERUM OMNIS:",
+    ]
+      .filter(Boolean)
+      .join("\n\n");
+
+    const generated = await this.llm.generate({ system, prompt });
+    if (generated) {
+      return { provider: this.llm.name, source: "llm", reply: generated };
+    }
+    return {
+      provider: "deterministic",
+      source: "deterministic",
+      reply: this.deterministicChat(input.message, context),
+    };
+  }
+
+  private deterministicChat(message: string, context: string): string {
+    const head = context
+      ? "Here is what the sealed case vault currently holds:"
+      : "The case vault has no sealed findings yet. Upload and seal evidence first, then ask again.";
+    return [
+      `You asked: "${message.trim()}"`,
+      "",
+      head,
+      context || "(empty vault)",
+      "",
+      "To take this further (deep research, drafting an affidavit or letter), configure a local",
+      "LLM (ai.mode=external with Ollama). Whatever you rely on must be SEALED as a PDF — use",
+      "\"Seal answer\" so it becomes court-usable evidence. If it is not sealed, Verum Omnis never said it.",
+      "(Deterministic mode: no local LLM configured.)",
+    ].join("\n");
+  }
+
+  /**
+   * Communications ledger (anti-harassment): summarises every outbound message
+   * recorded in the vault by recipient, so the operator can see how many emails
+   * were sent to whom and how often before sending more.
+   */
+  commsLedger(): {
+    total: number;
+    recipients: Array<{ to: string; role: string; count: number; last_subject: string }>;
+  } {
+    const dir = join(this.config.storage.vault_dir, "outbound-email");
+    if (!existsSync(dir)) return { total: 0, recipients: [] };
+    const map = new Map<string, { to: string; role: string; count: number; last_subject: string }>();
+    let total = 0;
+    for (const file of readdirSync(dir)) {
+      if (!file.endsWith(".json")) continue;
+      try {
+        const rec = JSON.parse(readFileSync(join(dir, file), "utf8")) as {
+          to?: string;
+          subject?: string;
+          recipient_role?: string;
+        };
+        const to = rec.to ?? "unknown";
+        total += 1;
+        const existing = map.get(to);
+        if (existing) {
+          existing.count += 1;
+          existing.last_subject = rec.subject ?? existing.last_subject;
+        } else {
+          map.set(to, {
+            to,
+            role: rec.recipient_role ?? "unknown",
+            count: 1,
+            last_subject: rec.subject ?? "",
+          });
+        }
+      } catch {
+        /* skip unreadable record */
+      }
+    }
+    return {
+      total,
+      recipients: [...map.values()].sort((a, b) => b.count - a.count),
+    };
   }
 
   private deterministicNarrative(ask: string, context: string): string {

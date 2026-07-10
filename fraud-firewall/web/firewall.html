@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <title>Verum Omnis — Guardian Fraud Firewall</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=JetBrains+Mono:wght@400;500&family=Source+Sans+3:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./css/theme.css" />
+  </head>
+  <body>
+    <div class="scanline" aria-hidden="true"></div>
+
+    <header class="topbar">
+      <div class="shell topbar-inner">
+        <a class="brand" href="/">
+          <img src="./assets/verum-globe-mark.png" alt="Verum Omnis" />
+          <span class="brand-copy">
+            <span class="brand-name">VERUM OMNIS</span>
+            <span class="brand-tag">Guardian Fraud Firewall</span>
+          </span>
+        </a>
+        <div class="nav-meta">
+          <a class="nav-link" href="./index.html">Investigator</a>
+          <span class="pill" id="healthPill"><span class="dot"></span> Connecting</span>
+          <span class="pill">Constitution v5.2.7</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="shell">
+      <section class="hero firewall-hero">
+        <div class="hero-text">
+          <p class="eyebrow">Guardian Fraud Firewall</p>
+          <h1>Truth That <em>Cannot</em> Be Erased</h1>
+          <p class="hero-lead">
+            On-premise bank monitoring under Constitution v5.2.7. Four Verum AIs assist the bank:
+            three help hunt fraud in real time; confirmed fraud is triple-verified, sealed with
+            SHA-512, and Verum receives a commission invoice only — never customer data or evidence.
+          </p>
+          <div class="cta-row">
+            <button class="btn btn-primary" id="runDemoBtn" type="button">Run Detection Demo</button>
+            <a class="btn btn-ghost" href="./index.html">Back to Investigator</a>
+          </div>
+        </div>
+        <div class="hero-art">
+          <img class="hero-logo" src="./assets/verum-logo-full.png" alt="Verum Omnis" />
+        </div>
+      </section>
+
+      <section class="panel-grid">
+        <div class="panel">
+          <h2>Live Monitor</h2>
+          <p class="sub">Paste transaction JSON or run the built-in demo cluster.</p>
+
+          <div class="stat-row">
+            <div class="stat"><span class="label">Seal Credits</span><span class="value" id="creditValue">—</span></div>
+            <div class="stat"><span class="label">Alert Status</span><span class="value" id="statusValue">IDLE</span></div>
+            <div class="stat"><span class="label">Quorum</span><span class="value" id="quorumValue">—</span></div>
+          </div>
+
+          <div class="field">
+            <label for="txnInput">Transactions (JSON array)</label>
+            <textarea id="txnInput" spellcheck="false"></textarea>
+          </div>
+
+          <div class="cta-row">
+            <button class="btn btn-primary" id="monitorBtn" type="button">Monitor Buffer</button>
+            <button class="btn btn-ghost" id="loadDemoBtn" type="button">Load Demo Txns</button>
+            <button class="btn btn-ghost" id="refreshCreditsBtn" type="button">Refresh Credits</button>
+          </div>
+
+          <div class="result" hidden id="resultBlock">
+            <p class="sub" id="resultMessage"></p>
+            <pre id="resultPre"></pre>
+            <div class="cta-row" id="downloadRow" hidden>
+              <a class="btn btn-ghost" id="downloadSeal" href="#" target="_blank" rel="noreferrer">Download Sealed PDF</a>
+            </div>
+          </div>
+        </div>
+
+        <aside class="panel">
+          <h2>Pipeline</h2>
+          <p class="sub">Four firewall AIs — three assist the bank's fraud hunt; all Constitution-bound.</p>
+          <ol class="pipeline">
+            <li><span class="step-num">01</span><div><div class="step-title">Forensic Input Scan</div><p class="step-copy">Velocity, amount, and geo rules fingerprint every transaction.</p></div></li>
+            <li><span class="step-num">02</span><div><div class="step-title">AI Routing Lockdown</div><p class="step-copy">Gemma 4 + Mistral agents only — Constitution-bound prompts.</p></div></li>
+            <li><span class="step-num">03</span><div><div class="step-title">Triple Verification</div><p class="step-copy">Gemma 3, Phi-3, and 9-Brain must all CONCUR.</p></div></li>
+            <li><span class="step-num">04</span><div><div class="step-title">Silence Ledger</div><p class="step-copy">Confirmed fraud is sealed. Ignored risk cannot be erased.</p></div></li>
+          </ol>
+          <div class="privacy">
+            <strong>Privacy hard rule:</strong> Verum Omnis receives commission invoices only —
+            never customer data, transactions, or sealed evidence.
+          </div>
+        </aside>
+      </section>
+
+      <section class="panel" id="commsPanel">
+        <h2>Communications Ledger</h2>
+        <p class="sub">
+          Every outbound message is recorded in the vault by recipient — so you can see how many
+          emails were sent to whom before sending more (anti-harassment safeguard).
+        </p>
+        <div id="commsLedger"><p class="sub">Loading…</p></div>
+      </section>
+
+      <section class="panel pricing" id="pricingPanel">
+        <h2>Pricing &amp; Licensing</h2>
+        <p class="sub">
+          One rule: Verum Omnis takes <strong>20%</strong> of value. Private individuals and
+          SAPS are permanently free. Data is never sold.
+        </p>
+
+        <div class="price-streams" id="priceStreams"></div>
+
+        <div class="quote-form">
+          <div class="field">
+            <label for="quoteCategory">Category</label>
+            <select id="quoteCategory">
+              <option value="fraud_recovery">Fraud recovery — 20% of value prevented</option>
+              <option value="legal_services">Legal services — 20% of local lawyer fees</option>
+              <option value="ai_subscription">AI subscription — 20% of turnover</option>
+              <option value="commercial">Commercial engagement — 20%</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="quoteUserType">User type</label>
+            <select id="quoteUserType">
+              <option value="bank">Bank</option>
+              <option value="ai_company">AI company</option>
+              <option value="institution">Institution</option>
+              <option value="commercial">Commercial</option>
+              <option value="individual">Private individual (free)</option>
+              <option value="saps">SAPS (free)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="quoteAmount" id="quoteAmountLabel">Value prevented (ZAR)</label>
+            <input id="quoteAmount" type="number" min="0" step="1000" placeholder="1500000" />
+          </div>
+          <div class="field legal-only" id="quoteJurisdictionField" hidden>
+            <label for="quoteJurisdiction">Jurisdiction</label>
+            <select id="quoteJurisdiction">
+              <option value="ZA-KZN">ZA-KZN</option>
+              <option value="ZA-GP">ZA-GP</option>
+              <option value="ZA-WC">ZA-WC</option>
+              <option value="UAE">UAE</option>
+              <option value="US">US</option>
+              <option value="UK">UK</option>
+              <option value="EU">EU</option>
+            </select>
+          </div>
+          <div class="field legal-only" id="quoteComplexityField" hidden>
+            <label for="quoteComplexity">Matter complexity</label>
+            <select id="quoteComplexity">
+              <option value="simple">Simple</option>
+              <option value="moderate" selected>Moderate</option>
+              <option value="complex">Complex</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="cta-row">
+          <button class="btn btn-primary" id="quoteBtn" type="button">Calculate 20% share</button>
+        </div>
+
+        <div class="result" hidden id="quoteResultBlock">
+          <div class="quote-amount" id="quoteAmountOut"></div>
+          <div class="verify-grid" id="quoteGrid"></div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="shell footer">
+      <span>Verum Omnis · Protocol verum-omnis-seal v1.0 · Patent Pending</span>
+      <a href="https://www.verumglobal.foundation" target="_blank" rel="noreferrer">www.verumglobal.foundation</a>
+    </footer>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script type="module" src="./js/firewall.js"></script>
+  </body>
+</html>

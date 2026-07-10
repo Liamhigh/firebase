@@ -336,6 +336,27 @@ export function startServer(firewall: FraudFirewall): {
         return sendJson(res, 200, result);
       }
 
+      if (method === "POST" && url.pathname === "/v1/ai/chat") {
+        const rawText = await readBody(req);
+        let body: {
+          message?: string;
+          history?: Array<{ role: "user" | "assistant"; content: string }>;
+        } = {};
+        if (rawText.trim()) body = JSON.parse(rawText);
+        if (!body.message || !body.message.trim()) {
+          return sendJson(res, 400, { error: "message is required" });
+        }
+        const result = await firewall.chat({
+          message: body.message,
+          history: Array.isArray(body.history) ? body.history : undefined,
+        });
+        return sendJson(res, 200, result);
+      }
+
+      if (method === "GET" && url.pathname === "/v1/comms/ledger") {
+        return sendJson(res, 200, firewall.commsLedger());
+      }
+
       if (method === "GET" && url.pathname === "/v1/findings") {
         const atoms = readJson<unknown[]>(findingsPath(config, "evidence_atoms.json")) ?? [];
         const contradictions =
