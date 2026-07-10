@@ -20,7 +20,7 @@ reconstruction, offence matrix, and financial analysis remain in scope because
 | Data models & HTTP API | X | ✅ |
 | Evidence atoms + structured contradictions | (report content) | ✅ |
 | OpenTimestamps anchoring | IV, §6.2 | ✅ real calendar stamping + Bitcoin confirmation (mock fallback) |
-| Email delivery | V | 🟡 writes queued JSON (no SMTP) |
+| Email delivery | V | ✅ real SMTP send (nodemailer) + queued JSON audit; privacy preserved |
 | Real local LLMs (Gemma/Phi/Mistral) | II | 🟡 deterministic heuristics |
 | Sealed-report content: timeline, offence matrix, financial analysis | V §5.3 | 🟡 Phase 1 |
 | Licensing / pricing (universal 20% model + free tiers) | VI, business constitution | ✅ pricing engine + quotes; SMTP delivery still pending |
@@ -52,7 +52,13 @@ reconstruction, offence matrix, and financial analysis remain in scope because
   lawyer fees, geographically benchmarked), AI-company subscription (20% of turnover),
   any commercial engagement (20%). Private individuals + SAPS permanently **free**; data
   never sold. `GET /v1/pricing`, `POST /v1/pricing/quote`, console Pricing panel.
-- ⛔ (remaining) Real SMTP "send-only" email gateway behind `NotificationService` (VII), with delivery audit. Dep: SMTP credentials.
+- ✅ **Real SMTP delivery** (`notifications/email.ts` via nodemailer): async `dispatch`
+  sends over SMTP when configured and always writes the queued JSON audit record.
+  Bank emails carry the sealed-PDF attachment; Verum emails never carry evidence
+  (code-enforced). Enable by setting env secrets: `SMTP_HOST`, `SMTP_PORT`,
+  `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS`, `EMAIL_FROM` (a bank SMTP relay works).
+  Without them it safely falls back to queued JSON. Verified end-to-end against a
+  local SMTP server.
 - ⏸ Bank document-sealing subscriptions — to be discussed (per operator).
 
 ### Phase 4 — Bank system integration

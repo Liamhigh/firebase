@@ -1,5 +1,6 @@
 import { writeFileSync, mkdirSync, existsSync } from "node:fs";
 import { join } from "node:path";
+import nodemailer, { type Transporter } from "nodemailer";
 import type {
   CommissionInvoice,
   FirewallConfig,
@@ -17,12 +18,40 @@ export interface OutboundEmail {
   recipient_role: "verum" | "bank";
 }
 
+export interface DispatchResult {
+  queued_path: string;
+  delivered: boolean;
+  transport: "smtp" | "queued";
+  message_id?: string;
+  error?: string;
+}
+
 /**
  * Notification system with CODE-enforced privacy:
  * Verum emails physically cannot attach evidence files.
  */
 export class NotificationService {
+  private transporter: Transporter | null = null;
+
   constructor(private readonly config: FirewallConfig) {}
+
+  private smtp() {
+    return this.config.email?.smtp;
+  }
+
+  private getTransporter(): Transporter | null {
+    const smtp = this.smtp();
+    if (!smtp?.host) return null;
+    if (!this.transporter) {
+      this.transporter = nodemailer.createTransport({
+        host: smtp.host,
+        port: smtp.port,
+        secure: smtp.secure ?? false,
+        auth: smtp.user ? { user: smtp.user, pass: smtp.pass } : undefined,
+      });
+    }
+    return this.transporter;
+  }
 
   buildVerumCommissionEmail(invoice: CommissionInvoice): OutboundEmail {
     assertInvoicePrivacy(invoice);
@@ -104,8 +133,12 @@ export class NotificationService {
     };
   }
 
-  /** Persist outbound emails locally (on-prem mailer / SMTP hook). */
-  dispatch(email: OutboundEmail): { queued_path: string } {
+  /**
+   * Deliver an outbound email. Always writes a queued JSON audit record; when
+   * SMTP is configured, also sends via SMTP. Verum emails can never carry
+   * evidence attachments (code-enforced).
+   */
+  async dispatch(email: OutboundEmail): Promise<DispatchResult> {
     if (email.recipient_role === "verum") {
       this.enforceNoEvidenceToVerum(email);
     }
@@ -114,7 +147,41 @@ export class NotificationService {
     const safe = email.subject.replace(/[^a-zA-Z0-9._-]+/g, "_").slice(0, 80);
     const path = join(outDir, `${Date.now()}-${email.recipient_role}-${safe}.json`);
     writeFileSync(path, JSON.stringify(email, null, 2) + "\n", "utf8");
-    return { queued_path: path };
+
+    const transporter = this.getTransporter();
+    if (!transporter) {
+      return { queued_path: path, delivered: false, transport: "queued" };
+    }
+
+    // Attachments are permitted for banks only; existing files only.
+    const attachments =
+      email.recipient_role === "bank"
+        ? email.attachments
+            .filter((a) => existsSync(a.path))
+            .map((a) => ({ filename: a.filename, path: a.path }))
+        : [];
+    try {
+      const info = await transporter.sendMail({
+        from: this.config.email?.from ?? "verum-omnis@localhost",
+        to: email.to,
+        subject: email.subject,
+        text: email.body,
+        attachments,
+      });
+      return {
+        queued_path: path,
+        delivered: true,
+        transport: "smtp",
+        message_id: (info as { messageId?: string }).messageId,
+      };
+    } catch (err) {
+      return {
+        queued_path: path,
+        delivered: false,
+        transport: "smtp",
+        error: err instanceof Error ? err.message : String(err),
+      };
+    }
   }
 
   /**

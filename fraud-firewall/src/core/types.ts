@@ -210,6 +210,21 @@ export interface FirewallConfig {
   ots?: {
     mode: "live" | "mock";
   };
+  /**
+   * Outbound email. When `smtp.host` is set the notification service delivers
+   * via SMTP; otherwise it only writes the queued JSON audit record. Credentials
+   * are normally injected from env (SMTP_HOST/PORT/USER/PASS/SECURE, EMAIL_FROM).
+   */
+  email?: {
+    from?: string;
+    smtp?: {
+      host: string;
+      port: number;
+      secure?: boolean;
+      user?: string;
+      pass?: string;
+    };
+  };
   seal_credits: {
     initial_balance: number;
     low_balance_threshold: number;

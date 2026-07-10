@@ -341,8 +341,8 @@ export class FraudFirewall {
       seal: sealed.seal,
       sealedPdfPath: pdfPath,
     });
-    const verumQueued = this.notifications.dispatch(verumEmail);
-    const bankQueued = this.notifications.dispatch(bankEmail);
+    const verumQueued = await this.notifications.dispatch(verumEmail);
+    const bankQueued = await this.notifications.dispatch(bankEmail);
 
     alert = {
       ...alert,

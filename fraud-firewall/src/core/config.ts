@@ -19,5 +19,27 @@ export function loadConfig(path = process.env.VO_FIREWALL_CONFIG): FirewallConfi
       "Commission percent is hard-coded to 20% per VO-FIREWALL-SPEC-5.2.7",
     );
   }
+  applyEmailEnv(raw);
   return raw;
+}
+
+/**
+ * Populate SMTP settings from environment secrets when present. Env wins over
+ * any file config so credentials never need to live in firewall.json.
+ */
+function applyEmailEnv(config: FirewallConfig): void {
+  const host = process.env.SMTP_HOST;
+  const from = process.env.EMAIL_FROM;
+  if (!host && !from && !config.email) return;
+  config.email = config.email ?? {};
+  if (from) config.email.from = from;
+  if (host) {
+    config.email.smtp = {
+      host,
+      port: Number(process.env.SMTP_PORT ?? 587),
+      secure: process.env.SMTP_SECURE === "true",
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS,
+    };
+  }
 }
