@@ -969,3 +969,24 @@ select {
 .chat-input-row .btn {
   align-self: stretch;
 }
+
+/* ---- Chat answer verification chip ---- */
+.verify-chip {
+  display: inline-block;
+  margin-top: 0.55rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+  border: 1px solid transparent;
+}
+.verify-chip.verified { background: rgba(45, 156, 94, 0.18); color: #7ee0a8; border-color: rgba(45, 156, 94, 0.5); }
+.verify-chip.pending { background: rgba(212, 168, 67, 0.16); color: #e8c567; border-color: rgba(212, 168, 67, 0.5); }
+.verify-chip.tampered { background: rgba(200, 60, 60, 0.16); color: #f3a1a1; border-color: rgba(200, 60, 60, 0.5); }
+.verify-chip.notfound { background: rgba(120, 130, 150, 0.16); color: #b9c2d4; border-color: rgba(120, 130, 150, 0.45); }
+.verify-votes {
+  margin-top: 0.3rem;
+  font-size: 0.66rem;
+  color: #93a3ba;
+}

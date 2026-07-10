@@ -234,20 +234,41 @@ $("extractBtn")?.addEventListener("click", async () => {
 
 const chatHistory = [];
 
-function appendMessage(role, text, { sealable = false } = {}) {
+const VERDICT_LABEL = {
+  VERIFIED: { cls: "verified", text: "TRIPLE-AI VERIFIED" },
+  PARTIAL: { cls: "pending", text: "PARTIALLY VERIFIED" },
+  UNVERIFIED: { cls: "tampered", text: "UNVERIFIED — treat with caution" },
+  UNVERIFIED_NO_SEALED_EVIDENCE: { cls: "notfound", text: "NO SEALED EVIDENCE — seal evidence first" },
+};
+
+function verificationHtml(v) {
+  if (!v) return "";
+  const badge = VERDICT_LABEL[v.verdict] || { cls: "notfound", text: v.verdict };
+  const votes = v.verifiers
+    .map((x) => `${escapeHtml(x.name)}: ${x.vote === "CONCUR" ? "✓" : "⟳"}`)
+    .join(" · ");
+  return `<div class="verify-chip ${badge.cls}" title="${escapeHtml(votes)}">
+      ${badge.text} · quorum ${v.quorum}/${v.threshold}
+    </div>
+    <div class="verify-votes">${votes}</div>`;
+}
+
+function appendMessage(role, text, { sealable = false, verification = null } = {}) {
   const log = $("chatLog");
   if (!log) return null;
   const wrap = document.createElement("div");
   wrap.className = `chat-msg ${role}`;
   const who = role === "user" ? "You" : "Verum Omnis";
-  wrap.innerHTML = `<div class="chat-who">${who}</div><div class="chat-body">${escapeHtml(text)}</div>`;
+  wrap.innerHTML =
+    `<div class="chat-who">${who}</div><div class="chat-body">${escapeHtml(text)}</div>` +
+    (role === "assistant" ? verificationHtml(verification) : "");
   if (sealable) {
     const actions = document.createElement("div");
     actions.className = "chat-actions";
     const btn = document.createElement("button");
     btn.className = "btn btn-ghost btn-small";
     btn.textContent = "Seal answer as PDF";
-    btn.addEventListener("click", () => sealAnswer(text, btn));
+    btn.addEventListener("click", () => sealAnswer(text, verification, btn));
     actions.appendChild(btn);
     wrap.appendChild(actions);
   }
@@ -256,17 +277,27 @@ function appendMessage(role, text, { sealable = false } = {}) {
   return wrap;
 }
 
-async function sealAnswer(text, btn) {
+async function sealAnswer(text, verification, btn) {
   btn.disabled = true;
   btn.textContent = "Sealing…";
   try {
     const stamp = new Date().toISOString().replace(/[:.]/g, "").slice(0, 15);
+    const verifyBlock = verification
+      ? [
+          "",
+          "TRIPLE-AI VERIFICATION:",
+          `- Verdict: ${verification.verdict}`,
+          `- Quorum: ${verification.quorum} of ${verification.threshold} verifiers concurred`,
+          `- Grounding score: ${verification.grounding_score}`,
+          ...verification.verifiers.map((v) => `- ${v.name}: ${v.vote} — ${v.detail}`),
+        ].join("\n")
+      : "";
     const result = await api("/v1/seal", {
       method: "POST",
       body: JSON.stringify({
         document_reference: `VO-CHAT-${stamp}`,
         title: "Verum Omnis — Sealed AI Response",
-        body: text,
+        body_text: `${text}\n${verifyBlock}`,
       }),
     });
     await refreshCredits();
@@ -308,10 +339,13 @@ async function sendChat() {
       body: JSON.stringify({ message: outbound, history: chatHistory.slice(0, -1) }),
     });
     thinking?.remove();
-    appendMessage("assistant", res.reply, { sealable: true });
+    appendMessage("assistant", res.reply, { sealable: true, verification: res.verification });
     chatHistory.push({ role: "assistant", content: res.reply });
     const src = $("chatSource");
-    if (src) src.textContent = `Source: ${res.source} (${res.provider})`;
+    if (src) {
+      const v = res.verification;
+      src.textContent = `Source: ${res.source} (${res.provider})` + (v ? ` · verification ${v.verdict} (${v.quorum}/${v.threshold})` : "");
+    }
   } catch (err) {
     thinking?.remove();
     appendMessage("assistant", `Error: ${err.message}`);
