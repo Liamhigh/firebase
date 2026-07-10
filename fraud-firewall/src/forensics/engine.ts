@@ -162,6 +162,11 @@ export class ForensicEngine {
         bodyText: summarize(findings),
         evidencePayload: { atoms, contradictions },
         createdAt: now,
+        report: {
+          subject: findings.institution,
+          subtitle: "Evidence Extraction & Contradiction Findings",
+          jurisdiction: this.config.institution.jurisdiction,
+        },
       });
       result.seal = sealed.seal;
       result.sealed_pdf_path = sealedPath(this.config, sealed.seal.seal_id);

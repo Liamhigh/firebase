@@ -265,6 +265,12 @@ export class FraudFirewall {
         transactions: txns,
       },
       createdAt: now.toISOString(),
+      report: {
+        subject: this.config.institution.name,
+        subtitle: `${alert.fraud_type} — Guardian Fraud Firewall Investigation`,
+        caseReference: caseRef,
+        jurisdiction: this.config.institution.jurisdiction,
+      },
     });
 
     const invoice = generateCommissionInvoice({
