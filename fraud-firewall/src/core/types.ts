@@ -205,6 +205,16 @@ export interface FirewallConfig {
   ai: {
     mode: "deterministic" | "external";
     models: Record<string, { role: string; offline: boolean }>;
+    /**
+     * Optional local LLM for narrative assistance only (never for the
+     * deterministic detection/sealing path). Enabled when mode="external".
+     */
+    llm?: {
+      provider: "ollama";
+      base_url: string;
+      model: string;
+      timeout_ms?: number;
+    };
   };
   /** OpenTimestamps anchoring: "live" submits to real calendars, "mock" is offline. */
   ots?: {

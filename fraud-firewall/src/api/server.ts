@@ -261,6 +261,17 @@ export function startServer(firewall: FraudFirewall): {
         }
       }
 
+      if (method === "POST" && url.pathname === "/v1/ai/summary") {
+        const rawText = await readBody(req);
+        let body: { prompt?: string; use_findings?: boolean } = {};
+        if (rawText.trim()) body = JSON.parse(rawText);
+        const result = await firewall.aiNarrative({
+          prompt: body.prompt,
+          useFindings: body.use_findings,
+        });
+        return sendJson(res, 200, result);
+      }
+
       if (method === "GET" && url.pathname === "/v1/findings") {
         const atoms = readJson<unknown[]>(findingsPath(config, "evidence_atoms.json")) ?? [];
         const contradictions =

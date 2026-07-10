@@ -23,6 +23,9 @@ import { verifySeal, type SealVerification } from "../core/verification.js";
 import { buildTimelineFromTransactions } from "../forensics/timeline.js";
 import { offenceFromFraud } from "../forensics/offences.js";
 import { computeQuote, revenueModel, type QuoteInput } from "../core/pricing.js";
+import { createLlmProvider, type LlmProvider } from "../ai/llm.js";
+import { findingsPath, readJson } from "../storage/vault.js";
+import type { Contradiction, Offence, TimelineEvent } from "../core/types.js";
 import {
   alertPath,
   ensureVault,
@@ -53,6 +56,7 @@ export class FraudFirewall {
   private readonly credits: SealCreditLedgerService;
   private readonly agents: MistralAgentPool;
   private readonly forensics: ForensicEngine;
+  private readonly llm: LlmProvider;
   private readonly buffer: Transaction[] = [];
   private alertSeq = 0;
   private caseSeq = 0;
@@ -69,6 +73,73 @@ export class FraudFirewall {
     this.credits = new SealCreditLedgerService(config);
     this.agents = new MistralAgentPool(config, () => [...this.buffer]).configureDefaultPool();
     this.forensics = new ForensicEngine(config);
+    this.llm = createLlmProvider(config);
+  }
+
+  /**
+   * Plain-English narrative of the latest findings. Uses the local LLM when
+   * configured/reachable, else a deterministic templated summary. Never affects
+   * the sealed forensic content.
+   */
+  async aiNarrative(input: { prompt?: string; useFindings?: boolean } = {}): Promise<{
+    provider: string;
+    source: "llm" | "deterministic";
+    summary: string;
+  }> {
+    const context = input.useFindings === false ? "" : this.findingsContext();
+    const system =
+      "You are Verum Omnis. Communicate findings clearly. Cite evidence. Ordinal confidence only.";
+    const ask =
+      input.prompt?.trim() ||
+      "Summarise the forensic findings for a bank fraud officer in a short paragraph.";
+    const prompt = context ? `${ask}\n\nCONTEXT:\n${context}` : ask;
+
+    const generated = await this.llm.generate({ system, prompt });
+    if (generated) {
+      return { provider: this.llm.name, source: "llm", summary: generated };
+    }
+    return {
+      provider: "deterministic",
+      source: "deterministic",
+      summary: this.deterministicNarrative(ask, context),
+    };
+  }
+
+  private findingsContext(): string {
+    const contradictions = readJson<Contradiction[]>(
+      findingsPath(this.config, "contradictions.json"),
+    ) ?? [];
+    const timeline = readJson<TimelineEvent[]>(findingsPath(this.config, "timeline.json")) ?? [];
+    const offences = readJson<Offence[]>(findingsPath(this.config, "offence_matrix.json")) ?? [];
+    if (!contradictions.length && !timeline.length && !offences.length) return "";
+    const lines = [
+      `Contradictions: ${contradictions.length}`,
+      ...contradictions.slice(0, 5).map(
+        (c) => `- [${c.severity}] ${c.claim_a.text} <-> ${c.claim_b.text}`,
+      ),
+      `Timeline events: ${timeline.length}`,
+      ...timeline.slice(0, 5).map((e) => `- ${e.date}: ${e.description}`),
+      `Offences: ${offences.length}`,
+      ...offences.slice(0, 5).map((o) => `- ${o.title} (${o.severity}, ${o.confidence})`),
+    ];
+    return lines.join("\n");
+  }
+
+  private deterministicNarrative(ask: string, context: string): string {
+    if (!context) {
+      return (
+        "No forensic findings are currently available to summarise. Run evidence " +
+        "extraction or a monitoring pass first. (Deterministic mode: no local LLM configured.)"
+      );
+    }
+    return [
+      "FORENSIC SUMMARY (deterministic — no local LLM configured):",
+      context,
+      "",
+      "All items are anchored to sealed evidence with SHA-512 hashes and were produced",
+      "under Constitution v5.2.7 with Triple-AI verification. Configure ai.mode=external",
+      "with a local Ollama model for natural-language narration.",
+    ].join("\n");
   }
 
   /** Ingest an evidence document for forensic extraction (spec §4.1). */

@@ -462,6 +462,29 @@ $("quoteBtn").addEventListener("click", runQuote);
 syncQuoteForm();
 loadPricing();
 
+/* ---------------- AI assist ---------------- */
+
+async function runAiSummary() {
+  $("aiBtn").disabled = true;
+  try {
+    const prompt = $("aiPrompt").value.trim();
+    const res = await api("/v1/ai/summary", {
+      method: "POST",
+      body: JSON.stringify({ prompt: prompt || undefined, use_findings: true }),
+    });
+    $("aiResultBlock").hidden = false;
+    $("aiSource").textContent = `Source: ${res.source} (${res.provider})`;
+    $("aiSummary").textContent = res.summary;
+    toast(res.source === "llm" ? "LLM summary generated" : "Deterministic summary", "ok");
+  } catch (err) {
+    toast(err.message, "err");
+  } finally {
+    $("aiBtn").disabled = false;
+  }
+}
+
+$("aiBtn").addEventListener("click", runAiSummary);
+
 loadDemoIntoEditor();
 loadDemoDocsIntoEditor();
 refreshHealth();

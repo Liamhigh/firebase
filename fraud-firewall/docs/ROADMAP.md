@@ -21,7 +21,7 @@ reconstruction, offence matrix, and financial analysis remain in scope because
 | Evidence atoms + structured contradictions | (report content) | ✅ |
 | OpenTimestamps anchoring | IV, §6.2 | ✅ real calendar stamping + Bitcoin confirmation (mock fallback) |
 | Email delivery | V | ✅ real SMTP send (nodemailer) + queued JSON audit; privacy preserved |
-| Real local LLMs (Gemma/Phi/Mistral) | II | 🟡 deterministic heuristics |
+| Real local LLMs (Gemma/Phi/Mistral) | II | ✅ LLM adapter (Ollama) for narrative; deterministic core unchanged. Needs a model on the laptop. |
 | Sealed-report content: timeline, offence matrix, financial analysis | V §5.3 | 🟡 Phase 1 |
 | Licensing / pricing (universal 20% model + free tiers) | VI, business constitution | ✅ pricing engine + quotes; SMTP delivery still pending |
 | Bank system integration (read-only APIs) | VII | ⛔ (in-memory buffer) |
@@ -65,9 +65,16 @@ reconstruction, offence matrix, and financial analysis remain in scope because
 - Read-only connectors (Transaction Engine, Account DB, KYC, Comms logs) behind a `BankSource` interface + dev mock; data-access controls; per-access audit logging; wire Mistral agents to real sources (VII §7.1–7.4, VIII).
 - Dep: bank API access/credentials. Risk: high.
 
-### Phase 5 — Real local LLMs
-- Adapter so real Gemma 4/3, Phi-3, Mistral back `ConstitutionalModel`/agents/chat; deterministic remains default/fallback (II).
-- Dep: model runtime/hardware. Risk: high.
+### Phase 5 — Real local LLMs ✅ ADAPTER DONE
+- ✅ `ai/llm.ts`: `LlmProvider` abstraction with an **Ollama** provider (small models like
+  `phi3` / `gemma2:2b` on a laptop) and a `DeterministicProvider` default; factory driven
+  by `config.ai.mode`/`config.ai.llm`. `FraudFirewall.aiNarrative` + `POST /v1/ai/summary`
+  + console **AI Assist** panel. Any LLM error/timeout falls back to a deterministic summary.
+- ✅ Detection / contradictions / timeline / offences / sealing remain **deterministic**
+  (constitutional requirement) — the LLM only writes narrative.
+- To use a real model on the laptop: install Ollama, `ollama pull phi3`, then set
+  `ai.mode: "external"` and `ai.llm = { provider: "ollama", base_url: "http://localhost:11434", model: "phi3" }`.
+- Remaining: optionally let the LLM also back agent/chat roles.
 
 ### Phase 6 — Deployment & hardening
 - Cloud manifests (compose/k8s), system-requirements doc, API auth, health/metrics/observability (IX).

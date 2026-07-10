@@ -732,6 +732,28 @@ select {
   color: var(--success);
 }
 
+/* AI assist */
+.ai-assist {
+  margin-bottom: 3rem;
+  animation: rise 0.9s ease 0.24s both;
+}
+
+.ai-assist pre {
+  margin: 0.5rem 0 0;
+  max-height: 320px;
+  overflow: auto;
+  padding: 0.9rem;
+  border-radius: var(--radius);
+  background: rgba(4, 13, 27, 0.75);
+  border: 1px solid rgba(74, 126, 199, 0.2);
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  line-height: 1.5;
+  color: #c9d3e2;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
 .footer {
   border-top: 1px solid rgba(74, 126, 199, 0.16);
   padding: 1.5rem 0 2.5rem;

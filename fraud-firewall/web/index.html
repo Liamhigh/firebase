@@ -268,6 +268,26 @@
           <div class="verify-grid" id="quoteGrid"></div>
         </div>
       </section>
+
+      <section class="panel ai-assist" id="aiPanel">
+        <h2>AI Assist</h2>
+        <p class="sub">
+          Plain-English narrative of the latest findings. Uses a local LLM (Ollama) when
+          configured (<code>ai.mode: external</code>), otherwise a deterministic summary.
+          Detection, contradictions, and sealing always stay deterministic.
+        </p>
+        <div class="field">
+          <label for="aiPrompt">Ask (optional)</label>
+          <input id="aiPrompt" type="text" placeholder="Summarise the findings for a fraud officer" spellcheck="false" />
+        </div>
+        <div class="cta-row">
+          <button class="btn btn-primary" id="aiBtn" type="button">Generate summary</button>
+        </div>
+        <div class="result" hidden id="aiResultBlock">
+          <p class="sub" id="aiSource"></p>
+          <pre id="aiSummary"></pre>
+        </div>
+      </section>
     </main>
 
     <footer class="shell footer">
