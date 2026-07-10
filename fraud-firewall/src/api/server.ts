@@ -375,9 +375,13 @@ export function startServer(firewall: FraudFirewall): {
         const path = `${config.storage.sealed_dir}/${sealId}.pdf`;
         if (!existsSync(path)) return notFound(res);
         const bytes = readFileSync(path);
+        // inline=1 lets the console embed the report on screen for review; the
+        // default remains attachment so direct links download the sealed PDF.
+        const inline = url.searchParams.get("inline") === "1";
         res.writeHead(200, {
           "Content-Type": "application/pdf",
-          "Content-Disposition": `attachment; filename="${sealId}.pdf"`,
+          "Content-Disposition": `${inline ? "inline" : "attachment"}; filename="${sealId}.pdf"`,
+          "Cache-Control": "no-store",
         });
         return res.end(bytes);
       }

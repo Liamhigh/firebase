@@ -19,7 +19,7 @@
     <header class="topbar">
       <div class="shell topbar-inner">
         <a class="brand" href="/">
-          <img src="./assets/mainlogo.png" alt="Verum Omnis" />
+          <img src="./assets/vo-logo.svg" alt="Verum Omnis" />
           <span class="brand-copy">
             <span class="brand-name">VERUM OMNIS</span>
             <span class="brand-tag">AI Forensics for Truth</span>
@@ -171,14 +171,27 @@
 
         <div class="result" hidden id="extractResultBlock">
           <p class="sub" id="extractMessage"></p>
-          <div class="contra-list" id="contraList"></div>
-          <details class="raw-findings">
-            <summary>Raw findings JSON</summary>
-            <pre id="extractPre"></pre>
-          </details>
-          <div class="cta-row" id="extractDownloadRow" hidden>
-            <a class="btn btn-ghost" id="downloadFindingsSeal" href="#" target="_blank" rel="noreferrer">Download Sealed Findings PDF</a>
+
+          <div class="sealed-report" id="sealedReport" hidden>
+            <div class="sealed-report-head">
+              <span class="sr-title">Sealed forensic report — displayed for review</span>
+              <div class="cta-row" id="extractDownloadRow" hidden>
+                <button class="btn btn-ghost" id="printFindingsSeal" type="button">Print</button>
+                <a class="btn btn-ghost" id="downloadFindingsSeal" href="#" target="_blank" rel="noreferrer">Open / Download PDF</a>
+              </div>
+            </div>
+            <iframe id="sealedFrame" title="Sealed forensic report" src="about:blank"></iframe>
+            <p class="sr-note">
+              The raw findings JSON and the sealed PDF are saved to the vault
+              (<code>vault/findings/</code> and <code>vault/sealed/</code>). This on-screen
+              copy closes when you leave the page.
+            </p>
           </div>
+
+          <details class="contra-index">
+            <summary>Contradiction index (<span id="contraIndexCount">0</span>) — quick anchors</summary>
+            <div class="contra-list" id="contraList"></div>
+          </details>
         </div>
       </section>
 

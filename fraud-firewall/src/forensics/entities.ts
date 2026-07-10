@@ -24,6 +24,29 @@ const ORG_SUFFIX =
 
 const PERSON = /\b([A-Z][a-z]{1,}(?:\s+[A-Z][a-z’'-]{1,}){1,3})\b/g;
 
+// Tokens that mark a capitalised phrase as a legal/business concept, NOT a
+// personal name. A candidate containing any of these is rejected as a person.
+// Prevents dense contracts from mis-attributing contradictions to phantom
+// "people" like "Franchised Business" or "Franchise Agreement".
+const NON_NAME_TOKENS = new Set([
+  "business", "businesses", "agreement", "agreements", "manual", "product",
+  "products", "interest", "fuel", "fuels", "station", "stations", "terms",
+  "rental", "rentals", "premises", "equipment", "franchise", "franchised",
+  "franchisor", "franchisee", "lessor", "lessee", "court", "act", "report",
+  "bank", "ltd", "company", "companies", "project", "projects", "petroleum",
+  "energy", "service", "lease", "tripartite", "particular", "annexure",
+  "annexures", "forecourt", "outlet", "outlets", "system", "holdings", "group",
+  "authority", "register", "registrar", "section", "schedule", "clause",
+  "appendix", "motor", "properties", "investments", "committee", "board",
+  "department", "trust", "estate", "protocol", "standard", "standards",
+]);
+
+function looksLikeConcept(name: string): boolean {
+  return name
+    .split(/\s+/)
+    .some((tok) => NON_NAME_TOKENS.has(tok.replace(/[^a-z]/gi, "").toLowerCase()));
+}
+
 // Sentence-leading / connector words that get glued to a following name.
 const LEADING_STOP = new Set([
   "later", "the", "also", "on", "in", "this", "that", "when", "he", "she",
@@ -96,6 +119,7 @@ export function extractEntities(atoms: EvidenceAtom[], minMentions = 2): Entity[
       if (!name) continue;
       const k = keyOf(name);
       if (NON_NAME.has(k)) continue;
+      if (looksLikeConcept(name)) continue;
       if ([...orgNames].some((o) => o.includes(k) || k.includes(o))) continue;
       bump(name, "person", atom);
     }

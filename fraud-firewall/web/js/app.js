@@ -230,6 +230,9 @@ function renderFindings(result) {
     `${findings.atom_count} evidence atom(s) · ${contradictions.length} contradiction(s) · ` +
     `${tl} timeline event(s) · ${off} offence(s) · ${bf} brain finding(s) · ${ent} part(y/ies)${consensusStr}.`;
 
+  const idxCount = $("contraIndexCount");
+  if (idxCount) idxCount.textContent = String(contradictions.length);
+
   $("contraList").innerHTML = contradictions
     .map((c) => {
       const sev = c.severity;
@@ -255,17 +258,33 @@ function renderFindings(result) {
     })
     .join("");
 
-  $("extractPre").textContent = JSON.stringify(findings, null, 2);
-
+  // The forensic PDF report comes out ON SCREEN (raw JSON stays in the vault).
+  const reportBlock = $("sealedReport");
   const row = $("extractDownloadRow");
   const link = $("downloadFindingsSeal");
+  const frame = $("sealedFrame");
   if (result.seal?.seal_id) {
+    reportBlock.hidden = false;
     row.hidden = false;
+    frame.src = `/v1/sealed/${result.seal.seal_id}?inline=1`;
     link.href = `/v1/sealed/${result.seal.seal_id}`;
   } else {
+    reportBlock.hidden = true;
     row.hidden = true;
+    frame.src = "about:blank";
   }
 }
+
+// Print the on-screen sealed report directly from the embedded viewer.
+$("printFindingsSeal")?.addEventListener("click", () => {
+  const frame = $("sealedFrame");
+  try {
+    frame.contentWindow?.focus();
+    frame.contentWindow?.print();
+  } catch {
+    window.open(frame.src, "_blank", "noreferrer");
+  }
+});
 
 async function runExtract(documents, seal) {
   $("extractBtn").disabled = true;

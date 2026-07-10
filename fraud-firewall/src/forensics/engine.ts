@@ -15,6 +15,7 @@ import { buildOffencesFromContradictions } from "./offences.js";
 import { runBrainAnalysis, computeConsensus } from "./brains.js";
 import { extractEntities, respondentFor } from "./entities.js";
 import { createCaseLawProvider } from "./caselaw.js";
+import type { LlmProvider } from "../ai/llm.js";
 import { DocumentSealingService } from "../core/sealing.js";
 import {
   ensureVault,
@@ -57,7 +58,11 @@ export class ForensicEngine {
   private readonly sealing: DocumentSealingService;
   private readonly buffer = new Map<string, ForensicDocument>();
 
-  constructor(private readonly config: FirewallConfig) {
+  constructor(
+    private readonly config: FirewallConfig,
+    /** Optional local LLM used ONLY to author the narrative (never detection). */
+    private readonly llm?: LlmProvider,
+  ) {
     ensureVault(config);
     this.sealing = new DocumentSealingService(config);
   }
@@ -171,6 +176,12 @@ export class ForensicEngine {
       case_search: caseSearch,
     };
 
+    // Weave a plain-language "what happened" narrative from the anchored facts.
+    // Deterministic by default; LLM-authored when a local model is reachable.
+    const narrated = await this.buildNarrative(findings);
+    findings.narrative = narrated.text;
+    findings.narrative_source = narrated.source;
+
     const atomsPath = findingsPath(this.config, "evidence_atoms.json");
     const contradictionsPath = findingsPath(this.config, "contradictions.json");
     const timelinePath = findingsPath(this.config, "timeline.json");
@@ -236,6 +247,122 @@ export class ForensicEngine {
   reset(): void {
     this.buffer.clear();
   }
+
+  /**
+   * Produce the "what happened" narrative. Tries the local LLM (seeing only the
+   * structured, sealed-vault findings — never raw private data beyond the atoms
+   * already sealed); falls back to a deterministic template. Either way the
+   * narrative is descriptive prose ONLY and never alters the sealed facts.
+   */
+  private async buildNarrative(
+    findings: ExtractionFindings,
+  ): Promise<{ text: string; source: "llm" | "deterministic" }> {
+    const deterministic = deterministicNarrative(findings);
+    if (this.llm) {
+      try {
+        const generated = await this.llm.generate({
+          system:
+            "You are Verum Omnis, a forensic report author. Write a factual, sober narrative " +
+            "of what happened using ONLY the supplied anchored findings. Cite page anchors like " +
+            "(annexure p.X). Use ordinal confidence words, never percentages. Do not invent facts.",
+          prompt: `${narrativeContext(findings)}\n\nWrite the NARRATIVE — WHAT HAPPENED section (3-6 paragraphs).`,
+        });
+        if (generated && generated.trim().length > 40) {
+          return { text: generated.trim(), source: "llm" };
+        }
+      } catch {
+        /* fall through to deterministic */
+      }
+    }
+    return { text: deterministic, source: "deterministic" };
+  }
+}
+
+/** Compact, token-bounded context for the LLM narrative author. */
+function narrativeContext(f: ExtractionFindings): string {
+  const people = f.entities.filter((e) => e.type === "person").map((e) => e.name);
+  const orgs = f.entities.filter((e) => e.type === "organization").map((e) => e.name);
+  return [
+    `Institution: ${f.institution}`,
+    `Parties (people): ${people.join(", ") || "none identified"}`,
+    `Organisations: ${orgs.join(", ") || "none identified"}`,
+    `Candidate contradictions: ${f.contradiction_count}`,
+    ...f.contradictions
+      .slice(0, 12)
+      .map(
+        (c) =>
+          `- [${c.severity}] ${c.respondent ? c.respondent + ": " : ""}"${trunc(c.claim_a.text)}" (${c.claim_a.source}) vs "${trunc(c.claim_b.text)}" (${c.claim_b.source})`,
+      ),
+    `Chronology (${f.timeline.length} dated events):`,
+    ...f.timeline.slice(0, 15).map((e) => `- ${e.date}: ${trunc(e.description)} (${e.evidence_id} p.${e.page})`),
+    `Offences (${f.offences.length}):`,
+    ...f.offences.slice(0, 10).map((o) => `- ${o.title} [${o.severity}] ${o.legal_basis.join("; ")}`),
+  ].join("\n");
+}
+
+function trunc(s: string, n = 180): string {
+  const clean = s.replace(/\s+/g, " ").trim();
+  return clean.length > n ? clean.slice(0, n) + "…" : clean;
+}
+
+/**
+ * Deterministic "what happened" narrative — no AI. Reads like a report opening
+ * but is 100% reproducible from the anchored findings.
+ */
+function deterministicNarrative(f: ExtractionFindings): string {
+  const people = f.entities.filter((e) => e.type === "person").map((e) => e.name);
+  const orgs = f.entities.filter((e) => e.type === "organization").map((e) => e.name);
+  const dates = f.timeline.map((t) => t.date).filter(Boolean).sort();
+  const span =
+    dates.length >= 2
+      ? `between ${dates[0]} and ${dates[dates.length - 1]}`
+      : dates.length === 1
+        ? `on or about ${dates[0]}`
+        : "over an unspecified period";
+  const critical = f.contradictions.filter((c) => c.severity === "CRITICAL").length;
+
+  const paras: string[] = [];
+  paras.push(
+    `This report concerns ${f.institution}. Across ${f.document_count} document(s) the engine ` +
+      `extracted ${f.atom_count} anchored evidence atom(s) and flagged ${f.contradiction_count} ` +
+      `candidate contradiction(s) (${critical} rated CRITICAL). ${
+        people.length ? `Parties of interest include ${listing(people, 6)}. ` : ""
+      }${orgs.length ? `Entities referenced include ${listing(orgs, 6)}. ` : ""}` +
+      `Documented events occurred ${span}.`,
+  );
+
+  if (f.contradictions.length) {
+    const c = f.contradictions[0];
+    paras.push(
+      `The most material candidate contradiction${c.respondent ? ` (attributed to ${c.respondent})` : ""} ` +
+        `sets "${trunc(c.claim_a.text, 220)}" (${c.claim_a.source}) against "${trunc(c.claim_b.text, 220)}" ` +
+        `(${c.claim_b.source}). In total ${f.contradiction_count} such pairings were surfaced; each is anchored ` +
+        `to sealed source text by SHA-512 and page/line reference for independent checking.`,
+    );
+  }
+
+  if (f.offences.length) {
+    paras.push(
+      `Mapped against statute, the findings implicate ${f.offences.length} candidate offence(s), including ` +
+        `${listing(f.offences.slice(0, 4).map((o) => o.title), 4)}. Legal bases cited include ` +
+        `${listing([...new Set(f.offences.flatMap((o) => o.legal_basis))].slice(0, 5), 5)}.`,
+    );
+  }
+
+  paras.push(
+    `The Nine-Brain consensus is ${f.consensus.verdict} with ${f.consensus.count} independent brain(s) ` +
+      `active (threshold ${f.consensus.threshold}). NOTE: the items above are machine-surfaced CANDIDATES. ` +
+      `They are sealed as-is for the record; a qualified analyst (or the configured local LLM) should curate ` +
+      `which candidates are legally material before the report is relied upon in proceedings.`,
+  );
+
+  return paras.join("\n\n");
+}
+
+function listing(items: string[], max: number): string {
+  const shown = items.slice(0, max);
+  if (shown.length <= 1) return shown[0] ?? "";
+  return `${shown.slice(0, -1).join(", ")} and ${shown[shown.length - 1]}`;
 }
 
 function shortStamp(iso: string): string {
@@ -249,6 +376,9 @@ function summarize(findings: ExtractionFindings): string {
     `Documents: ${findings.document_count}`,
     `Evidence atoms: ${findings.atom_count}`,
     `Contradictions: ${findings.contradiction_count}`,
+    "",
+    `NARRATIVE — WHAT HAPPENED (${(findings.narrative_source ?? "deterministic").toUpperCase()}):`,
+    findings.narrative ?? "No narrative generated.",
     "",
     "PARTIES / ENTITIES OF INTEREST:",
     ...(findings.entities.length

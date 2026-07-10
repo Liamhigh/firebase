@@ -83,8 +83,10 @@ export class FraudFirewall {
     this.notifications = new NotificationService(config);
     this.credits = new SealCreditLedgerService(config);
     this.agents = new MistralAgentPool(config, () => [...this.buffer]).configureDefaultPool();
-    this.forensics = new ForensicEngine(config);
     this.llm = createLlmProvider(config);
+    // The engine uses the LLM for narrative authoring only; detection & sealing
+    // stay fully deterministic regardless of whether a model is reachable.
+    this.forensics = new ForensicEngine(config, this.llm);
     // Fail fast if the sealed Constitution has been tampered with.
     this.constitution = loadConstitution(config.constitution_version);
     assertConstitutionIntegrity(this.constitution);

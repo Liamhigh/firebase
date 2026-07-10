@@ -151,7 +151,11 @@ export class NotificationService {
     const path = join(outDir, `${Date.now()}-${email.recipient_role}-${safe}.json`);
     writeFileSync(path, JSON.stringify(email, null, 2) + "\n", "utf8");
 
-    const transporter = this.getTransporter();
+    // Send only when a transporter is configured AND sending is enabled.
+    // `enabled` defaults to true when explicitly set in file config (back-compat),
+    // but env-provided SMTP defaults to OFF unless EMAIL_ENABLED=true.
+    const enabled = this.config.email?.enabled ?? true;
+    const transporter = enabled ? this.getTransporter() : null;
     if (!transporter) {
       return { queued_path: path, delivered: false, transport: "queued" };
     }

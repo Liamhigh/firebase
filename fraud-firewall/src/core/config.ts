@@ -30,9 +30,19 @@ export function loadConfig(path = process.env.VO_FIREWALL_CONFIG): FirewallConfi
 function applyEmailEnv(config: FirewallConfig): void {
   const host = process.env.SMTP_HOST;
   const from = process.env.EMAIL_FROM;
-  if (!host && !from && !config.email) return;
+  const enabledEnv = process.env.EMAIL_ENABLED;
+  if (!host && !from && !config.email && enabledEnv === undefined) return;
   config.email = config.email ?? {};
   if (from) config.email.from = from;
+  // Emails only actually send when explicitly enabled. This keeps forensic
+  // document scans and demos silent even when SMTP creds are present in env.
+  if (enabledEnv !== undefined) {
+    config.email.enabled = enabledEnv === "true";
+  } else if (host) {
+    // SMTP configured purely from env with no explicit switch → default OFF
+    // (send nothing) so nobody is surprised by mail during testing.
+    config.email.enabled = config.email.enabled ?? false;
+  }
   if (host) {
     config.email.smtp = {
       host,

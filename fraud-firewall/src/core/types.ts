@@ -231,6 +231,12 @@ export interface FirewallConfig {
    */
   email?: {
     from?: string;
+    /**
+     * Master send switch. When false (or unset via env), emails are only written
+     * to the queued audit record and never actually sent — so document scans and
+     * demos never trigger mail. Live fraud-invoice delivery requires EMAIL_ENABLED=true.
+     */
+    enabled?: boolean;
     smtp?: {
       host: string;
       port: number;
@@ -507,4 +513,11 @@ export interface ExtractionFindings {
   consensus: NineBrainConsensus;
   entities: Entity[];
   case_search: CaseSearch;
+  /**
+   * Plain-language "what happened" narrative woven from the anchored findings.
+   * Deterministic by default; authored by the local LLM (Ollama) when configured.
+   * The narrative NEVER changes the sealed facts/atoms/contradictions.
+   */
+  narrative?: string;
+  narrative_source?: "llm" | "deterministic";
 }

@@ -16,5 +16,7 @@ Standard scripts are defined in `fraud-firewall/package.json`:
 ### Non-obvious notes
 - The dev server is plain `node:http` (no framework) started via `tsx watch src/cli.ts serve`. It requires no database or external services — all fraud detection is offline/deterministic (`ai.mode: "deterministic"` in `config/firewall.json`).
 - Running the pipeline (via `demo`, the UI "Run Detection Demo" button, or `POST /v1/monitor` / `POST /v1/seal`) **consumes seal credits** and writes artifacts (sealed PDFs, invoices, outbound emails, ledger) into `fraud-firewall/vault/`. The `vault/` dir is gitignored and auto-created on startup; delete it to reset credit balance / ledger state.
-- Config path can be overridden with the `VO_FIREWALL_CONFIG` env var.
+- Config path can be overridden with the `VO_FIREWALL_CONFIG` env var. For local testing, set `ots.mode: "mock"` (or copy the config and point `VO_FIREWALL_CONFIG` at it) so sealing doesn't call the live OpenTimestamps calendars over the network.
+- Email is **send-disabled by default**, even when SMTP creds are present in env. Mail is only sent when `EMAIL_ENABLED=true`; otherwise every outbound message is written to `vault/outbound-email/*.json` but not delivered. Email is only ever produced by the fraud-monitor pipeline (`POST /v1/monitor` / "Run Detection Demo") — document extraction/sealing never emails.
+- Evidence extraction writes raw findings JSON to `vault/findings/*.json` and the sealed report PDF to `vault/sealed/`; the console UI displays the sealed PDF inline (via `GET /v1/sealed/:id?inline=1`) and does **not** show raw JSON on screen.
 - Docker deploy (`docker compose -f docker/docker-compose.yml up --build`) references `docker/Dockerfile`; use only for production-style runs, not local dev.
