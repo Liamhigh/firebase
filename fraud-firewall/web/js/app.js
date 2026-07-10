@@ -218,9 +218,11 @@ function renderFindings(result) {
   contraEl.textContent = String(findings.contradiction_count ?? contradictions.length);
   contraEl.className = "value " + (contradictions.length ? "bad" : "ok");
 
-  $("extractMessage").textContent = contradictions.length
-    ? `${contradictions.length} contradiction(s) detected across ${findings.atom_count} evidence atom(s).`
-    : `No contradictions detected across ${findings.atom_count} evidence atom(s).`;
+  const tl = findings.timeline?.length ?? 0;
+  const off = findings.offences?.length ?? 0;
+  $("extractMessage").textContent =
+    `${findings.atom_count} evidence atom(s) · ${contradictions.length} contradiction(s) · ` +
+    `${tl} timeline event(s) · ${off} offence(s).`;
 
   $("contraList").innerHTML = contradictions
     .map((c) => {
@@ -340,20 +342,20 @@ function renderVerification(res) {
 
 async function runVerify() {
   const sealId = $("verifySealId").value.trim();
-  if (!sealId) {
-    toast("Enter a seal ID", "err");
+  const file = $("verifyFile").files?.[0];
+  if (!sealId && !file) {
+    toast("Select a sealed PDF or enter a seal ID", "err");
     return;
   }
   $("verifyBtn").disabled = true;
   try {
-    const file = $("verifyFile").files?.[0];
     let sha512;
     if (file) {
       sha512 = await sha512Hex(await file.arrayBuffer());
     }
     const res = await api("/v1/verify", {
       method: "POST",
-      body: JSON.stringify({ seal_id: sealId, sha512 }),
+      body: JSON.stringify({ seal_id: sealId || undefined, sha512 }),
     });
     renderVerification(res);
     const ok = res.result === "VERIFIED" || res.result === "SEAL_FOUND_PENDING_CHAIN";

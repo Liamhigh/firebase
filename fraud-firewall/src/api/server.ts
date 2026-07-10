@@ -234,8 +234,10 @@ export function startServer(firewall: FraudFirewall): {
           sha512?: string;
           pdf_base64?: string;
         };
-        if (!body.seal_id) {
-          return sendJson(res, 400, { error: "seal_id required" });
+        if (!body.seal_id && !body.sha512 && !body.pdf_base64) {
+          return sendJson(res, 400, {
+            error: "provide seal_id, sha512, or pdf_base64",
+          });
         }
         const verification = firewall.verifySeal({
           sealId: body.seal_id,

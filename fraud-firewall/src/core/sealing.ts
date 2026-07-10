@@ -14,7 +14,7 @@ import {
 } from "./constitution.js";
 import type { FirewallConfig, SealRecord } from "./types.js";
 import { SealCreditLedgerService } from "./sealCredits.js";
-import { sealedPath, writeJson } from "../storage/vault.js";
+import { hashPointerPath, sealedPath, writeJson } from "../storage/vault.js";
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
@@ -175,6 +175,11 @@ export class DocumentSealingService {
       sealedPath(this.config, sealId).replace(/\.pdf$/, ".json"),
       { seal, constitution: ruleset },
     );
+    // Hash pointer enables verifying an uploaded PDF without knowing the seal id.
+    writeJson(hashPointerPath(this.config, documentSha512), {
+      seal_id: sealId,
+      document_sha512: documentSha512,
+    });
 
     return {
       seal,

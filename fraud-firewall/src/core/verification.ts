@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from "node:fs";
 import type { FirewallConfig, SealRecord } from "./types.js";
 import { sha512, shortCode } from "./crypto.js";
 import { mockBlockHeight } from "./sealing.js";
-import { sealedPath } from "../storage/vault.js";
+import { hashPointerPath, sealedPath } from "../storage/vault.js";
 import { readJson } from "../storage/vault.js";
 
 /**
@@ -48,7 +48,8 @@ interface OtsProof {
 }
 
 export interface VerifyInput {
-  sealId: string;
+  /** Seal id. Optional when a PDF/SHA-512 is supplied (resolved by hash). */
+  sealId?: string;
   /** Client-computed SHA-512 of the PDF being verified. */
   sha512?: string;
   /** Base64 PDF bytes; the server computes SHA-512 from these. */
@@ -96,7 +97,36 @@ export function verifySeal(
   input: VerifyInput,
 ): SealVerification {
   const now = input.now ? new Date(input.now) : new Date();
-  const pdfPath = sealedPath(config, input.sealId);
+
+  // Pre-compute the candidate hash so we can resolve a seal id by file alone.
+  let computed: string | null = null;
+  if (input.sha512) {
+    computed = input.sha512.trim().toLowerCase();
+  } else if (input.pdfBase64) {
+    computed = sha512(Buffer.from(input.pdfBase64, "base64"));
+  }
+
+  // Resolve the seal id: explicit, or looked up from the document hash pointer.
+  let sealId = input.sealId?.trim();
+  if (!sealId && computed) {
+    const pointer = readJson<{ seal_id: string }>(hashPointerPath(config, computed));
+    sealId = pointer?.seal_id;
+  }
+  if (!sealId) {
+    return {
+      result: "NOT_FOUND",
+      seal_id: input.sealId ?? "",
+      integrity: null,
+      computed_sha512: computed,
+      expected_sha512: null,
+      blockchain: null,
+      message: computed
+        ? "No seal matches this document's SHA-512."
+        : "Provide a seal id or a sealed PDF to verify.",
+    };
+  }
+
+  const pdfPath = sealedPath(config, sealId);
   const recordPath = pdfPath.replace(/\.pdf$/, ".json");
   const otsPath = pdfPath.replace(/\.pdf$/, ".ots");
 
@@ -104,25 +134,19 @@ export function verifySeal(
   if (!stored?.seal) {
     return {
       result: "NOT_FOUND",
-      seal_id: input.sealId,
+      seal_id: sealId,
       integrity: null,
-      computed_sha512: null,
+      computed_sha512: computed,
       expected_sha512: null,
       blockchain: null,
-      message: `No sealed record found for ${input.sealId}.`,
+      message: `No sealed record found for ${sealId}.`,
     };
   }
 
   const expected = stored.seal.document_sha512 ?? stored.seal.sha512;
 
-  // Determine the hash to compare: explicit client hash, provided PDF bytes,
-  // or (fallback) the stored sealed PDF on disk.
-  let computed: string | null = null;
-  if (input.sha512) {
-    computed = input.sha512.trim().toLowerCase();
-  } else if (input.pdfBase64) {
-    computed = sha512(Buffer.from(input.pdfBase64, "base64"));
-  } else if (existsSync(pdfPath)) {
+  // If no hash was supplied, fall back to re-hashing the stored sealed PDF.
+  if (!computed && existsSync(pdfPath)) {
     computed = sha512(readFileSync(pdfPath));
   }
 
@@ -135,7 +159,7 @@ export function verifySeal(
   if (!computed) {
     return {
       result: "INDETERMINATE",
-      seal_id: input.sealId,
+      seal_id: sealId,
       integrity: null,
       computed_sha512: null,
       expected_sha512: expected,
@@ -150,7 +174,7 @@ export function verifySeal(
   if (!integrity) {
     return {
       result: "TAMPERED",
-      seal_id: input.sealId,
+      seal_id: sealId,
       integrity: false,
       computed_sha512: computed,
       expected_sha512: expected,
@@ -164,7 +188,7 @@ export function verifySeal(
   if (blockchain.status === "PENDING") {
     return {
       result: "SEAL_FOUND_PENDING_CHAIN",
-      seal_id: input.sealId,
+      seal_id: sealId,
       integrity: true,
       computed_sha512: computed,
       expected_sha512: expected,
@@ -176,7 +200,7 @@ export function verifySeal(
 
   return {
     result: "VERIFIED",
-    seal_id: input.sealId,
+    seal_id: sealId,
     integrity: true,
     computed_sha512: computed,
     expected_sha512: expected,

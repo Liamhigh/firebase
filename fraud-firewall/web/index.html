@@ -184,12 +184,12 @@
         </p>
 
         <div class="field">
-          <label for="verifySealId">Seal ID (from the cover / QR code)</label>
-          <input id="verifySealId" type="text" placeholder="seal-…" spellcheck="false" />
+          <label for="verifyFile">Sealed PDF — SHA-512 computed in your browser, seal found by hash</label>
+          <input id="verifyFile" type="file" accept="application/pdf" />
         </div>
         <div class="field">
-          <label for="verifyFile">Sealed PDF (optional — SHA-512 computed in your browser)</label>
-          <input id="verifyFile" type="file" accept="application/pdf" />
+          <label for="verifySealId">Seal ID (optional if a PDF is selected — from the cover / QR code)</label>
+          <input id="verifySealId" type="text" placeholder="seal-…" spellcheck="false" />
         </div>
 
         <div class="cta-row">

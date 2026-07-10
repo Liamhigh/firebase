@@ -68,3 +68,8 @@ export function evidencePath(config: FirewallConfig, evidenceId: string): string
 export function findingsPath(config: FirewallConfig, file: string): string {
   return join(findingsDir(config), file);
 }
+
+/** Pointer file mapping a document SHA-512 to its seal id (verify-by-file). */
+export function hashPointerPath(config: FirewallConfig, sha512: string): string {
+  return join(config.storage.sealed_dir, "by-hash", `${sha512}.json`);
+}

@@ -20,6 +20,8 @@ import { NotificationService } from "../notifications/email.js";
 import { SealCreditLedgerService } from "../core/sealCredits.js";
 import { ForensicEngine } from "../forensics/engine.js";
 import { verifySeal, type SealVerification } from "../core/verification.js";
+import { buildTimelineFromTransactions } from "../forensics/timeline.js";
+import { offenceFromFraud } from "../forensics/offences.js";
 import {
   alertPath,
   ensureVault,
@@ -84,7 +86,7 @@ export class FraudFirewall {
 
   /** Verify a sealed document: SHA-512 match + OpenTimestamps anchor (spec §6.4). */
   verifySeal(input: {
-    sealId: string;
+    sealId?: string;
     sha512?: string;
     pdfBase64?: string;
   }): SealVerification {
@@ -250,17 +252,45 @@ export class FraudFirewall {
       alert.fraud_type,
       this.config.institution.jurisdiction,
     );
+    const timeline = buildTimelineFromTransactions(txns);
+    const offence = offenceFromFraud({
+      fraudType: alert.fraud_type,
+      legalBasis: laws,
+      anchors: [...new Set(proposed.flatMap((p) => p.related_txn_ids))].slice(0, 12),
+      severity: alert.confidence === "VERY_HIGH" ? "CRITICAL" : "HIGH",
+      confidence: alert.confidence,
+      caseReference: caseRef,
+    });
+    const bankRetains = Math.round((alert.fraud_amount - alert.commission_20pct) * 100) / 100;
     const reportBody = [
       alert.evidence_summary,
       "",
+      "CHRONOLOGY OF EVENTS:",
+      ...timeline.map((e) => `- ${e.date} — ${e.description}`),
+      "",
       "APPLICABLE LAW:",
       ...laws.map((l) => `- ${l}`),
+      "",
+      "OFFENCE MATRIX:",
+      `${offence.offence_id} ${offence.title} — severity=${offence.severity} confidence=${offence.confidence}`,
+      `  Legal basis: ${offence.legal_basis.join("; ")}`,
+      `  Evidence anchors: ${offence.evidence_anchors.join(", ") || "n/a"}`,
+      "",
+      "FINANCIAL ANALYSIS:",
+      `- Fraud amount: ${alert.currency} ${alert.fraud_amount}`,
+      `- Verum Omnis commission (20%): ${alert.currency} ${alert.commission_20pct}`,
+      `- Institution retains (80%): ${alert.currency} ${bankRetains}`,
+      `- Transactions in scope: ${txns.length}`,
       "",
       "TRIPLE-AI VERIFICATION:",
       `- Gemma3: ${verification.votes.gemma3.vote}`,
       `- Phi3: ${verification.votes.phi3.vote}`,
       `- 9-Brain: ${verification.votes.nine_brain.vote}`,
       `- Quorum: ${verification.quorum}`,
+      "",
+      "COURT-READY DECLARATION:",
+      "Prepared under Constitution v5.2.7 with Triple-AI verification. Every finding is anchored",
+      "to sealed evidence with SHA-512 hashes. Ordinal confidence only; contradictions disclosed.",
     ].join("\n");
 
     const sealed = await this.sealing.seal({

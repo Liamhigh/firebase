@@ -373,6 +373,34 @@ export const ContradictionSchema = z.object({
 });
 export type Contradiction = z.infer<typeof ContradictionSchema>;
 
+/** Reconstructed timeline event anchored to evidence (spec §4.4 / §5.3). */
+export const TimelineEventSchema = z.object({
+  event_id: z.string(),
+  /** Human-readable date as found in the evidence. */
+  date: z.string(),
+  /** ISO date for sorting when parseable. */
+  iso_date: z.string().optional(),
+  description: z.string(),
+  evidence_id: z.string(),
+  page: z.number().int().nonnegative(),
+  line: z.number().int().nonnegative(),
+  sha512: z.string(),
+});
+export type TimelineEvent = z.infer<typeof TimelineEventSchema>;
+
+/** Offence matrix row: offence → legal basis + evidence anchors (spec §5.3). */
+export const OffenceSchema = z.object({
+  offence_id: z.string(),
+  title: z.string(),
+  legal_basis: z.array(z.string()).default([]),
+  evidence_anchors: z.array(z.string()).default([]),
+  severity: SeveritySchema,
+  confidence: ConfidenceSchema,
+  /** Origin, e.g. a contradiction id or "rule-engine". */
+  source: z.string().optional(),
+});
+export type Offence = z.infer<typeof OffenceSchema>;
+
 /** Aggregate findings written to the vault `findings/` directory (spec §7.2). */
 export interface ExtractionFindings {
   generated_at: string;
@@ -383,4 +411,6 @@ export interface ExtractionFindings {
   contradiction_count: number;
   atoms: EvidenceAtom[];
   contradictions: Contradiction[];
+  timeline: TimelineEvent[];
+  offences: Offence[];
 }

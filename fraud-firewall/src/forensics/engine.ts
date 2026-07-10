@@ -10,6 +10,8 @@ import { ForensicDocumentSchema } from "../core/types.js";
 import { hashDocument, toPages } from "./hasher.js";
 import { EvidenceExtractor } from "./extractor.js";
 import { ContradictionEngine } from "./contradiction.js";
+import { buildTimelineFromAtoms } from "./timeline.js";
+import { buildOffencesFromContradictions } from "./offences.js";
 import { DocumentSealingService } from "../core/sealing.js";
 import {
   ensureVault,
@@ -118,6 +120,8 @@ export class ForensicEngine {
     const contradictions: Contradiction[] = this.contradictions.detect(atoms, {
       now,
     });
+    const timeline = buildTimelineFromAtoms(atoms);
+    const offences = buildOffencesFromContradictions(contradictions);
 
     const findings: ExtractionFindings = {
       generated_at: now,
@@ -128,13 +132,19 @@ export class ForensicEngine {
       contradiction_count: contradictions.length,
       atoms,
       contradictions,
+      timeline,
+      offences,
     };
 
     const atomsPath = findingsPath(this.config, "evidence_atoms.json");
     const contradictionsPath = findingsPath(this.config, "contradictions.json");
+    const timelinePath = findingsPath(this.config, "timeline.json");
+    const offencesPath = findingsPath(this.config, "offence_matrix.json");
     const manifestPath = findingsPath(this.config, "manifest.json");
     writeJson(atomsPath, atoms);
     writeJson(contradictionsPath, contradictions);
+    writeJson(timelinePath, timeline);
+    writeJson(offencesPath, offences);
     writeJson(manifestPath, {
       generated_at: findings.generated_at,
       constitution_version: findings.constitution_version,
@@ -142,6 +152,8 @@ export class ForensicEngine {
       document_count: findings.document_count,
       atom_count: findings.atom_count,
       contradiction_count: findings.contradiction_count,
+      timeline_count: timeline.length,
+      offence_count: offences.length,
       evidence: docs.map((d) => ({
         evidence_id: d.evidence_id,
         source_file: d.source_file,
@@ -200,6 +212,27 @@ function summarize(findings: ExtractionFindings): string {
       `  B: "${c.claim_b.text}" (${c.claim_b.source})`,
       `  Law: ${c.applicable_law.join("; ") || "n/a"}`,
     ]),
+    "",
+    "CHRONOLOGY OF EVENTS:",
+    ...(findings.timeline.length
+      ? findings.timeline.map(
+          (e) => `- ${e.date} — ${e.description} (${e.evidence_id} p.${e.page})`,
+        )
+      : ["- No dated events extracted."]),
+    "",
+    "OFFENCE MATRIX:",
+    ...(findings.offences.length
+      ? findings.offences.flatMap((o) => [
+          `${o.offence_id} ${o.title} — severity=${o.severity} confidence=${o.confidence}`,
+          `  Legal basis: ${o.legal_basis.join("; ") || "n/a"}`,
+          `  Anchors: ${o.evidence_anchors.join(" | ")}`,
+        ])
+      : ["- No offences identified."]),
+    "",
+    "COURT-READY DECLARATION:",
+    "Prepared under Constitution v5.2.7 with Triple-AI verification (Gemma 3 + Phi-3 + 9-Brain).",
+    "Every finding is anchored to sealed evidence with SHA-512 hashes. Contradiction detection",
+    "was ON; ordinal confidence only; mandatory disclosure of all contradictions.",
     "",
     "CONSTITUTIONAL NOTE:",
     "Findings produced under Constitution v5.2.7. Evidence anchors and hashes are immutable.",
