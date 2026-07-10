@@ -601,6 +601,57 @@ select {
   word-break: break-word;
 }
 
+/* Verify seal */
+.verify {
+  margin-bottom: 3rem;
+  animation: rise 0.9s ease 0.2s both;
+}
+
+.verify-banner {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  padding: 0.7rem 1rem;
+  border-radius: var(--radius);
+  border: 1px solid rgba(74, 126, 199, 0.3);
+  margin-bottom: 0.75rem;
+}
+
+.verify-banner.verified {
+  color: #9ff0c0;
+  border-color: rgba(45, 156, 94, 0.55);
+  background: rgba(45, 156, 94, 0.12);
+}
+.verify-banner.pending {
+  color: var(--gold-300);
+  border-color: rgba(212, 168, 67, 0.55);
+  background: rgba(212, 168, 67, 0.1);
+}
+.verify-banner.tampered,
+.verify-banner.notfound {
+  color: #ffb4b4;
+  border-color: rgba(220, 38, 38, 0.55);
+  background: rgba(220, 38, 38, 0.12);
+}
+
+.verify-grid {
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  gap: 0.35rem 0.9rem;
+  font-size: 0.82rem;
+}
+
+.verify-grid .k {
+  color: var(--blue-400);
+  font-weight: 600;
+}
+
+.verify-grid .v {
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  color: var(--ink);
+  word-break: break-all;
+}
+
 .footer {
   border-top: 1px solid rgba(74, 126, 199, 0.16);
   padding: 1.5rem 0 2.5rem;

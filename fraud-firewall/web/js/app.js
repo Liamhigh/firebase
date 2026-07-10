@@ -297,6 +297,77 @@ $("extractBtn").addEventListener("click", async () => {
   await runExtract(documents, $("sealFindingsChk").checked);
 });
 
+/* ---------------- Seal verification ---------------- */
+
+async function sha512Hex(buffer) {
+  const digest = await crypto.subtle.digest("SHA-512", buffer);
+  return [...new Uint8Array(digest)]
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+const VERIFY_BANNER = {
+  VERIFIED: { cls: "verified", text: "VERIFIED — sealed & anchored" },
+  SEAL_FOUND_PENDING_CHAIN: { cls: "pending", text: "SEAL VALID — blockchain pending" },
+  TAMPERED: { cls: "tampered", text: "TAMPERED — hash mismatch" },
+  NOT_FOUND: { cls: "notfound", text: "NOT FOUND — no such seal" },
+  INDETERMINATE: { cls: "pending", text: "SEAL FOUND — supply the PDF to verify" },
+};
+
+function row(k, v) {
+  return `<div class="k">${escapeHtml(k)}</div><div class="v">${escapeHtml(v)}</div>`;
+}
+
+function renderVerification(res) {
+  $("verifyResultBlock").hidden = false;
+  const banner = VERIFY_BANNER[res.result] || { cls: "notfound", text: res.result };
+  const bEl = $("verifyBanner");
+  bEl.className = "verify-banner " + banner.cls;
+  bEl.textContent = banner.text;
+  $("verifyMessage").textContent = res.message || "";
+
+  const bc = res.blockchain || {};
+  const rows = [
+    row("Seal ID", res.seal_id || "—"),
+    row("Integrity", res.integrity === null ? "—" : res.integrity ? "SHA-512 MATCH" : "MISMATCH"),
+    row("Computed SHA-512", res.computed_sha512 || "—"),
+    row("Anchored SHA-512", res.expected_sha512 || "—"),
+    row("Blockchain", `${bc.provider || "OpenTimestamps"} · ${bc.status || "—"}` + (bc.confirmations != null ? ` (${bc.confirmations} conf)` : "")),
+  ];
+  if (bc.block_height) rows.push(row("Bitcoin block", String(bc.block_height)));
+  $("verifyGrid").innerHTML = rows.join("");
+}
+
+async function runVerify() {
+  const sealId = $("verifySealId").value.trim();
+  if (!sealId) {
+    toast("Enter a seal ID", "err");
+    return;
+  }
+  $("verifyBtn").disabled = true;
+  try {
+    const file = $("verifyFile").files?.[0];
+    let sha512;
+    if (file) {
+      sha512 = await sha512Hex(await file.arrayBuffer());
+    }
+    const res = await api("/v1/verify", {
+      method: "POST",
+      body: JSON.stringify({ seal_id: sealId, sha512 }),
+    });
+    renderVerification(res);
+    const ok = res.result === "VERIFIED" || res.result === "SEAL_FOUND_PENDING_CHAIN";
+    toast(res.result.replace(/_/g, " "), ok ? "ok" : "err");
+  } catch (err) {
+    // A 404 from the API still returns a JSON body; surface it if present.
+    toast(err.message, "err");
+  } finally {
+    $("verifyBtn").disabled = false;
+  }
+}
+
+$("verifyBtn").addEventListener("click", runVerify);
+
 loadDemoIntoEditor();
 loadDemoDocsIntoEditor();
 refreshHealth();

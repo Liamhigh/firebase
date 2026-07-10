@@ -1,4 +1,6 @@
-import { PDFDocument, PDFPage, StandardFonts, rgb } from "pdf-lib";
+import { PDFDocument, PDFPage, StandardFonts, degrees, rgb } from "pdf-lib";
+import QRCode from "qrcode";
+import { PNG } from "pngjs";
 import {
   makeSealId,
   sha512,
@@ -13,7 +15,37 @@ import {
 import type { FirewallConfig, SealRecord } from "./types.js";
 import { SealCreditLedgerService } from "./sealCredits.js";
 import { sealedPath, writeJson } from "../storage/vault.js";
-import { writeFileSync } from "node:fs";
+import { readFileSync, writeFileSync, existsSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+
+// Candidate company-logo files, in priority order. A dedicated seal-logo.png
+// (if a valid PNG is supplied) is embedded; otherwise a vector emblem is drawn.
+const LOGO_CANDIDATES = ["seal-logo.png", "mainlogo.png"].map((f) =>
+  fileURLToPath(new URL(`../../web/assets/${f}`, import.meta.url)),
+);
+const OTS_CALENDARS = [
+  "https://alice.btc.calendar.opentimestamps.org",
+  "https://bob.btc.calendar.opentimestamps.org",
+];
+
+/**
+ * Return bytes of the first VALID logo PNG, or null. Validating with pngjs
+ * first is essential: pdf-lib's PNG decoder can hang (not throw) on a corrupt
+ * PNG, so we never hand it an undecodable file.
+ */
+function loadValidLogoBytes(): Buffer | null {
+  for (const path of LOGO_CANDIDATES) {
+    if (!existsSync(path)) continue;
+    try {
+      const bytes = readFileSync(path);
+      PNG.sync.read(bytes); // throws on corrupt/invalid PNG
+      return bytes;
+    } catch {
+      // Corrupt or unreadable — skip and try the next candidate.
+    }
+  }
+  return null;
+}
 
 /** Cover-page metadata for court-ready forensic reports (Greensky standard). */
 export interface SealReportMeta {
@@ -79,6 +111,7 @@ export class DocumentSealingService {
     });
     const digest = sha512(contentForHash);
     const sealId = makeSealId(digest);
+    const verifyUrl = appendSeal(this.config.verum.verify_url, sealId);
 
     const pdfBytes = await this.buildSealedPdf({
       title: input.title,
@@ -89,29 +122,51 @@ export class DocumentSealingService {
       createdAt,
       ruleset,
       report: input.report,
+      verifyUrl,
     });
 
-    // Re-hash final PDF bytes for the seal record (court-admissible fingerprint)
-    const pdfHash = sha512(Buffer.from(pdfBytes));
+    // SHA-512 happens LAST: fingerprint the final watermarked, QR-stamped PDF.
+    // This is the value anchored to the blockchain via OpenTimestamps and the
+    // value re-computed at verification time.
+    const documentSha512 = sha512(Buffer.from(pdfBytes));
+
+    // Write the (mock) OpenTimestamps proof committing to the document hash.
+    // status stays PENDING until Bitcoin confirmation (see verification.ts).
+    const otsProofFile = `${sealId}.ots`;
+    writeJson(sealedPath(this.config, sealId).replace(/\.pdf$/, ".ots"), {
+      version: 1,
+      provider: "OpenTimestamps",
+      file_sha512: documentSha512,
+      seal_id: sealId,
+      calendar_urls: OTS_CALENDARS,
+      submitted_at: createdAt,
+      status: "PENDING",
+      note: "Bitcoin confirmation can take a few hours; verify page shows PENDING until anchored.",
+    });
+
     const seal: SealRecord = {
       seal_id: sealId,
-      sha512: pdfHash,
+      sha512: documentSha512,
+      document_sha512: documentSha512,
       constitution_version: this.constitution.version,
       created_at: createdAt,
       document_reference: input.documentReference,
+      verify_url: verifyUrl,
+      ots_proof_file: otsProofFile,
       blockchain: {
         provider: "OpenTimestamps",
-        status: "MOCK",
-        block_height: mockBlockHeight(pdfHash),
-        confirmations: 6,
-        ots_receipt: `ots-mock-${shortCode(pdfHash, 16)}`,
+        status: "PENDING",
+        submitted_at: createdAt,
+        calendar_urls: OTS_CALENDARS,
+        confirmations: 0,
+        ots_receipt: `ots-${shortCode(documentSha512, 16)}`,
       },
     };
 
     this.credits.consumeSeal({
       sealId,
       documentReference: input.documentReference,
-      documentSha512: pdfHash,
+      documentSha512,
       aiVerifier: "Gemma3",
     });
 
@@ -138,6 +193,7 @@ export class DocumentSealingService {
     createdAt: string;
     ruleset: ReturnType<typeof constitutionRuleset>;
     report?: SealReportMeta;
+    verifyUrl: string;
   }): Promise<Uint8Array> {
     const doc = await PDFDocument.create();
     const font = await doc.embedFont(StandardFonts.Helvetica);
@@ -157,6 +213,68 @@ export class DocumentSealingService {
     const bodyInk = rgb(0.16, 0.17, 0.2);
     const headingInk = rgb(0.102, 0.18, 0.322);
 
+    // Company logo (embedded on the cover + content headers) — only if a valid
+    // PNG is available; otherwise a vector Verum Omnis emblem is drawn instead.
+    let logo: Awaited<ReturnType<typeof doc.embedPng>> | null = null;
+    const logoBytes = loadValidLogoBytes();
+    if (logoBytes) {
+      try {
+        logo = await doc.embedPng(logoBytes);
+      } catch {
+        logo = null;
+      }
+    }
+
+    // Draw either the embedded logo image or a vector "VO" emblem at (x,y) with
+    // the given box size (both cover and content-header call this).
+    const drawLogo = (p: PDFPage, x: number, y: number, box: number): void => {
+      if (logo) {
+        const scale = box / Math.max(logo.width, logo.height);
+        p.drawImage(logo, { x, y, width: logo.width * scale, height: logo.height * scale });
+        return;
+      }
+      const r = box / 2;
+      const cx = x + r;
+      const cy = y + r;
+      p.drawCircle({ x: cx, y: cy, size: r, color: navy2, borderColor: gold, borderWidth: Math.max(1, r * 0.1) });
+      p.drawCircle({ x: cx, y: cy, size: r * 0.72, borderColor: blue, borderWidth: Math.max(0.6, r * 0.04), opacity: 0, borderOpacity: 1 });
+      const mono = "VO";
+      const ms = r * 0.9;
+      p.drawText(mono, {
+        x: cx - bold.widthOfTextAtSize(mono, ms) / 2,
+        y: cy - ms * 0.36,
+        size: ms,
+        font: bold,
+        color: gold,
+      });
+    };
+
+    // QR code encoding the verification URL (links to seal verification).
+    const qrPng = await QRCode.toBuffer(params.verifyUrl, {
+      type: "png",
+      margin: 1,
+      width: 240,
+      color: { dark: "#040d1bff", light: "#ffffffff" },
+    });
+    const qr = await doc.embedPng(qrPng);
+
+    // Subtle "VERUM OMNIS SEALED" watermark drawn on every page.
+    const drawWatermark = (p: PDFPage, dark: boolean): void => {
+      const wmColor = dark ? rgb(0.29, 0.494, 0.78) : rgb(0.45, 0.5, 0.58);
+      const opacity = dark ? 0.06 : 0.05;
+      for (let row = 0; row < 4; row++) {
+        p.drawText("VERUM OMNIS SEALED", {
+          x: 40,
+          y: 120 + row * 200,
+          size: 30,
+          font: bold,
+          color: wmColor,
+          rotate: degrees(35),
+          opacity,
+        });
+      }
+    };
+
     const classification = pdfSafe(
       params.report?.classification ?? "CONFIDENTIAL - LAW ENFORCEMENT SENSITIVE",
     );
@@ -169,6 +287,7 @@ export class DocumentSealingService {
     // ---- Cover page (blue / navy) ----
     const cover = doc.addPage([pageWidth, pageHeight]);
     cover.drawRectangle({ x: 0, y: 0, width: pageWidth, height: pageHeight, color: navy });
+    drawWatermark(cover, true);
     cover.drawRectangle({ x: 0, y: pageHeight - 72, width: pageWidth, height: 72, color: navy2 });
     cover.drawRectangle({ x: 0, y: pageHeight - 76, width: pageWidth, height: 4, color: blue });
     cover.drawRectangle({ x: 0, y: 0, width: 6, height: pageHeight, color: blue });
@@ -179,6 +298,8 @@ export class DocumentSealingService {
       font: bold,
       color: gold,
     });
+    drawLogo(cover, pageWidth - margin - 44, pageHeight - 62, 44);
+    drawLogo(cover, margin, pageHeight - 210, 72);
 
     let cy = pageHeight - 250;
     cover.drawText("FORENSIC EVIDENCE REPORT", {
@@ -223,6 +344,24 @@ export class DocumentSealingService {
       });
       cy -= 18;
     }
+    // QR code (bottom-right) linking to seal verification.
+    const qrSize = 104;
+    const qrX = pageWidth - margin - qrSize;
+    cover.drawImage(qr, { x: qrX, y: 96, width: qrSize, height: qrSize });
+    cover.drawText("Scan to verify seal", {
+      x: qrX,
+      y: 84,
+      size: 8,
+      font,
+      color: ink,
+    });
+    cover.drawText("SHA-512 anchored via OpenTimestamps (Bitcoin)", {
+      x: margin,
+      y: 150,
+      size: 8,
+      font,
+      color: ink,
+    });
     cover.drawText(`CONSTITUTIONAL FORENSIC AI v${params.ruleset.version}`, {
       x: margin,
       y: 122,
@@ -248,9 +387,11 @@ export class DocumentSealingService {
 
     const startPage = (): void => {
       page = doc.addPage([pageWidth, pageHeight]);
+      drawWatermark(page, false);
       const pageNo = contentPages.length + 2;
+      drawLogo(page, margin, pageHeight - 62, 16);
       page.drawText(`${headerSubject} | Forensic Report ${params.documentReference}`, {
-        x: margin,
+        x: margin + 22,
         y: pageHeight - 52,
         size: 8,
         font,
@@ -412,8 +553,16 @@ function wrapText(text: string, width: number): string[] {
   return lines;
 }
 
-function mockBlockHeight(hash: string): number {
-  // Deterministic mock height from hash for offline demos
+/** Append a seal id to the configured verify URL, preserving any hash fragment. */
+function appendSeal(base: string, sealId: string): string {
+  const [main, fragment] = base.split("#");
+  const sep = main.includes("?") ? "&" : "?";
+  const withSeal = `${main}${sep}seal=${encodeURIComponent(sealId)}`;
+  return fragment ? `${withSeal}#${fragment}` : withSeal;
+}
+
+/** Deterministic mock Bitcoin block height for confirmed OpenTimestamps anchors. */
+export function mockBlockHeight(hash: string): number {
   const n = parseInt(hash.slice(0, 8), 16);
   return 800000 + (n % 200000);
 }

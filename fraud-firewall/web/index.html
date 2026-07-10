@@ -174,6 +174,34 @@
           </div>
         </div>
       </section>
+
+      <section class="panel verify" id="verifyPanel">
+        <h2>Verify Seal</h2>
+        <p class="sub">
+          Re-compute the SHA-512 of a sealed PDF and check it against the anchored fingerprint,
+          then confirm the OpenTimestamps Bitcoin anchor. Fresh seals show <em>pending</em> until
+          the blockchain confirms (can take a few hours).
+        </p>
+
+        <div class="field">
+          <label for="verifySealId">Seal ID (from the cover / QR code)</label>
+          <input id="verifySealId" type="text" placeholder="seal-…" spellcheck="false" />
+        </div>
+        <div class="field">
+          <label for="verifyFile">Sealed PDF (optional — SHA-512 computed in your browser)</label>
+          <input id="verifyFile" type="file" accept="application/pdf" />
+        </div>
+
+        <div class="cta-row">
+          <button class="btn btn-primary" id="verifyBtn" type="button">Verify</button>
+        </div>
+
+        <div class="result" hidden id="verifyResultBlock">
+          <div class="verify-banner" id="verifyBanner"></div>
+          <p class="sub" id="verifyMessage"></p>
+          <div class="verify-grid" id="verifyGrid"></div>
+        </div>
+      </section>
     </main>
 
     <footer class="shell footer">

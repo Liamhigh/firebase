@@ -46,14 +46,23 @@ export type VerificationVote = z.infer<typeof VerificationVoteSchema>;
 
 export const SealRecordSchema = z.object({
   seal_id: z.string(),
+  /** SHA-512 of the final sealed PDF bytes (computed last). */
   sha512: z.string(),
+  /** Alias of sha512 — the document fingerprint anchored to the blockchain. */
+  document_sha512: z.string().optional(),
   constitution_version: z.string(),
   created_at: z.string(),
   document_reference: z.string(),
+  /** Public verification URL (also encoded in the cover QR code). */
+  verify_url: z.string().optional(),
+  /** OpenTimestamps proof filename stored alongside the sealed PDF. */
+  ots_proof_file: z.string().optional(),
   blockchain: z
     .object({
       provider: z.literal("OpenTimestamps"),
       status: z.enum(["SUBMITTED", "PENDING", "CONFIRMED", "MOCK"]),
+      submitted_at: z.string().optional(),
+      calendar_urls: z.array(z.string()).optional(),
       block_height: z.number().optional(),
       confirmations: z.number().optional(),
       ots_receipt: z.string().optional(),

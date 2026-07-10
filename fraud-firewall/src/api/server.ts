@@ -228,6 +228,30 @@ export function startServer(firewall: FraudFirewall): {
         return sendJson(res, 200, { manifest, atoms, contradictions });
       }
 
+      if (method === "POST" && url.pathname === "/v1/verify") {
+        const body = JSON.parse(await readBody(req)) as {
+          seal_id?: string;
+          sha512?: string;
+          pdf_base64?: string;
+        };
+        if (!body.seal_id) {
+          return sendJson(res, 400, { error: "seal_id required" });
+        }
+        const verification = firewall.verifySeal({
+          sealId: body.seal_id,
+          sha512: body.sha512,
+          pdfBase64: body.pdf_base64,
+        });
+        // Always 200: the verdict (incl. NOT_FOUND) is carried in the body.
+        return sendJson(res, 200, verification);
+      }
+
+      if (method === "GET" && url.pathname.startsWith("/v1/verify/")) {
+        const sealId = url.pathname.replace("/v1/verify/", "");
+        const verification = firewall.verifySeal({ sealId });
+        return sendJson(res, 200, verification);
+      }
+
       if (method === "GET" && url.pathname.startsWith("/v1/sealed/")) {
         const sealId = url.pathname.replace("/v1/sealed/", "");
         const path = `${config.storage.sealed_dir}/${sealId}.pdf`;

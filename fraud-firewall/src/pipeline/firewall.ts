@@ -19,6 +19,7 @@ import { generateCommissionInvoice } from "../core/commission.js";
 import { NotificationService } from "../notifications/email.js";
 import { SealCreditLedgerService } from "../core/sealCredits.js";
 import { ForensicEngine } from "../forensics/engine.js";
+import { verifySeal, type SealVerification } from "../core/verification.js";
 import {
   alertPath,
   ensureVault,
@@ -79,6 +80,15 @@ export class FraudFirewall {
   /** Extract evidence atoms + contradictions from documents (spec §4.2/§4.3). */
   extractEvidence(opts: { documents?: unknown[]; seal?: boolean } = {}) {
     return this.forensics.extract(opts);
+  }
+
+  /** Verify a sealed document: SHA-512 match + OpenTimestamps anchor (spec §6.4). */
+  verifySeal(input: {
+    sealId: string;
+    sha512?: string;
+    pdfBase64?: string;
+  }): SealVerification {
+    return verifySeal(this.config, input);
   }
 
   getConfig(): FirewallConfig {
