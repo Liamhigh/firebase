@@ -1,0 +1,157 @@
+{
+  "version": "5.2.7",
+  "last_updated": "2026-07-13",
+  "total_features": 86,
+  "total_complete": 41,
+  "categories": [
+    {
+      "name": "Core Engine",
+      "total": 11,
+      "complete": 9,
+      "features": [
+        {"id": "1.1", "name": "Constitution loading", "status": "complete"},
+        {"id": "1.2", "name": "SHA-512 hashing", "status": "complete"},
+        {"id": "1.3", "name": "Seal credit ledger", "status": "complete"},
+        {"id": "1.4", "name": "Commission calculation", "status": "complete"},
+        {"id": "1.5", "name": "Type system (Zod)", "status": "complete"},
+        {"id": "1.6", "name": "Configuration loading", "status": "complete"},
+        {"id": "1.7", "name": "Sealing service", "status": "complete"},
+        {"id": "1.8", "name": "Rule engine", "status": "complete"},
+        {"id": "1.9", "name": "Firewall pipeline", "status": "complete"},
+        {"id": "1.10", "name": "Determinism enforcement", "status": "in_progress"},
+        {"id": "1.11", "name": "Constitutional compliance checker", "status": "not_started"}
+      ]
+    },
+    {
+      "name": "AI Integration",
+      "total": 10,
+      "complete": 3,
+      "features": [
+        {"id": "2.1", "name": "Gemma 3 interface", "status": "in_progress"},
+        {"id": "2.2", "name": "Phi-3 interface", "status": "in_progress"},
+        {"id": "2.3", "name": "Gemma 4 interface", "status": "in_progress"},
+        {"id": "2.4", "name": "Mistral Instruct interface", "status": "in_progress"},
+        {"id": "2.5", "name": "llama.cpp integration", "status": "not_started"},
+        {"id": "2.6", "name": "Triple-AI consensus", "status": "not_started"},
+        {"id": "2.7", "name": "Deterministic mode fallback", "status": "complete"},
+        {"id": "2.8", "name": "10-word prompt limit", "status": "complete"},
+        {"id": "2.9", "name": "Model output validation", "status": "not_started"},
+        {"id": "2.10", "name": "AI audit trail", "status": "in_progress"}
+      ]
+    },
+    {
+      "name": "Sealing Service",
+      "total": 8,
+      "complete": 4,
+      "features": [
+        {"id": "3.1", "name": "SHA-512 hash generation", "status": "complete"},
+        {"id": "3.2", "name": "PDF sealing", "status": "complete"},
+        {"id": "3.3", "name": "Seal footer format", "status": "complete"},
+        {"id": "3.4", "name": "Classification banners", "status": "in_progress"},
+        {"id": "3.5", "name": "OpenTimestamps anchoring", "status": "not_started"},
+        {"id": "3.6", "name": "Seal verification", "status": "not_started"},
+        {"id": "3.7", "name": "Bulk sealing", "status": "not_started"},
+        {"id": "3.8", "name": "Seal credit deduction", "status": "complete"}
+      ]
+    },
+    {
+      "name": "Notification System",
+      "total": 7,
+      "complete": 4,
+      "features": [
+        {"id": "4.1", "name": "Commission email to Verum", "status": "in_progress"},
+        {"id": "4.2", "name": "Sealed report email to bank", "status": "in_progress"},
+        {"id": "4.3", "name": "Email template rendering", "status": "complete"},
+        {"id": "4.4", "name": "Subject line formatting", "status": "complete"},
+        {"id": "4.5", "name": "Privacy wall", "status": "complete"},
+        {"id": "4.6", "name": "SMTP configuration", "status": "not_started"},
+        {"id": "4.7", "name": "Delivery confirmation/retry", "status": "not_started"}
+      ]
+    },
+    {
+      "name": "Commission System",
+      "total": 6,
+      "complete": 4,
+      "features": [
+        {"id": "5.1", "name": "20% commission calculation", "status": "complete"},
+        {"id": "5.2", "name": "Invoice generation", "status": "complete"},
+        {"id": "5.3", "name": "Payment reference generation", "status": "complete"},
+        {"id": "5.4", "name": "Due date calculation", "status": "complete"},
+        {"id": "5.5", "name": "Invoice status tracking", "status": "not_started"},
+        {"id": "5.6", "name": "Commission reporting", "status": "not_started"}
+      ]
+    },
+    {
+      "name": "API and Web UI",
+      "total": 12,
+      "complete": 6,
+      "features": [
+        {"id": "6.1", "name": "HTTP server", "status": "complete"},
+        {"id": "6.2", "name": "REST API endpoints", "status": "in_progress"},
+        {"id": "6.3", "name": "POST /v1/monitor", "status": "complete"},
+        {"id": "6.4", "name": "POST /v1/seal", "status": "complete"},
+        {"id": "6.5", "name": "GET /v1/status", "status": "complete"},
+        {"id": "6.6", "name": "GET /v1/ledger", "status": "in_progress"},
+        {"id": "6.7", "name": "Web console UI", "status": "in_progress"},
+        {"id": "6.8", "name": "Demo mode", "status": "complete"},
+        {"id": "6.9", "name": "Authentication", "status": "not_started"},
+        {"id": "6.10", "name": "API rate limiting", "status": "not_started"},
+        {"id": "6.11", "name": "Request/response logging", "status": "in_progress"},
+        {"id": "6.12", "name": "CORS configuration", "status": "not_started"}
+      ]
+    },
+    {
+      "name": "Docker and Deployment",
+      "total": 8,
+      "complete": 3,
+      "features": [
+        {"id": "7.1", "name": "Dockerfile", "status": "complete"},
+        {"id": "7.2", "name": "docker-compose.yml", "status": "complete"},
+        {"id": "7.3", "name": "Health checks", "status": "not_started"},
+        {"id": "7.4", "name": "GPU support", "status": "not_started"},
+        {"id": "7.5", "name": "Volume mounts", "status": "complete"},
+        {"id": "7.6", "name": "Environment variables", "status": "in_progress"},
+        {"id": "7.7", "name": "Kubernetes manifests", "status": "not_started"},
+        {"id": "7.8", "name": "Auto-scaling", "status": "not_started"}
+      ]
+    },
+    {
+      "name": "Documentation",
+      "total": 8,
+      "complete": 8,
+      "features": [
+        {"id": "8.1", "name": "README.md", "status": "complete"},
+        {"id": "8.2", "name": "WHAT_THIS_IS.md", "status": "complete"},
+        {"id": "8.3", "name": "PROMPT.md", "status": "complete"},
+        {"id": "8.4", "name": "AI_BUILD_INSTRUCTIONS.md", "status": "complete"},
+        {"id": "8.5", "name": "CONSTITUTION.md", "status": "complete"},
+        {"id": "8.6", "name": "ARCHITECTURE.md", "status": "complete"},
+        {"id": "8.7", "name": "NINE_BRAIN_RULES.md", "status": "complete"},
+        {"id": "8.8", "name": "REPORT_FORMAT_SPECIFICATION.md", "status": "complete"}
+      ]
+    },
+    {
+      "name": "Testing",
+      "total": 16,
+      "complete": 4,
+      "features": [
+        {"id": "9.1", "name": "Unit tests: core", "status": "in_progress"},
+        {"id": "9.2", "name": "Unit tests: pipeline", "status": "not_started"},
+        {"id": "9.3", "name": "Unit tests: sealing", "status": "not_started"},
+        {"id": "9.4", "name": "Unit tests: agents", "status": "not_started"},
+        {"id": "9.5", "name": "Determinism tests", "status": "not_started"},
+        {"id": "9.6", "name": "Constitutional tests", "status": "not_started"},
+        {"id": "9.7", "name": "Commission tests", "status": "complete"},
+        {"id": "9.8", "name": "Seal credit tests", "status": "complete"},
+        {"id": "9.9", "name": "Privacy wall tests", "status": "not_started"},
+        {"id": "9.10", "name": "Tamper detection tests", "status": "not_started"},
+        {"id": "9.11", "name": "Integration tests", "status": "not_started"},
+        {"id": "9.12", "name": "Performance tests", "status": "not_started"},
+        {"id": "9.13", "name": "Type checking", "status": "complete"},
+        {"id": "9.14", "name": "Mock AI tests", "status": "not_started"},
+        {"id": "9.15", "name": "Agent tests", "status": "not_started"},
+        {"id": "9.16", "name": "Notification tests", "status": "not_started"}
+      ]
+    }
+  ]
+}
