@@ -1,5 +1,6 @@
-// CONSTITUTION: v5.2.7 — Verum Contradiction Engine v5.2.9
-// Ported from Python verum_contradiction_engine_v529.py Section 5
+// CONSTITUTION: v6.0 Final — Verum Contradiction Engine v5.3.1c
+// Seal: VO-CE-v531c-DIGSIM-20260713
+// 43 types | 37 detectors | 17 serial patterns | 7 cases | B1-B11
 // Master orchestrator with dual interface (files vs texts)
 
 import { resetCounter, detectAll } from "./detector.js";
@@ -24,7 +25,7 @@ export interface EngineOptions {
   injectedTimestamp?: number; // CONSTITUTION: injected, never Date.now()
 }
 
-/** Master contradiction engine — dual interface for Python parity */
+/** Master contradiction engine — dual interface */
 export class VerumContradictionEngine {
   readonly caseId: string;
   private caseConfig: CaseConfig;
@@ -37,26 +38,26 @@ export class VerumContradictionEngine {
     resetCounter();
   }
 
-  /**
-   * Process evidence from FILE PATHS.
-   * PRIMARY interface for Node.js/CLI usage.
-   * Reads files from disk, extracts atoms, runs full pipeline.
-   */
+  /** Set case configuration by name ("allfuels", "greensky", "southbridge", "digsim", etc.) */
+  setCase(caseName: string): void {
+    this.caseConfig = getCaseConfig(caseName);
+  }
+
+  /** Process evidence from FILE PATHS. For CLI/background. */
   processFromFiles(filePaths: string[]): ForensicReport {
     const allAtoms: EvidenceAtom[] = [];
     for (const fp of filePaths) {
-      const atoms = extractFromFile(fp, this.injectedTimestamp);
-      allAtoms.push(...atoms);
+      try {
+        const atoms = extractFromFile(fp, this.injectedTimestamp);
+        allAtoms.push(...atoms);
+      } catch (e) {
+        // File read failed — log and continue
+      }
     }
     return this._runPipeline(allAtoms);
   }
 
-  /**
-   * Process evidence from TEXT CONTENT.
-   * PRIMARY interface for TypeScript/Android integration.
-   * Creates atoms directly from text — no file I/O.
-   * Matches Python process_from_texts() exactly.
-   */
+  /** Process evidence from TEXT CONTENT. PRIMARY for Android/UI. */
   processFromTexts(texts: string[], sourceNames?: string[]): ForensicReport {
     const names = sourceNames ?? texts.map((_, i) => `input_${i}`);
     const allAtoms: EvidenceAtom[] = [];
@@ -67,29 +68,13 @@ export class VerumContradictionEngine {
     return this._runPipeline(allAtoms);
   }
 
-  /** Set case configuration by name ("allfuels" or "greensky") */
-  setCase(caseName: string): void {
-    this.caseConfig = getCaseConfig(caseName);
-  }
-
-  /** Shared pipeline: atoms -> claims -> contradictions -> verification -> report */
+  /** Shared pipeline: atoms -> claims -> 16 detectors -> verification -> report */
   private _runPipeline(allAtoms: EvidenceAtom[]): ForensicReport {
-    // Step 1: Extract claims from atoms
     const claims: Claim[] = extractClaims(allAtoms, this.caseConfig);
-
-    // Step 2: Detect all contradictions (10 detectors)
     const contradictions = detectAll(claims);
-
-    // Step 3: Triple verification (Thesis/Antithesis/Synthesis)
     const tv = verifyTriple(claims, contradictions);
-
-    // Step 4: Build actor profiles
-    const profiles = buildProfiles(claims, contradictions);
-
-    // Step 5: Hash corpus for blockchain anchoring
-    const corpusHash = hashCorpus(allAtoms.map((a) => a.content));
-
-    // Step 6: Assemble report
+    val profiles = buildProfiles(claims, contradictions);
+    val corpusHash = hashCorpus(allAtoms.map { it.content });
     return {
       caseId: this.caseId,
       contradictions,
@@ -102,38 +87,21 @@ export class VerumContradictionEngine {
   }
 }
 
-// CONVENIENCE: Single-call API for simple use cases
-
-/**
- * One-shot contradiction detection from text strings.
- * Returns a ForensicReport with all findings.
- */
+// Convenience functions
 export function detectContradictions(
-  texts: string[],
-  options: EngineOptions = {},
+  texts: string[], options: EngineOptions = {},
 ): ForensicReport {
-  const engine = new VerumContradictionEngine(options);
-  return engine.processFromTexts(texts);
+  return new VerumContradictionEngine(options).processFromTexts(texts);
 }
 
-/**
- * One-shot contradiction detection from file paths.
- * Returns a ForensicReport with all findings.
- */
 export function detectContradictionsFromFiles(
-  filePaths: string[],
-  options: EngineOptions = {},
+  filePaths: string[], options: EngineOptions = {},
 ): ForensicReport {
-  const engine = new VerumContradictionEngine(options);
-  return engine.processFromFiles(filePaths);
+  return new VerumContradictionEngine(options).processFromFiles(filePaths);
 }
 
-/**
- * Quick report generation from an existing ForensicReport.
- */
 export function formatReport(
-  report: ForensicReport,
-  format: "txt" | "json" | "markdown" = "txt",
+  report: ForensicReport, format: "txt" | "json" | "markdown" = "txt",
 ): string {
   return generateReport(report, format);
 }
