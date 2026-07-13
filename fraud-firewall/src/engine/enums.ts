@@ -1,9 +1,10 @@
-// CONSTITUTION: v5.2.7 — Contradiction Engine Enums
-// Ported from Python verum_contradiction_engine_v529.py Section 0
-// All enums are const objects (frozen) for determinism
+// CONSTITUTION: v6.0 Final — Contradiction Engine Enums
+// Engine: v5.3.1c | Seal: VO-CE-v531c-DIGSIM-20260713
+// 43 contradiction types | 37 detectors | 17 serial patterns | 7 cases | B1-B11
 
-/** 16 contradiction types detected by the engine */
+/** 43 contradiction types detected by the v5.3.1c engine. */
 export const ContradictionType = {
+  // === v5.2.9 Legacy (16 types) ===
   STATEMENT_VS_STATEMENT: "STATEMENT_VS_STATEMENT",
   STATEMENT_VS_EVIDENCE: "STATEMENT_VS_EVIDENCE",
   OMISSION: "OMISSION",
@@ -20,10 +21,65 @@ export const ContradictionType = {
   CORPORATE_VEIL_ABUSE: "CORPORATE_VEIL_ABUSE",
   TACIT_LEASE_VIOLATION: "TACIT_LEASE_VIOLATION",
   POST_EXPIRY_ENFORCEMENT: "POST_EXPIRY_ENFORCEMENT",
+
+  // === v5.3.0 Expansion (14 types) ===
+  DOCUMENT_TAMPERING: "DOCUMENT_TAMPERING",
+  WITNESS_INTIMIDATION: "WITNESS_INTIMIDATION",
+  EVIDENCE_DESTRUCTION: "EVIDENCE_DESTRUCTION",
+  CONFLICT_OF_INTEREST: "CONFLICT_OF_INTEREST",
+  BRIBERY_CORRUPTION: "BRIBERY_CORRUPTION",
+  MONEY_LAUNDERING: "MONEY_LAUNDERING",
+  IDENTITY_FRAUD: "IDENTITY_FRAUD",
+  FORGERY: "FORGERY",
+  EXTORTION: "EXTORTION",
+  EMBEZZLEMENT: "EMBEZZLEMENT",
+  TAX_EVASION: "TAX_EVASION",
+  INSIDER_TRADING: "INSIDER_TRADING",
+  CYBERCRIME_EVIDENCE: "CYBERCRIME_EVIDENCE",
+  HUMAN_RIGHTS_VIOLATION: "HUMAN_RIGHTS_VIOLATION",
+
+  // === v5.3.1 Expansion (7 types) ===
+  MANDATE_ABANDONMENT: "MANDATE_ABANDONMENT",
+  ACKNOWLEDGE_THEN_DENY: "ACKNOWLEDGE_THEN_DENY",
+  OWNERSHIP_MISREPRESENTATION: "OWNERSHIP_MISREPRESENTATION",
+  COSTING_MANIPULATION: "COSTING_MANIPULATION",
+  COMMUNITY_MANIPULATION: "COMMUNITY_MANIPULATION",
+  INSTITUTIONAL_SILENCE: "INSTITUTIONAL_SILENCE",
+  ICCPR_REMEDY_DENIAL: "ICCPR_REMEDY_DENIAL",
+
+  // === v5.3.1c DIGSIM Expansion (6 types) ===
+  DEFECTIVE_JURAT: "DEFECTIVE_JURAT",
+  PROTECTION_ORDER_AS_LEVERAGE: "PROTECTION_ORDER_AS_LEVERAGE",
+  FALSE_ALLEGATION_IN_AFFIDAVIT: "FALSE_ALLEGATION_IN_AFFIDAVIT",
+  TEMPORAL_PRECEDENCE_CONFLICT: "TEMPORAL_PRECEDENCE_CONFLICT",
+  PROCESS_REMEDY_CONFLICT: "PROCESS_REMEDY_CONFLICT",
+  CHARACTER_ASSASSINATION: "CHARACTER_ASSASSINATION",
 } as const;
 export type ContradictionType = (typeof ContradictionType)[keyof typeof ContradictionType];
 
-/** Ordinal severity — no percentages, ever */
+/** 17 serial fraud patterns detected by the engine. */
+export const SerialFraudPattern = {
+  P001_GOODWILL_FORFEITURE: "P001_GOODWILL_FORFEITURE",
+  P002_RENT_WHILE_DENYING_CONTRACT: "P002_RENT_WHILE_DENYING_CONTRACT",
+  P003_UNSIGNED_DOCUMENT_ENFORCEMENT: "P003_UNSIGNED_DOCUMENT_ENFORCEMENT",
+  P004_SECTION_12B_ARBITRATION_AVOIDANCE: "P004_SECTION_12B_ARBITRATION_AVOIDANCE",
+  P005_COMPENSATION_DEMAND_WITHOUT_RIGHT: "P005_COMPENSATION_DEMAND_WITHOUT_RIGHT",
+  P006_DUAL_CONTROL_SHAM: "P006_DUAL_CONTROL_SHAM",
+  P007_JUDICIAL_PERJURY_PATTERN: "P007_JUDICIAL_PERJURY_PATTERN",
+  P008_CROSS_BORDER_OPPRESSION: "P008_CROSS_BORDER_OPPRESSION",
+  P009_FRANCHISE_SYSTEMATIC_EVICT: "P009_FRANCHISE_SYSTEMATIC_EVICT",
+  P010_EXCLUSIVITY_DENIAL_PATTERN: "P010_EXCLUSIVITY_DENIAL_PATTERN",
+  P011_GASLIGHTING_ISOLATION: "P011_GASLIGHTING_ISOLATION",
+  P012_DIGITAL_EVIDENCE_TAMPERING: "P012_DIGITAL_EVIDENCE_TAMPERING",
+  P013_BANKING_FRAUD_PATTERN: "P013_BANKING_FRAUD_PATTERN",
+  P014_LAW_ENFORCEMENT_INTERFERENCE: "P014_LAW_ENFORCEMENT_INTERFERENCE",
+  P015_DEFECTIVE_JURAT: "P015_DEFECTIVE_JURAT",
+  P016_PROTECTION_ORDER_LEVERAGE: "P016_PROTECTION_ORDER_LEVERAGE",
+  P017_PROCESS_REMEDY_DENIAL: "P017_PROCESS_REMEDY_DENIAL",
+} as const;
+export type SerialFraudPattern = (typeof SerialFraudPattern)[keyof typeof SerialFraudPattern];
+
+/** Ordinal severity — no percentages, ever (Constitution v6.0 Final Directive 1). */
 export const Severity = {
   VERY_HIGH: "VERY_HIGH",
   HIGH: "HIGH",
@@ -33,7 +89,7 @@ export const Severity = {
 } as const;
 export type Severity = (typeof Severity)[keyof typeof Severity];
 
-/** Confidence levels — DETERMINISTIC is highest (mathematical proof) */
+/** Confidence levels — DETERMINISTIC is highest (mathematical proof). */
 export const Confidence = {
   DETERMINISTIC: "DETERMINISTIC",
   VERY_HIGH: "VERY_HIGH",
@@ -44,7 +100,7 @@ export const Confidence = {
 } as const;
 export type Confidence = (typeof Confidence)[keyof typeof Confidence];
 
-/** Statement types for evidence classification */
+/** Statement types for evidence classification. */
 export const StatementType = {
   CLAIM: "CLAIM",
   DENIAL: "DENIAL",
@@ -59,7 +115,7 @@ export const StatementType = {
 } as const;
 export type StatementType = (typeof StatementType)[keyof typeof StatementType];
 
-/** The 7 constitutional subjects + RACKETERING + OTHER */
+/** The 7 constitutional subjects + RACKETERING + OTHER. */
 export const Subject = {
   GOODWILL_VALUE: "GOODWILL_VALUE",
   CONTRACT_VALIDITY: "CONTRACT_VALIDITY",
@@ -73,7 +129,7 @@ export const Subject = {
 } as const;
 export type Subject = (typeof Subject)[keyof typeof Subject];
 
-/** File types supported for evidence ingestion */
+/** File types supported for evidence ingestion. */
 export const FileType = {
   PDF: "PDF",
   IMAGE: "IMAGE",
@@ -89,7 +145,23 @@ export const FileType = {
 } as const;
 export type FileType = (typeof FileType)[keyof typeof FileType];
 
-/** Severity score for sorting — higher = more severe */
+/** 11 Brain identifiers (B1-B11). */
+export const Brain = {
+  B1_CONTRADICTION: "B1_CONTRADICTION",
+  B2_DOCUMENT: "B2_DOCUMENT",
+  B3_COMMUNICATIONS: "B3_COMMUNICATIONS",
+  B4_BEHAVIORAL: "B4_BEHAVIORAL",
+  B5_TIMELINE: "B5_TIMELINE",
+  B6_FINANCIAL: "B6_FINANCIAL",
+  B7_LEGAL: "B7_LEGAL",
+  B8_AUDIO: "B8_AUDIO",
+  B9_RESEARCH: "B9_RESEARCH",
+  B10_HUMAN_RIGHTS: "B10_HUMAN_RIGHTS",
+  B11_INSTITUTIONAL: "B11_INSTITUTIONAL",
+} as const;
+export type Brain = (typeof Brain)[keyof typeof Brain];
+
+/** Score conversion utilities — internal use only, never exposed as confidence. */
 export function severityScore(sev: Severity): number {
   return {
     [Severity.VERY_HIGH]: 5,
@@ -100,7 +172,6 @@ export function severityScore(sev: Severity): number {
   }[sev] ?? 0;
 }
 
-/** Confidence numeric score for calibration */
 export function confidenceScore(c: Confidence): number {
   return {
     [Confidence.DETERMINISTIC]: 1.0,
@@ -112,7 +183,6 @@ export function confidenceScore(c: Confidence): number {
   }[c] ?? 0.5;
 }
 
-/** Convert numeric score back to ordinal Confidence */
 export function scoreToConfidence(s: number): Confidence {
   if (s >= 0.95) return Confidence.DETERMINISTIC;
   if (s >= 0.80) return Confidence.VERY_HIGH;
