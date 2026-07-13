@@ -3,7 +3,7 @@
 **Document Purpose:** Feature completion matrix. 86 features tracked across 9 categories. Shows what's done and what's missing. The coding assistant works through this systematically.
 
 **Last Updated:** 2026-07-13
-**Version:** 5.2.7
+**Version:** 5.3.1c
 
 ---
 
@@ -21,7 +21,7 @@
 
 | # | Feature | Status | Notes |
 |---|---------|--------|-------|
-| 1.1 | Constitution loading (v5.2.7) | + | `src/core/constitution.ts` — loads and validates |
+| 1.1 | Constitution loading (v6.0 Final) | + | `src/core/constitution.ts` — loads and validates |
 | 1.2 | SHA-512 cryptographic hashing | + | `src/core/crypto.ts` — SHA-512, AES-256-GCM |
 | 1.3 | Seal credit ledger | + | `src/core/sealCredits.ts` — balance, consume, audit |
 | 1.4 | Commission calculation (20%) | + | `src/core/commission.ts` — hard-coded 20% |
@@ -31,7 +31,7 @@
 | 1.8 | Rule engine (bank-configurable) | + | `src/pipeline/rules.ts` — velocity, amount, geo |
 | 1.9 | Firewall pipeline orchestrator | + | `src/pipeline/firewall.ts` — main detection loop |
 | 1.10 | Determinism enforcement | + | Fixed timestamps, no Date.now() in business logic |
-| 1.11 | Contradiction Engine v5.2.9 | + | `src/engine/` — 10 detectors, 3-layer model, dual interface |
+| 1.11 | Contradiction Engine v5.3.1c | + | `src/engine/` — 16 detectors (10 base + 6 DIGSIM), 43 types, 3-layer model, dual interface, 7 cases |
 
 **Category 1: 11/11 complete (100%)**
 
@@ -166,7 +166,7 @@
 | 9.1 | Unit tests for core/ | ~ | crypto, commission, sealCredits tested |
 | 9.2 | Unit tests for pipeline/ | - | firewall engine, rules engine |
 | 9.3 | Unit tests for sealing | - | PDF sealing, hash generation |
-| 9.4 | Unit tests for engine/ | - | 10 detectors, calibrator, semantic analyzer |
+| 9.4 | Unit tests for engine/ | ~ | 16 detectors, calibrator, semantic analyzer — v5.3.1c |
 | 9.5 | Determinism tests | - | Same input = same output, every time |
 | 9.6 | Constitutional compliance tests | - | All outputs pass Constitution validation |
 | 9.7 | Commission calculation tests | + | 20% calculation verified |
@@ -201,4 +201,5 @@
 
 ---
 
+*Engine: v5.3.1c | Constitution: v6.0 Final | Seal: VO-CE-v531c-DIGSIM-20260713*
 *Last updated: 2026-07-13. Update this file as features are completed.*
