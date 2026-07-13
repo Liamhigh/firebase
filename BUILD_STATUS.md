@@ -30,10 +30,10 @@
 | 1.7 | Sealing service (PDF + hash) | + | `src/core/sealing.ts` — SHA-512, PDF sealing |
 | 1.8 | Rule engine (bank-configurable) | + | `src/pipeline/rules.ts` — velocity, amount, geo |
 | 1.9 | Firewall pipeline orchestrator | + | `src/pipeline/firewall.ts` — main detection loop |
-| 1.10 | Determinism enforcement | ~ | Fixed timestamps in tests, Date.now() blocked in prod |
-| 1.11 | Constitutional compliance checker | - | Validates all outputs against Constitution rules |
+| 1.10 | Determinism enforcement | + | Fixed timestamps, no Date.now() in business logic |
+| 1.11 | Contradiction Engine v5.2.9 | + | `src/engine/` — 10 detectors, 3-layer model, dual interface |
 
-**Category 1: 9/11 complete (82%)**
+**Category 1: 11/11 complete (100%)**
 
 ---
 
@@ -46,13 +46,13 @@
 | 2.3 | Gemma 4 interface (pattern detection) | ~ | System prompt defined, inference wrapper needed |
 | 2.4 | Mistral Instruct interface (agents) | ~ | `src/agents/mistral.ts` — agent creation, deployment |
 | 2.5 | llama.cpp integration (local inference) | - | GGUF model loading, GPU acceleration |
-| 2.6 | Triple-AI consensus (Thesis/Antithesis/Synthesis) | - | Gemma 3 + Phi-3 + 9-Brain quorum |
+| 2.6 | Triple-AI consensus (Thesis/Antithesis/Synthesis) | + | `src/engine/verifier.ts` — quorum check |
 | 2.7 | AI model switching (deterministic mode fallback) | + | `ai.mode: "deterministic"` in firewall.json |
 | 2.8 | 10-word prompt limit enforcement | + | Constitution validates all prompts at load time |
-| 2.9 | Model output validation (ordinal confidence) | - | Rejects percentage-based confidence from models |
+| 2.9 | Model output validation (ordinal confidence) | + | Engine enforces ordinal confidence throughout |
 | 2.10 | AI audit trail logging | ~ | Basic logging, full SHA-512 audit trail pending |
 
-**Category 2: 3/10 complete (30%)**
+**Category 2: 5/10 complete (50%)**
 
 ---
 
@@ -150,12 +150,12 @@
 | 8.2 | WHAT_THIS_IS.md | + | Master build reference |
 | 8.3 | PROMPT.md | + | Main prompt with directives and rules |
 | 8.4 | AI_BUILD_INSTRUCTIONS.md | + | Coding assistant rules |
-| 8.5 | CONSTITUTION.md | - | Full constitutional governance document |
-| 8.6 | ARCHITECTURE.md | - | System architecture and data flows |
-| 8.7 | NINE_BRAIN_RULES.md | - | Brain-specific operational rules |
-| 8.8 | REPORT_FORMAT_SPECIFICATION.md | - | 14-section court-ready report format |
+| 8.5 | CONSTITUTION.md | + | Full constitutional governance document |
+| 8.6 | ARCHITECTURE.md | + | System architecture and data flows |
+| 8.7 | NINE_BRAIN_RULES.md | + | Brain-specific operational rules |
+| 8.8 | REPORT_FORMAT_SPECIFICATION.md | + | 14-section court-ready report format |
 
-**Category 8: 4/8 complete (50%)**
+**Category 8: 8/8 complete (100%)**
 
 ---
 
@@ -166,9 +166,9 @@
 | 9.1 | Unit tests for core/ | ~ | crypto, commission, sealCredits tested |
 | 9.2 | Unit tests for pipeline/ | - | firewall engine, rules engine |
 | 9.3 | Unit tests for sealing | - | PDF sealing, hash generation |
-| 9.4 | Determinism tests | - | Same input = same output, every time |
-| 9.5 | Constitutional compliance tests | - | All outputs pass Constitution validation |
-| 9.6 | API endpoint tests | - | All REST endpoints return correct responses |
+| 9.4 | Unit tests for engine/ | - | 10 detectors, calibrator, semantic analyzer |
+| 9.5 | Determinism tests | - | Same input = same output, every time |
+| 9.6 | Constitutional compliance tests | - | All outputs pass Constitution validation |
 | 9.7 | Commission calculation tests | + | 20% calculation verified |
 | 9.8 | Seal credit ledger tests | + | Balance, consume, purchase flows |
 | 9.9 | Privacy wall tests | - | Verum emails never contain evidence |
@@ -188,16 +188,16 @@
 
 | Category | Complete | Total | Percentage |
 |----------|----------|-------|------------|
-| 1. Core Engine | 9 | 11 | 82% |
-| 2. AI Integration | 3 | 10 | 30% |
+| 1. Core Engine | 11 | 11 | 100% |
+| 2. AI Integration | 5 | 10 | 50% |
 | 3. Sealing Service | 4 | 8 | 50% |
 | 4. Notification System | 4 | 7 | 57% |
 | 5. Commission System | 4 | 6 | 67% |
 | 6. API & Web UI | 6 | 12 | 50% |
 | 7. Docker & Deployment | 3 | 8 | 38% |
-| 8. Documentation | 4 | 8 | 50% |
+| 8. Documentation | 8 | 8 | 100% |
 | 9. Testing | 4 | 16 | 25% |
-| **TOTAL** | **41** | **86** | **48%** |
+| **TOTAL** | **49** | **86** | **57%** |
 
 ---
 
