@@ -3,7 +3,7 @@
  * ===========================================
  * Engine-to-G3 contract serializer for the G3 Hybrid Report Pipeline (GHRP).
  *
- * Status: PROPOSED - pending founder ratification (see G3_HYBRID_REPORT_PIPELINE.md)
+ * Status: RATIFIED — BINDING (founder directive, 2026-07-14)
  *
  * What this does:
  * - Serializes engine contradiction results into the Findings JSON contract
@@ -24,6 +24,9 @@ export const STATUS_ENGINE_VERIFIED = "ENGINE-VERIFIED";
 export const STATUS_G3_CANDIDATE = "G3-RAISED CANDIDATE - PENDING VERIFICATION";
 export const STATUS_CANDIDATE_PROMOTED = "CANDIDATE PROMOTED - ENGINE-VERIFIED";
 export const STATUS_CANDIDATE_REJECTED = "CANDIDATE REJECTED - REASON LOGGED";
+// Highest evidentiary tier: a contradiction a court has itself confirmed,
+// anchored by a sealed judgment reference (e.g. H208/25). Never deleted.
+export const STATUS_JUDICIALLY_CONFIRMED = "JUDICIALLY-CONFIRMED";
 
 export type OrdinalSeverity =
   | "CRITICAL" | "VERY_HIGH" | "HIGH" | "MODERATE" | "LOW" | "INSUFFICIENT";
@@ -36,6 +39,7 @@ export type VerificationStatus =
   | typeof STATUS_G3_CANDIDATE
   | typeof STATUS_CANDIDATE_PROMOTED
   | typeof STATUS_CANDIDATE_REJECTED
+  | typeof STATUS_JUDICIALLY_CONFIRMED
   | string;
 
 export interface ContradictionRecord {
@@ -69,6 +73,7 @@ export interface FindingsJson {
   supplement_date?: string | null;
   engine_verified_count: number;
   g3_candidate_count: number;
+  judicially_confirmed_count?: number;
   integrity_findings: string[];
   contradictions: ContradictionRecord[];
 }
@@ -192,6 +197,9 @@ export function emitFindingsJson(
   const candidateCount = records.filter(
     (r) => r.verification_status === STATUS_G3_CANDIDATE
   ).length;
+  const judiciallyConfirmedCount = records.filter(
+    (r) => r.verification_status === STATUS_JUDICIALLY_CONFIRMED
+  ).length;
 
   return {
     engine_version: options.engineVersion,
@@ -202,6 +210,7 @@ export function emitFindingsJson(
     supplement_date: options.supplementDate ?? null,
     engine_verified_count: records.length - candidateCount,
     g3_candidate_count: candidateCount,
+    judicially_confirmed_count: judiciallyConfirmedCount,
     integrity_findings: options.integrityFindings ?? [],
     contradictions: records,
   };
