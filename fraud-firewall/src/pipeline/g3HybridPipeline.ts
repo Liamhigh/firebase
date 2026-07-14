@@ -226,7 +226,7 @@ export class G3CandidateRegistry {
   }
 
   auditTrail(): CandidateAuditEntry[] {
-    return [...thisthis.audit];
+    return [...this.audit];
   }
 
   /**
