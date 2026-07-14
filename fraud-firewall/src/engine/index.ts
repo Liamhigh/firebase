@@ -8,7 +8,8 @@ import { extractFromFile, extractFromText, extractClaims, hashCorpus } from "./e
 import { verifyTriple, buildProfiles, generateReport } from "./verifier.js";
 import { reportCalibration } from "./calibrator.js";
 import { getCaseConfig } from "./cases.js";
-import type { EvidenceAtom, Claim, ForensicReport, CaseConfig } from "./types.js";
+import type { CaseConfig } from "./cases.js";
+import type { EvidenceAtom, Claim, ForensicReport } from "./types.js";
 
 export * from "./enums.js";
 export * from "./types.js";
@@ -73,8 +74,8 @@ export class VerumContradictionEngine {
     const claims: Claim[] = extractClaims(allAtoms, this.caseConfig);
     const contradictions = detectAll(claims);
     const tv = verifyTriple(claims, contradictions);
-    val profiles = buildProfiles(claims, contradictions);
-    val corpusHash = hashCorpus(allAtoms.map { it.content });
+    const profiles = buildProfiles(claims, contradictions);
+    const corpusHash = hashCorpus(allAtoms.map((a) => a.content));
     return {
       caseId: this.caseId,
       contradictions,
