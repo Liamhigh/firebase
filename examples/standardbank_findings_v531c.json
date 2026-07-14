@@ -1,0 +1,435 @@
+{
+  "engine_version": "5.3.1c",
+  "findings_json_version": "1.0.0",
+  "generated_utc": "2026-07-14T00:00:00+00:00",
+  "source_bundle": "standardbank.pdf (1047 pp.) + standardbank_1.PDF (143 pp. - verified exact prefix duplicate)",
+  "case_ids": [
+    "greensky",
+    "southbridge",
+    "standard_bank"
+  ],
+  "supplement_date": "2026-07-14",
+  "engine_verified_count": 20,
+  "g3_candidate_count": 0,
+  "note": "Worked example for the Findings JSON contract: 20 contradiction records produced 2026-07-14 from the Standard Bank master evidence bundle by multi-method extraction (text layer + Tesseract OCR + structural parse + engine-lexicon scan + manual verification). 19 new, 1 re-anchored. Full narrative register: VO_Supplementary_Contradiction_Register (sealed vault).",
+  "integrity_findings": [
+    "G1: Nanzo draft notice names 'Al-Munther' as 50% partner instead of Liam Anthony Highcock (p64, p67) — confirm issued version",
+    "G2: phone typo +27 82 446 4787 (p938) vs +27 82 445 4787 elsewhere",
+    "G3: '[insert date]' placeholder in sealed cybercrime exhibit (p808) — date fixed elsewhere as 9 Apr 2025",
+    "G4: pp.74-87 duplicated as pp.88-101 — dedupe in next seal",
+    "G5: standardbank_1.PDF = exact pp.1-143 prefix of standardbank.pdf",
+    "G6: 'USD 78 trillion annually' (p14) vs fact sheet's cumulative definition (p156-160) — use fact-sheet wording only",
+    "G7: Kevin headshot + WhatsApp screenshots are image-only — annexure originals preserved per p800"
+  ],
+  "contradictions": [
+    {
+      "contradiction_id": "VO-SB-001",
+      "type": "ACKNOWLEDGE_THEN_DENY",
+      "severity": "CRITICAL",
+      "confidence": "HIGH",
+      "proposition_a_text": "10 Mar 2025: Marius stated deal 'fell through', Greensky never invoiced, client lost (p136, p142)",
+      "proposition_a_actor": "Marius Nortje",
+      "proposition_b_text": "6 Apr 2025: Marius admitted Kevin completed the deal on 13 March 2025 (p138, p142, p738)",
+      "proposition_b_actor": "Marius Nortje",
+      "conflict_description": "Denial of the transaction on 10 March followed by admission on 6 April that it completed on 13 March; client order (24 Feb) and same-day invoice thanks (8 Mar) prove the deal was alive when denied.",
+      "source_document": "standardbank.pdf (Verum Omnis Sealed Master Evidence Bundle)",
+      "source_page": 142,
+      "sha512_anchor": "",
+      "extraction_method": "multi-method: text-layer + OCR + manual verification",
+      "legal_hypothesis": null,
+      "verification_status": {
+        "status": "KNOWN — re-anchored",
+        "requires_human_review": "true"
+      }
+    },
+    {
+      "contradiction_id": "VO-SB-002",
+      "type": "POST_EXPIRY_ENFORCEMENT",
+      "severity": "CRITICAL",
+      "confidence": "HIGH",
+      "proposition_a_text": "13 Mar 2025: transaction executed — order fulfilled, invoice accepted (p136, p142)",
+      "proposition_a_actor": "Kevin Lappeman",
+      "proposition_b_text": "1 Apr 2025: Kevin 'unilaterally cancelled our agreement' 18 days after completion (p136, p142)",
+      "proposition_b_actor": "Kevin Lappeman",
+      "conflict_description": "Retroactive cancellation of an already-completed transaction; functions only to manufacture a paper basis for exclusion of the 50% shareholder.",
+      "source_document": "standardbank.pdf (Verum Omnis Sealed Master Evidence Bundle)",
+      "source_page": 142,
+      "sha512_anchor": "",
+      "extraction_method": "multi-method: text-layer + OCR + manual verification",
+      "legal_hypothesis": null,
+      "verification_status": {
+        "status": "NEW — not in existing 111-contradiction catalogue",
+        "requires_human_review": "true"
+      }
+    },
+    {
+      "contradiction_id": "VO-SB-003",
+      "type": "FABRICATED_DECOY_EVIDENCE",
+      "severity": "CRITICAL",
+      "confidence": "HIGH",
+      "proposition_a_text": "24 Mar 2025: Marius proposed 'meeting for everyone to speak' — declined (p142)",
+      "proposition_a_actor": "Marius Nortje",
+      "proposition_b_text": "25 Mar 2025: Kevin email containing forged WhatsApp messages and fabricated $28,000 liability (p142)",
+      "proposition_b_actor": "Kevin Lappeman",
+      "conflict_description": "Fabrication deployed the day after the declined meeting — coordinated two-actor chain to remove the shareholder via digital fraud.",
+      "source_document": "standardbank.pdf (Verum Omnis Sealed Master Evidence Bundle)",
+      "source_page": 142,
+      "sha512_anchor": "",
+      "extraction_method": "multi-method: text-layer + OCR + manual verification",
+      "legal_hypothesis": null,
+      "verification_status": {
+        "status": "NEW — not in existing 111-contradiction catalogue",
+        "requires_human_review": "true"
+      }
+    },
+    {
+      "contradiction_id": "VO-SB-004",
+      "type": "STATEMENT_VS_EVIDENCE",
+      "severity": "HIGH",
+      "confidence": "HIGH",
+      "proposition_a_text": "Post-1 Apr 2025: screenshots sent showing 'no funds received' / zero bank balance (p138, p142)",
+      "proposition_a_actor": "Marius Nortje",
+      "proposition_b_text": "Client proof of order predating forgery + 6 Apr admission that the deal completed 13 Mar (p138, p142)",
+      "proposition_b_actor": "Documentary record",
+      "conflict_description": "Zero-balance screenshots contradicted by the completed transaction and the admission; funds moved, screenshots concealed the movement.",
+      "source_document": "standardbank.pdf (Verum Omnis Sealed Master Evidence Bundle)",
+      "source_page": 138,
+      "sha512_anchor": "",
+      "extraction_method": "multi-method: text-layer + OCR + manual verification",
+      "legal_hypothesis": null,
+      "verification_status": {
+        "status": "NEW — not in existing 111-contradiction catalogue",
+        "requires_human_review": "true"
+      }
+    },
+    {
+      "contradiction_id": "VO-SB-005",
+      "type": "GOODWILL_FORFEITURE_SWINDLE",
+      "severity": "HIGH",
+      "confidence": "MODERATE",
+      "proposition_a_text": "Jun 2025: position that 'the company may have lost money… documents will be provided proving' it (p60)",
+      "proposition_a_actor": "Marius Nortje / Nanzo",
+      "proposition_b_text": "Marius demanded R150,000 from Liam personally to 'take over the company' (p66)",
+      "proposition_b_actor": "Marius Nortje",
+      "conflict_description": "A company that 'lost money' cannot command a R150k buy-out demand; paired with admitted account-clearing (p62) the loss claim is a swindle narrative.",
+      "source_document": "standardbank.pdf (Verum Omnis Sealed Master Evidence Bundle)",
+      "source_page": 66,
+      "sha512_anchor": "",
+      "extraction_method": "multi-method: text-layer + OCR + manual verification",
+      "legal_hypothesis": null,
+      "verification_status": {
+        "status": "NEW — not in existing 111-contradiction catalogue",
+        "requires_human_review": "true"
+      }
+    },
+    {
+      "contradiction_id": "VO-SB-006",
+      "type": "FABRICATED_DECOY_EVIDENCE",
+      "severity": "HIGH",
+      "confidence": "HIGH",
+      "proposition_a_text": "8 Mar 2025 10:49: Liam's last WhatsApp message before forced exit (Exhibit B, p121)",
+      "proposition_a_actor": "Greensky WhatsApp group",
+      "proposition_b_text": "9 Mar 2025: group activity continued after his exit — 'Message After Exit + Fake Continuity' (Exhibit C, p122)",
+      "proposition_b_actor": "Greensky WhatsApp group",
+      "conflict_description": "Post-exit group activity manufactured a false record of Liam's ongoing participation, contemporaneous with the 9 March access cut-off.",
+      "source_document": "standardbank.pdf (Verum Omnis Sealed Master Evidence Bundle)",
+      "source_page": 121,
+      "sha512_anchor": "",
+      "extraction_method": "multi-method: text-layer + OCR + manual verification",
+      "legal_hypothesis": null,
+      "verification_status": {
+        "status": "NEW — not in existing 111-contradiction catalogue",
+        "requires_human_review": "true"
+      }
+    },
+    {
+      "contradiction_id": "VO-SB-007",
+      "type": "DATA_BREACH_ENABLED_FRAUD",
+      "severity": "HIGH",
+      "confidence": "HIGH",
+      "proposition_a_text": "9 Apr 2025: unauthorised Gmail access attempt from device 'SCAQUACULTURE' (p937, p808)",
+      "proposition_a_actor": "Kevin Lappeman (alleged)",
+      "proposition_b_text": "Device name appears in official Greensky WhatsApp group photos; location logs tie it to Kevin Lappeman's region (p808-809)",
+      "proposition_b_actor": "Device/location logs",
+      "conflict_description": "Intrusion attempt timed five days before the certified file dropped (13 Apr); SAPS CAS 126/4/2025. NOTE: sealed exhibit p808 retains '[insert date]' placeholder — correct to 9 April 2025 in the index.",
+      "source_document": "standardbank.pdf (Verum Omnis Sealed Master Evidence Bundle)",
+      "source_page": 808,
+      "sha512_anchor": "",
+      "extraction_method": "multi-method: text-layer + OCR + manual verification",
+      "legal_hypothesis": null,
+      "verification_status": {
+        "status": "NEW — not in existing 111-contradiction catalogue",
+        "requires_human_review": "true"
+      }
+    },
+    {
+      "contradiction_id": "VO-SB-008",
+      "type": "FRAUD_ON_THE_COURT",
+      "severity": "CRITICAL",
+      "confidence": "HIGH",
+      "proposition_a_text": "Original sealed Greensky file: PDF/A, hash-verified, no headshot, no cropped screenshots (p797, p801)",
+      "proposition_a_actor": "Kevin Lappeman",
+      "proposition_b_text": "Kevin's court exhibit: fabricated headshot labelled 'Liam Highcock', cropped WhatsApp, invented 'SL002 Contradiction' timeline, 'Kevin Setup' page (p797, p801)",
+      "proposition_b_actor": "Sealed record",
+      "conflict_description": "Materials introduced to court are not part of the certified file; forensic rebuttal finds material alteration = evidence tampering. Serial pattern with VO-SB-003 (same actor, same forged-WhatsApp technique, two venues).",
+      "source_document": "standardbank.pdf (Verum Omnis Sealed Master Evidence Bundle)",
+      "source_page": 797,
+      "sha512_anchor": "",
+      "extraction_method": "multi-method: text-layer + OCR + manual verification",
+      "legal_hypothesis": null,
+      "verification_status": {
+        "status": "NEW — not in existing 111-contradiction catalogue",
+        "requires_human_review": "true"
+      }
+    },
+    {
+      "contradiction_id": "VO-SB-009",
+      "type": "JUDICIAL_VS_DOCUMENTARY",
+      "severity": "HIGH",
+      "confidence": "HIGH",
+      "proposition_a_text": "Kevin's H208/25 court narrative: harm-based complaint built on the SL002 exhibit",
+      "proposition_a_actor": "Kevin Lappeman",
+      "proposition_b_text": "Port Shepstone Magistrate's Court H208/25, judgment 02 Oct 2025: 'absence of proven harm'; 'evidence-related nature' of Liam's communications acknowledged (paras 30-34, 37-38) (p102-104)",
+      "proposition_b_actor": "Port Shepstone Magistrate's Court",
+      "conflict_description": "The judicial record contradicts the exhibit's premise; the exhibit itself is provably fabricated against the sealed original.",
+      "source_document": "standardbank.pdf (Verum Omnis Sealed Master Evidence Bundle)",
+      "source_page": 103,
+      "sha512_anchor": "",
+      "extraction_method": "multi-method: text-layer + OCR + manual verification",
+      "legal_hypothesis": null,
+      "verification_status": {
+        "status": "NEW — not in existing 111-contradiction catalogue",
+        "requires_human_review": "true"
+      }
+    },
+    {
+      "contradiction_id": "VO-SB-010",
+      "type": "ACKNOWLEDGE_THEN_DENY",
+      "severity": "CRITICAL",
+      "confidence": "HIGH",
+      "proposition_a_text": "9 May 2025: Southbridge — claims of $11k diversion, $28k fraudulent demand, Gmail breach 'are actionable'; cites DIFC fraud precedent (p126); 16 May: forwards Liam's case file to Nanzo as his counsel (p140)",
+      "proposition_a_actor": "Southbridge Legal",
+      "proposition_b_text": "19 May: reclassifies as commercial only (p141); 28 Jun: 'has not authorized the use of its name in any capacity' + defamation/fraud threat (p745-746)",
+      "proposition_b_actor": "Southbridge Legal",
+      "conflict_description": "Institutional triple-flip: validated the fraud claims, acted as counsel (forwarded the file), then denied any involvement 'in any capacity' — the 28 June denial is contradicted by their own 16 May conduct.",
+      "source_document": "standardbank.pdf (Verum Omnis Sealed Master Evidence Bundle)",
+      "source_page": 126,
+      "sha512_anchor": "",
+      "extraction_method": "multi-method: text-layer + OCR + manual verification",
+      "legal_hypothesis": null,
+      "verification_status": {
+        "status": "NEW — not in existing 111-contradiction catalogue",
+        "requires_human_review": "true"
+      }
+    },
+    {
+      "contradiction_id": "VO-SB-011",
+      "type": "STATEMENT_VS_EVIDENCE",
+      "severity": "HIGH",
+      "confidence": "HIGH",
+      "proposition_a_text": "9 May 2025: 'DIFC Courts… have jurisdiction over DIFC-registered entities like Greensky Ornamentals'; CFA framed on DIFC Practice Directions (p126)",
+      "proposition_a_actor": "Southbridge Legal",
+      "proposition_b_text": "Greensky Ornamentals FZ-LLC is RAKEZ-registered, Ras Al Khaimah, Licence 1198269 — not DIFC (p1, p822)",
+      "proposition_b_actor": "RAKEZ MOA",
+      "conflict_description": "Foundational jurisdictional premise factually wrong; DIFC framing silently abandoned by 19 May for UAE Commercial Transactions Law with no explanation.",
+      "source_document": "standardbank.pdf (Verum Omnis Sealed Master Evidence Bundle)",
+      "source_page": 126,
+      "sha512_anchor": "",
+      "extraction_method": "multi-method: text-layer + OCR + manual verification",
+      "legal_hypothesis": null,
+      "verification_status": {
+        "status": "NEW — not in existing 111-contradiction catalogue",
+        "requires_human_review": "true"
+      }
+    },
+    {
+      "contradiction_id": "VO-SB-012",
+      "type": "DEFAMATION_THREAT",
+      "severity": "HIGH",
+      "confidence": "HIGH",
+      "proposition_a_text": "Southbridge engaged as Liam's counsel (CFA confirmed 9 May; 'formally instructed and fully briefed' per 6 Sept p827)",
+      "proposition_a_actor": "Southbridge Legal",
+      "proposition_b_text": "28 Jun 2025: 'grounds for legal action, including but not limited to defamation, fraud, and reputational harm… Govern yourself accordingly' (p746)",
+      "proposition_b_actor": "Southbridge Legal",
+      "conflict_description": "Defamation/fraud threat issued by a firm against its own instructing client; feeds IntimidationEscalationBrain stage 1-2.",
+      "source_document": "standardbank.pdf (Verum Omnis Sealed Master Evidence Bundle)",
+      "source_page": 746,
+      "sha512_anchor": "",
+      "extraction_method": "multi-method: text-layer + OCR + manual verification",
+      "legal_hypothesis": null,
+      "verification_status": {
+        "status": "NEW — not in existing 111-contradiction catalogue",
+        "requires_human_review": "true"
+      }
+    },
+    {
+      "contradiction_id": "VO-SB-013",
+      "type": "TEMPORAL_PRECEDENCE_CONFLICT",
+      "severity": "CRITICAL",
+      "confidence": "MODERATE",
+      "proposition_a_text": "16 Jul 2025, Saqib Rizwan (Faimy Amar): C&D 'previously served to your client on 23/04/2025' (p55, p57)",
+      "proposition_a_actor": "Faimy Amar & Co",
+      "proposition_b_text": "Sealed record (25 occurrences incl. p16, p154, p295, p830): C&D letter dated 30 April 2025",
+      "proposition_b_actor": "Faimy Amar & Co",
+      "conflict_description": "A letter dated 30 April cannot have been served 23 April — one date is false; if served 23 April the face date is backdated. VERIFY against C&D PDF metadata + service proof.",
+      "source_document": "standardbank.pdf (Verum Omnis Sealed Master Evidence Bundle)",
+      "source_page": 57,
+      "sha512_anchor": "",
+      "extraction_method": "multi-method: text-layer + OCR + manual verification",
+      "legal_hypothesis": null,
+      "verification_status": {
+        "status": "NEW — not in existing 111-contradiction catalogue",
+        "requires_human_review": "true"
+      }
+    },
+    {
+      "contradiction_id": "VO-SB-014",
+      "type": "ATTORNEY_OBSTRUCTION",
+      "severity": "HIGH",
+      "confidence": "HIGH",
+      "proposition_a_text": "6-8 Sept 2025: Attorney Devika instructed to step down for professional misconduct (p828)",
+      "proposition_a_actor": "Devika G Kurup / Faimy Amar",
+      "proposition_b_text": "'Despite this clear instruction, she continued to act, and subsequently made false statements on record' (p828)",
+      "proposition_b_actor": "Devika G Kurup / Faimy Amar",
+      "conflict_description": "Continued acting after client dismissal + false statements on record; Bar complaint VO-BAR-2025/09 with hash-watermarked evidence.",
+      "source_document": "standardbank.pdf (Verum Omnis Sealed Master Evidence Bundle)",
+      "source_page": 828,
+      "sha512_anchor": "",
+      "extraction_method": "multi-method: text-layer + OCR + manual verification",
+      "legal_hypothesis": null,
+      "verification_status": {
+        "status": "NEW — not in existing 111-contradiction catalogue",
+        "requires_human_review": "true"
+      }
+    },
+    {
+      "contradiction_id": "VO-SB-015",
+      "type": "STATEMENT_VS_STATEMENT",
+      "severity": "HIGH",
+      "confidence": "HIGH",
+      "proposition_a_text": "19 Jun 2025, SB BCB Complaints: 'you will be contacted shortly… Should you not receive any correspondence by next week, kindly let me know so I can follow up' (p74)",
+      "proposition_a_actor": "Standard Bank (Rakash Daya)",
+      "proposition_b_text": "25 Jun: 'I wasnt contacted by anyone' (p79); SB: 'provided you with the resolution feedback' — none exists (p80); 11 Dec: 'she assured me someone would contact me and no one has' (p86)",
+      "proposition_b_actor": "Standard Bank",
+      "conflict_description": "Documented undertaking to contact the client 'by next week' never honoured; 'resolution feedback' claimed but no resolution content exists in the record; 175 days of silence.",
+      "source_document": "standardbank.pdf (Verum Omnis Sealed Master Evidence Bundle)",
+      "source_page": 74,
+      "sha512_anchor": "",
+      "extraction_method": "multi-method: text-layer + OCR + manual verification",
+      "legal_hypothesis": null,
+      "verification_status": {
+        "status": "NEW — not in existing 111-contradiction catalogue",
+        "requires_human_review": "true"
+      }
+    },
+    {
+      "contradiction_id": "VO-SB-016",
+      "type": "INSTITUTIONAL_SILENCE_CASCADE",
+      "severity": "HIGH",
+      "confidence": "HIGH",
+      "proposition_a_text": "13 Jun: complaint 'referred to Client Business Banking Experience department' (p4); 19 Jun: escalated, contact promised (p74); 25 Jun: 'resolution feedback provided' (p80)",
+      "proposition_a_actor": "Standard Bank",
+      "proposition_b_text": "19 Aug: 'apply online or visit a branch' (p83); 25 Aug: 'you will need to visit one of your nearest branch' (p84)",
+      "proposition_b_actor": "Standard Bank",
+      "conflict_description": "Entire complaints/escalation channel looped back to 'walk into a branch' with no decision on the account or the R4m facility — functional refusal without a written refusal.",
+      "source_document": "standardbank.pdf (Verum Omnis Sealed Master Evidence Bundle)",
+      "source_page": 84,
+      "sha512_anchor": "",
+      "extraction_method": "multi-method: text-layer + OCR + manual verification",
+      "legal_hypothesis": null,
+      "verification_status": {
+        "status": "NEW — not in existing 111-contradiction catalogue",
+        "requires_human_review": "true"
+      }
+    },
+    {
+      "contradiction_id": "VO-SB-017",
+      "type": "MANUFACTURED_CONSENT",
+      "severity": "MODERATE",
+      "confidence": "HIGH",
+      "proposition_a_text": "SB auto-closure clause: 'If we do not hear back from you, we will mark your request as resolved' (p75, p89)",
+      "proposition_a_actor": "Standard Bank",
+      "proposition_b_text": "Liam responded repeatedly (p76, p79-82, p85-86) — the silence premise never occurred",
+      "proposition_b_actor": "Liam Highcock",
+      "conflict_description": "Silence-as-resolution mechanism applied to a complainant who never went silent; any auto-closure would be factually false on the bank's own record.",
+      "source_document": "standardbank.pdf (Verum Omnis Sealed Master Evidence Bundle)",
+      "source_page": 75,
+      "sha512_anchor": "",
+      "extraction_method": "multi-method: text-layer + OCR + manual verification",
+      "legal_hypothesis": null,
+      "verification_status": {
+        "status": "NEW — not in existing 111-contradiction catalogue",
+        "requires_human_review": "true"
+      }
+    },
+    {
+      "contradiction_id": "VO-SB-018",
+      "type": "OMISSION",
+      "severity": "MODERATE",
+      "confidence": "MODERATE",
+      "proposition_a_text": "11 Jun 2025: formal R4m loan + business account application; four documented submissions 4/6/9/11 Jun (p6-7); strengthened dossier 25 Jun (p79-80)",
+      "proposition_a_actor": "Standard Bank",
+      "proposition_b_text": "No approval, no decline, no reasons — ever (record through 11 Dec 2025)",
+      "proposition_b_actor": "Standard Bank",
+      "conflict_description": "Credit application never decided. HYPOTHESIS: NCA 24 of 2005 ss.62-64 requires reasons for refusal; indefinite silence is not a statutory outcome — escalate to NFO (reference supplied by the bank itself, p75).",
+      "source_document": "standardbank.pdf (Verum Omnis Sealed Master Evidence Bundle)",
+      "source_page": 7,
+      "sha512_anchor": "",
+      "extraction_method": "multi-method: text-layer + OCR + manual verification",
+      "legal_hypothesis": {
+        "suggested_offence": "Credit-decision silence / unfair credit practice",
+        "legal_basis": "National Credit Act 24 of 2005 ss.62-64; NFO jurisdiction",
+        "jurisdictional_note": "South Africa",
+        "required_additional_evidence": [
+          "Formal decline letter or proof none was issued",
+          "NFO complaint reference"
+        ],
+        "is_hypothesis": true
+      },
+      "verification_status": {
+        "status": "NEW — not in existing 111-contradiction catalogue",
+        "requires_human_review": "true"
+      }
+    },
+    {
+      "contradiction_id": "VO-SB-019",
+      "type": "TECHNOLOGY_REFUSAL_LIABILITY",
+      "severity": "MODERATE",
+      "confidence": "MODERATE",
+      "proposition_a_text": "21 Jun / 21 Jul 2025: Verum Omnis fraud-verification protocol offered to SB for internal trial — certified test document, SHA-512 seals, SAPS + RAKEZ case references (p77-78, p84)",
+      "proposition_a_actor": "Standard Bank",
+      "proposition_b_text": "No evaluation, no reply, no routing to Digital Risk or Innovation",
+      "proposition_b_actor": "Standard Bank",
+      "conflict_description": "Offered fraud-prevention technology never evaluated — matches the engine's own standard_bank config triggers ('offered / failed to evaluate').",
+      "source_document": "standardbank.pdf (Verum Omnis Sealed Master Evidence Bundle)",
+      "source_page": 78,
+      "sha512_anchor": "",
+      "extraction_method": "multi-method: text-layer + OCR + manual verification",
+      "legal_hypothesis": null,
+      "verification_status": {
+        "status": "NEW — not in existing 111-contradiction catalogue",
+        "requires_human_review": "true"
+      }
+    },
+    {
+      "contradiction_id": "VO-SB-020",
+      "type": "PROCESS_REMEDY_CONFLICT",
+      "severity": "HIGH",
+      "confidence": "HIGH",
+      "proposition_a_text": "17 Apr 2025, RAKEZ: MOA 'validating that you are 50% shareholder' — but submit to RAK PP portal because 'our portal360 not providing an option to submit any criminal complaints' (p860)",
+      "proposition_a_actor": "RAKEZ / RAK PP / Dubai Police",
+      "proposition_b_text": "16 Apr: Liam told RAK PP he cannot use the portal without UAE ID (p822); 21 Apr: Dubai Police closed e-crime as 'outside the territorial jurisdiction' (p878); 22 Apr: 'Only RAKEZ has responded once' (p928)",
+      "proposition_b_actor": "RAKEZ / RAK PP / Dubai Police",
+      "conflict_description": "Closed deflection loop: every authority acknowledges and points elsewhere; the designated complaint portal has no criminal-complaint option; no intake channel exists for a non-resident shareholder.",
+      "source_document": "standardbank.pdf (Verum Omnis Sealed Master Evidence Bundle)",
+      "source_page": 860,
+      "sha512_anchor": "",
+      "extraction_method": "multi-method: text-layer + OCR + manual verification",
+      "legal_hypothesis": null,
+      "verification_status": {
+        "status": "NEW — not in existing 111-contradiction catalogue",
+        "requires_human_review": "true"
+      }
+    }
+  ]
+}
