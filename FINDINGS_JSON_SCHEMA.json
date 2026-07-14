@@ -1,0 +1,187 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://verumomnis.org/schemas/findings-json/v1.0.0",
+  "title": "Verum Omnis Findings JSON",
+  "description": "Engine-to-G3 contract. One file per scan. Ordinal confidence only; every record anchored.",
+  "type": "object",
+  "required": [
+    "engine_version",
+    "findings_json_version",
+    "source_bundle",
+    "contradictions"
+  ],
+  "properties": {
+    "engine_version": {
+      "type": "string",
+      "example": "5.3.1c"
+    },
+    "findings_json_version": {
+      "type": "string",
+      "const": "1.0.0"
+    },
+    "generated_utc": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "source_bundle": {
+      "type": "string"
+    },
+    "case_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "supplement_date": {
+      "type": "string"
+    },
+    "new_contradictions": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "re_anchored_known": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "integrity_findings": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "contradictions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/contradictionRecord"
+      }
+    }
+  },
+  "$defs": {
+    "ordinalSeverity": {
+      "enum": [
+        "CRITICAL",
+        "VERY_HIGH",
+        "HIGH",
+        "MODERATE",
+        "LOW",
+        "INSUFFICIENT"
+      ]
+    },
+    "ordinalConfidence": {
+      "enum": [
+        "DETERMINISTIC",
+        "VERY_HIGH",
+        "HIGH",
+        "MODERATE",
+        "LOW",
+        "INSUFFICIENT"
+      ]
+    },
+    "verificationStatus": {
+      "enum": [
+        "ENGINE-VERIFIED",
+        "G3-RAISED CANDIDATE - PENDING VERIFICATION",
+        "CANDIDATE PROMOTED - ENGINE-VERIFIED",
+        "CANDIDATE REJECTED - REASON LOGGED",
+        "NEW - NOT IN EXISTING CATALOGUE",
+        "KNOWN - RE-ANCHORED"
+      ]
+    },
+    "contradictionRecord": {
+      "type": "object",
+      "required": [
+        "contradiction_id",
+        "type",
+        "severity",
+        "confidence",
+        "proposition_a_text",
+        "proposition_b_text",
+        "proposition_a_actor",
+        "proposition_b_actor",
+        "conflict_description",
+        "verification_status"
+      ],
+      "properties": {
+        "contradiction_id": {
+          "type": "string",
+          "pattern": "^[A-Z0-9-]+$"
+        },
+        "type": {
+          "type": "string",
+          "description": "One of the 43 ContradictionType enum values."
+        },
+        "severity": {
+          "$ref": "#/$defs/ordinalSeverity"
+        },
+        "confidence": {
+          "$ref": "#/$defs/ordinalConfidence"
+        },
+        "proposition_a_text": {
+          "type": "string"
+        },
+        "proposition_a_actor": {
+          "type": "string"
+        },
+        "proposition_b_text": {
+          "type": "string"
+        },
+        "proposition_b_actor": {
+          "type": "string"
+        },
+        "conflict_description": {
+          "type": "string"
+        },
+        "source_document": {
+          "type": "string"
+        },
+        "source_page": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "source_line": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "sha512_anchor": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{0,128}$"
+        },
+        "temporal_analysis": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "detected_fact": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "logical_pattern": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "legal_hypothesis": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "verification_status": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/verificationStatus"
+            },
+            {
+              "type": "object"
+            }
+          ]
+        }
+      },
+      "additionalProperties": true
+    }
+  }
+}
