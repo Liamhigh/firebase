@@ -43,8 +43,8 @@ function isOpposing(a: Claim, b: Claim): boolean {
     ["never", "always"], ["did not", "did"], ["does not", "does"],
   ];
   for (const [neg] of negations) {
-    if (neg in textA && !(neg in textB) && a.subject === b.subject) return true;
-    if (neg in textB && !(neg in textA) && a.subject === b.subject) return true;
+    if (textA.includes(neg) && !textB.includes(neg) && a.subject === b.subject) return true;
+    if (textB.includes(neg) && !textA.includes(neg) && a.subject === b.subject) return true;
   }
   const wordsA = new Set(textA.split(/\s+/));
   const wordsB = new Set(textB.split(/\s+/));
@@ -157,7 +157,7 @@ function detectStatementVsStatement(claims: Claim[]): Contradiction[] {
         const [isSem, semScore] = detectSemanticContradiction(a, b);
         if (isSem || (a.subject === b.subject && a.predicate === b.predicate && a.value !== b.value)) {
           results.push(createThreeLayerContradiction(
-            a, b, ContradictionType.STATEMENT_VS_STATEMENT, severityScore(a, b, ifV(isSem, (semScore * 30).toInt(), 20)),
+            a, b, ContradictionType.STATEMENT_VS_STATEMENT, ifV(isSem, Severity.HIGH, Severity.MODERATE),
             ifV(isSem, Confidence.HIGH, Confidence.MODERATE),
             "SAME_ACTOR_OPPOSING_CLAIMS",
             `Same actor "${a.actor}" made contradictory statements on the same subject`,
@@ -413,9 +413,7 @@ function detectFalseAllegationInAffidavit(claims: Claim[]): Contradiction[] {
     c.sourceType === StatementType.JUDICIAL_RECORD
   );
   const contemporaneous = claims.filter((c) =>
-    c.sourceType === StatementType.CONTEMPORANEOUS ||
-    c.sourceType === EngineStatementType.EMAIL ||
-    c.sourceType === EngineStatementType.CHAT_LOG
+    c.sourceType === StatementType.CONTEMPORANEOUS
   );
   for (const s of swornAllegations) {
     for (const e of contemporaneous) {
@@ -439,20 +437,22 @@ function detectTemporalPrecedenceConflict(claims: Claim[]): Contradiction[] {
   const afterMarkers = ["after", "subsequent to", "followed by", "later than", "then"];
   for (let i = 0; i < claims.length; i++) {
     for (let j = i + 1; j < claims.length; j++) {
-      const a = claims[i]; val b = claims[j];
+      const a = claims[i];
+      const b = claims[j];
       if (a.actor === b.actor && a.date !== null && b.date !== null) {
-        val lowerA = a.value.lowercase(); val lowerB = b.value.lowercase();
-        val aClaimsBefore = beforeMarkers.any { lowerA.contains(it) };
-        val bClaimsAfter = afterMarkers.any { lowerB.contains(it) };
-        val aClaimsAfter = afterMarkers.any { lowerA.contains(it) };
-        val bClaimsBefore = beforeMarkers.any { lowerB.contains(it) };
+        const lowerA = a.value.toLowerCase();
+        const lowerB = b.value.toLowerCase();
+        const aClaimsBefore = beforeMarkers.some((m) => lowerA.includes(m));
+        const bClaimsAfter = afterMarkers.some((m) => lowerB.includes(m));
+        const aClaimsAfter = afterMarkers.some((m) => lowerA.includes(m));
+        const bClaimsBefore = beforeMarkers.some((m) => lowerB.includes(m));
         if ((aClaimsBefore && bClaimsBefore && a.date > b.date) || (aClaimsAfter && bClaimsAfter && a.date < b.date)) {
-          results += createThreeLayerContradiction(
+          results.push(createThreeLayerContradiction(
             a, b, ContradictionType.TEMPORAL_PRECEDENCE_CONFLICT, Severity.HIGH, Confidence.HIGH,
             "TEMPORAL_PRECEDENCE_CONFLICT",
             "Event A documented before Event B, but later document claims B before A",
-            listOf(a.value, b.value, "Date A: ${a.date}, Date B: ${b.date}"), 0.85
-          );
+            [a.value, b.value, `Date A: ${a.date}, Date B: ${b.date}`], 0.85,
+          ));
         }
       }
     }
@@ -490,8 +490,8 @@ function detectCharacterAssassination(claims: Claim[]): Contradiction[] {
   );
   const personalMarkers = ["character", "reputation", "dishonest", "untrustworthy", "unreliable", "mental health", "emotional", "drinking", "personal life", "family"];
   for (const c of swornClaims) {
-    val lower = c.value.toLowerCase();
-    if (personalMarkers.some((m) => lower.contains(m)) && !lower.contains("relevant") && !lower.contains("material")) {
+    const lower = c.value.toLowerCase();
+    if (personalMarkers.some((m) => lower.includes(m)) && !lower.includes("relevant") && !lower.includes("material")) {
       results.push(createThreeLayerContradiction(
         c, c, ContradictionType.CHARACTER_ASSASSINATION, Severity.HIGH, Confidence.HIGH,
         "CHARACTER_ASSASSINATION_IN_SWORN_TESTIMONY",
@@ -537,7 +537,7 @@ export function detectAll(claims: Claim[]): Contradiction[] {
   const seen = new Set<string>();
   const unique: Contradiction[] = [];
   for (const c of all) {
-    val key = "${c.propositionAActor}:${c.propositionBActor}:${c.type}:${c.logicalPattern.patternType}";
+    const key = `${c.propositionAActor}:${c.propositionBActor}:${c.type}:${c.logicalPattern.patternType}`;
     if (!seen.has(key)) {
       seen.add(key);
       unique.push(c);
