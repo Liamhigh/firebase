@@ -148,15 +148,15 @@ describe("VO-DSS-1.2 document sealing round-trip", () => {
     const v2 = await verifySealedDocument(result.sealedPdf);
     assert.equal(v2.verdict, "SEAL_FOUND");
 
-    // Tamper: flip bytes in the middle of the file → hash mismatch on expected value.
-    const tampered = Uint8Array.from(result.sealedPdf);
-    tampered[Math.floor(tampered.length / 2)] ^= 0xff;
-    const v3 = await verifySealedDocument(tampered, result.sha512);
-    // If the subject still parses, the embedded hash no longer matches the recomputed file hash.
-    // (Verifier compares embedded seal vs supplied expected hash — here we simulate a QR scan
-    //  of the ORIGINAL hash against a MODIFIED file whose embedded seal we expect to differ.)
-    assert.ok(v3.verdict === "TAMPERED" || v3.verdict === "VERIFIED" || v3.verdict === "NO_SEAL");
-    if (v3.verdict === "TAMPERED") assert.ok(v3.reason.includes("altered"));
+    // Tamper: a DIFFERENT file whose embedded seal does not match this QR hash.
+    const other = await sealDocument(await makeSimplePdf(1), {
+      timestampMs: FIXED_TS,
+      sealType: "private",
+      anchorToBlockchain: false,
+    });
+    const v3 = await verifySealedDocument(other.sealedPdf, result.sha512.substring(0, 32));
+    assert.equal(v3.verdict, "TAMPERED");
+    assert.ok(v3.reason.includes("altered"));
   });
 
   it("preserves the seal chain when re-sealing (v1.2)", async () => {
@@ -204,11 +204,12 @@ describe("VO-DSS-1.2 document sealing round-trip", () => {
     assert.equal(v.isEncrypted, false);
   });
 
-  it("reports NO_SEAL for an unsealed PDF", async () => {
+  it("reports NO_SEAL for an unsealed PDF, with the recomputed fingerprint (verify.html parity)", async () => {
     const plain = await makeSimplePdf(1);
     const v = await verifySealedDocument(plain);
     assert.equal(v.verdict, "NO_SEAL");
     assert.equal(v.seal, null);
+    assert.equal(v.computedSha512, sha512Hex(plain));
   });
 });
 

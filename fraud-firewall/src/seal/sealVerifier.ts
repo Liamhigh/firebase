@@ -4,6 +4,7 @@
 // (e.g. from a scanned QR code) when supplied.
 
 import { PDFDocument } from "pdf-lib";
+import { sha512Hex } from "./sealHasher.js";
 import { parseSealSubject, SEAL_KEYWORDS_PREFIX, type ParsedSealSubject } from "./sealChain.js";
 
 export type VerificationVerdict =
@@ -18,6 +19,8 @@ export interface SealVerification {
   metadataSource: "PDF Subject metadata" | "PDF content scan" | null;
   isEncrypted: boolean;
   expectedHash: string | null;
+  /** SHA-512 recomputed over the uploaded bytes — shown on NO_SEAL, matching verify.html. */
+  computedSha512: string | null;
   reason: string;
 }
 
@@ -34,7 +37,7 @@ function scanRawBytes(pdfBytes: Uint8Array): ParsedSealSubject | null {
 
 /**
  * Verify a (possibly sealed) PDF.
- * @param expectedHash  Optional SHA-512 (full or prefix, e.g. the 32-hex QR value).
+ * @param expectedHash  Optional SHA-512 (full or prefix, e.g. from a scanned QR code).
  */
 export async function verifySealedDocument(
   pdfBytes: Uint8Array,
@@ -84,6 +87,7 @@ export async function verifySealedDocument(
       metadataSource,
       isEncrypted,
       expectedHash: expected,
+      computedSha512: null,
       reason: match
         ? "The SHA-512 fingerprint embedded in this document matches the expected hash. The document has NOT been tampered with since it was sealed."
         : "The SHA-512 fingerprint does NOT match the expected hash. This document has been altered or corrupted since it was sealed — do not accept it.",
@@ -97,6 +101,7 @@ export async function verifySealedDocument(
       metadataSource,
       isEncrypted,
       expectedHash: expected,
+      computedSha512: null,
       reason:
         "A Verum Omnis seal was found embedded in this document. Compare the Seal ID and SHA-512 prefix with the footer printed on every page to confirm authenticity.",
     };
@@ -108,7 +113,10 @@ export async function verifySealedDocument(
     metadataSource: null,
     isEncrypted,
     expectedHash: expected,
+    // verify.html parity: show the recomputed fingerprint so the user can
+    // compare it with the footer/QR of the document they expected.
+    computedSha512: sha512Hex(pdfBytes),
     reason:
-      "No Verum Omnis seal metadata was detected. The document was not sealed by the Verum Omnis system, or the seal metadata was stripped in transit.",
+      "No Verum Omnis seal metadata was detected. The document was not sealed by the Verum Omnis system, or the seal metadata was stripped in transit. Compare the recomputed SHA-512 of this file with the Seal ID on your document.",
   };
 }
