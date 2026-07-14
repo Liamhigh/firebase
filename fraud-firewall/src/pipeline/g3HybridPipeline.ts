@@ -161,7 +161,7 @@ export class G3CandidateRegistry {
     const record = this.candidates.get(candidateId);
     if (!record) throw new Error(`Unknown candidate ${candidateId}`);
     record.verification_status = STATUS_CANDIDATE_PROMOTED;
-    (record as Record<string, unknown>).promotion_method = method;
+    (record as unknown as Record<string, unknown>).promotion_method = method;
     this.audit.push({ action: "PROMOTED", candidateId, detail: method, utc: new Date(0).toISOString() });
     return record;
   }
@@ -174,7 +174,7 @@ export class G3CandidateRegistry {
     const record = this.candidates.get(candidateId);
     if (!record) throw new Error(`Unknown candidate ${candidateId}`);
     record.verification_status = STATUS_CANDIDATE_REJECTED;
-    (record as Record<string, unknown>).rejection_reason = reason;
+    (record as unknown as Record<string, unknown>).rejection_reason = reason;
     this.audit.push({ action: "REJECTED", candidateId, detail: reason, utc: new Date(0).toISOString() });
     return record;
   }
@@ -200,7 +200,7 @@ export class G3CandidateRegistry {
     const record = this.candidates.get(candidateId);
     if (!record) throw new Error(`Unknown candidate ${candidateId}`);
     record.verification_status = STATUS_JUDICIALLY_CONFIRMED;
-    (record as Record<string, unknown>).judicial_confirmation = {
+    (record as unknown as Record<string, unknown>).judicial_confirmation = {
       judgment_ref: judgmentRef.trim(),
       court,
       case_number: caseNumber,
@@ -226,7 +226,7 @@ export class G3CandidateRegistry {
   }
 
   auditTrail(): CandidateAuditEntry[] {
-    return [...this.audit];
+    return [...thisthis.audit];
   }
 
   /**
