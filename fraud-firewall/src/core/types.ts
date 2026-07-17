@@ -53,10 +53,16 @@ export const SealRecordSchema = z.object({
   blockchain: z
     .object({
       provider: z.literal("OpenTimestamps"),
-      status: z.enum(["SUBMITTED", "PENDING", "CONFIRMED", "MOCK"]),
+      status: z.enum(["PENDING", "PENDING_OFFLINE", "CONFIRMED"]),
+      /** Present only after a real Bitcoin confirmation is observed — never fabricated. */
       block_height: z.number().optional(),
       confirmations: z.number().optional(),
+      /** SHA-256 hex digest submitted to the OpenTimestamps calendars. */
+      ots_digest: z.string().optional(),
+      /** Base64 calendar attestation (upgradeable to a full .ots proof). */
       ots_receipt: z.string().optional(),
+      /** Operator-facing honest note about the anchor status. */
+      ots_note: z.string().optional(),
     })
     .optional(),
 });
