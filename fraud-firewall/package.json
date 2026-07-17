@@ -13,7 +13,7 @@
     "dev": "tsx watch src/cli.ts serve",
     "start": "node dist/cli.js serve",
     "demo": "tsx src/cli.ts demo",
-    "test": "tsx --test tests/**/*.test.ts",
+    "test": "tsx --test tests/*.test.ts",
     "lint": "tsc -p tsconfig.json --noEmit"
   },
   "engines": {
