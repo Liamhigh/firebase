@@ -403,7 +403,7 @@ function isHeading(line: string): boolean {
  */
 function pdfSafe(input: string): string {
   return input
-    .replace(/[‘‚′]/g, "'")
+    .replace(/[‘’‚′]/g, "'")
     .replace(/[“”„″]/g, '"')
     .replace(/[–—―]/g, "-")
     .replace(/[•⁃·]/g, "-")
