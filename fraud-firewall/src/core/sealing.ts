@@ -2,9 +2,9 @@ import { PDFDocument, PDFPage, StandardFonts, rgb } from "pdf-lib";
 import {
   makeSealId,
   sha512,
-  shortCode,
   stableStringify,
 } from "./crypto.js";
+import { resolveOtsSubmitter, type OtsSubmitter } from "./ots.js";
 import {
   constitutionRuleset,
   loadConstitution,
@@ -13,7 +13,8 @@ import {
 import type { FirewallConfig, SealRecord } from "./types.js";
 import { SealCreditLedgerService } from "./sealCredits.js";
 import { sealedPath, writeJson } from "../storage/vault.js";
-import { writeFileSync } from "node:fs";
+import { writeFileSync, mkdirSync } from "node:fs";
+import { dirname } from "node:path";
 
 /** Cover-page metadata for court-ready forensic reports (Greensky standard). */
 export interface SealReportMeta {
@@ -49,16 +50,26 @@ export interface SealResult {
 
 /**
  * Built-in document sealing service.
- * SHA-512 + OpenTimestamps-style blockchain metadata + PDF seal footer.
+ * SHA-512 + real OpenTimestamps calendar submission + PDF seal footer.
  * Consumes one seal credit per successful seal.
+ *
+ * Anchor honesty: the seal record is PENDING once a calendar accepts the
+ * digest, or PENDING_OFFLINE when no calendar is reachable. Block heights
+ * and confirmation counts are only ever recorded from real Bitcoin
+ * confirmations — they are never fabricated.
  */
 export class DocumentSealingService {
   private readonly constitution: Constitution;
   private readonly credits: SealCreditLedgerService;
+  private readonly submitOts: OtsSubmitter;
 
-  constructor(private readonly config: FirewallConfig) {
+  constructor(
+    private readonly config: FirewallConfig,
+    otsSubmitter?: OtsSubmitter,
+  ) {
     this.constitution = loadConstitution(config.constitution_version);
     this.credits = new SealCreditLedgerService(config);
+    this.submitOts = resolveOtsSubmitter(otsSubmitter);
   }
 
   async seal(input: SealInput): Promise<SealResult> {
@@ -93,6 +104,10 @@ export class DocumentSealingService {
 
     // Re-hash final PDF bytes for the seal record (court-admissible fingerprint)
     const pdfHash = sha512(Buffer.from(pdfBytes));
+    // Real OpenTimestamps submission: SHA-256 over the SHA-512 hex fingerprint.
+    // PENDING once a calendar accepts it; PENDING_OFFLINE when unreachable.
+    // No block height is recorded until a real Bitcoin confirmation exists.
+    const ots = await this.submitOts(pdfHash);
     const seal: SealRecord = {
       seal_id: sealId,
       sha512: pdfHash,
@@ -101,10 +116,10 @@ export class DocumentSealingService {
       document_reference: input.documentReference,
       blockchain: {
         provider: "OpenTimestamps",
-        status: "MOCK",
-        block_height: mockBlockHeight(pdfHash),
-        confirmations: 6,
-        ots_receipt: `ots-mock-${shortCode(pdfHash, 16)}`,
+        status: ots.status,
+        ots_digest: ots.digest,
+        ots_receipt: ots.attestations[0]?.receipt_b64,
+        ots_note: ots.note,
       },
     };
 
@@ -115,9 +130,12 @@ export class DocumentSealingService {
       aiVerifier: "Gemma3",
     });
 
-    writeFileSync(sealedPath(this.config, sealId), pdfBytes);
+    const pdfPath = sealedPath(this.config, sealId);
+    // Standalone use (no ensureVault) must still be able to persist.
+    mkdirSync(dirname(pdfPath), { recursive: true });
+    writeFileSync(pdfPath, pdfBytes);
     writeJson(
-      sealedPath(this.config, sealId).replace(/\.pdf$/, ".json"),
+      pdfPath.replace(/\.pdf$/, ".json"),
       { seal, constitution: ruleset },
     );
 
@@ -385,12 +403,12 @@ function isHeading(line: string): boolean {
  */
 function pdfSafe(input: string): string {
   return input
-    .replace(/[\u2018\u2019\u201A\u2032]/g, "'")
-    .replace(/[\u201C\u201D\u201E\u2033]/g, '"')
-    .replace(/[\u2013\u2014\u2015]/g, "-")
-    .replace(/[\u2022\u2043\u00b7]/g, "-")
-    .replace(/\u2026/g, "...")
-    .replace(/[\u2713\u2714\u2717\u2718]/g, "")
+    .replace(/[‘‚′]/g, "'")
+    .replace(/[“”„″]/g, '"')
+    .replace(/[–—―]/g, "-")
+    .replace(/[•⁃·]/g, "-")
+    .replace(/…/g, "...")
+    .replace(/[✓✔✗✘]/g, "")
     .replace(/\t/g, "  ")
     .replace(/[^\x0A\x0D\x20-\x7E]/g, "");
 }
@@ -410,10 +428,4 @@ function wrapText(text: string, width: number): string[] {
   }
   if (current) lines.push(current);
   return lines;
-}
-
-function mockBlockHeight(hash: string): number {
-  // Deterministic mock height from hash for offline demos
-  const n = parseInt(hash.slice(0, 8), 16);
-  return 800000 + (n % 200000);
 }
