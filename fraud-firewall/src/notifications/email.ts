@@ -18,6 +18,25 @@ export interface OutboundEmail {
 }
 
 /**
+ * Honest anchor wording: a seal is only ever "confirmed" once a real
+ * Bitcoin block height exists. Pending seals are described as submitted
+ * for anchoring — never as already anchored.
+ */
+function anchorStatus(blockchain: SealRecord["blockchain"]): string {
+  if (!blockchain) return "not submitted";
+  if (typeof blockchain.block_height === "number") {
+    return `confirmed at Bitcoin block ${blockchain.block_height}`;
+  }
+  if (blockchain.status === "PENDING") {
+    return "submitted for anchoring (OpenTimestamps, pending)";
+  }
+  if (blockchain.status === "PENDING_OFFLINE") {
+    return "pending submission to OpenTimestamps (offline)";
+  }
+  return "pending";
+}
+
+/**
  * Notification system with CODE-enforced privacy:
  * Verum emails physically cannot attach evidence files.
  */
@@ -35,7 +54,7 @@ export class NotificationService {
       `Fraud Amount:    ${invoice.currency} ${invoice.fraud_amount}`,
       `Verum Omnis 20%: ${invoice.currency} ${invoice.commission_amount}`,
       `Seal ID:         ${invoice.seal_id}`,
-      `Blockchain:      Block ${invoice.blockchain_block ?? "pending"}`,
+      `Bitcoin Anchor:  ${invoice.blockchain_block ? `confirmed at block ${invoice.blockchain_block}` : "submitted for anchoring (pending)"}`,
       `Date Detected:   ${invoice.generated_at}`,
       "",
       `PAYMENT DUE: ${invoice.currency} ${invoice.commission_amount}`,
@@ -74,12 +93,12 @@ export class NotificationService {
       `Case Reference:  ${alert.case_reference}`,
       `Fraud Amount:    ${alert.currency} ${alert.fraud_amount}`,
       `Seal ID:         ${seal.seal_id}`,
-      `Blockchain:      Block ${seal.blockchain?.block_height ?? "pending"}`,
+      `Bitcoin Anchor:  ${anchorStatus(seal.blockchain)}`,
       "Status:          VERIFIED",
       "",
       `ATTACHED: Sealed forensic evidence report (${sealedPdfPath})`,
       "- SHA-512 verified",
-      "- Bitcoin blockchain anchored",
+      `- Bitcoin anchor: ${anchorStatus(seal.blockchain)}`,
       "- Court-admissible under Daubert Standard",
       "",
       "ACTION REQUIRED:",
