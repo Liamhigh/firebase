@@ -36,7 +36,12 @@ describe("privacy hard rules", () => {
       constitution_version: "5.2.7",
       created_at: "2026-07-06T14:35:00Z",
       document_reference: "VO-FW-CASE-2026-0001",
-      blockchain: { provider: "OpenTimestamps", status: "MOCK", block_height: 892345 },
+      blockchain: {
+        provider: "OpenTimestamps",
+        status: "PENDING",
+        ots_digest: "b".repeat(64),
+        ots_note: "submitted for anchoring (OpenTimestamps, pending)",
+      },
     };
     const invoice = generateCommissionInvoice({
       config,
