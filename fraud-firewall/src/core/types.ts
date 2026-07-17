@@ -214,6 +214,13 @@ export interface FirewallConfig {
   server: {
     host: string;
     port: number;
+    /**
+     * Origins allowed to call the API cross-origin (CORS).
+     * "*" allows any origin (demo/development). Omit or use an empty
+     * list for same-origin only — no CORS headers are emitted.
+     * Production deployments should pin exact origins.
+     */
+    cors_allowed_origins?: string[];
   };
 }
 
