@@ -85,8 +85,8 @@ const OPPOSITES: [string, string][] = [
 /** Detect negation between two text strings */
 export function negationScore(textA: string, textB: string): number {
   let score = 0.0;
-  const aHasNeg = NEGATORS.some((n) => textA.includes(n));
-  const bHasNeg = NEGATORS.some((n) => textB.includes(n));
+  const aHasNeg = [...NEGATORS].some((n) => textA.includes(n));
+  const bHasNeg = [...NEGATORS].some((n) => textB.includes(n));
   if (aHasNeg !== bHasNeg) score += 0.4;
 
   for (const [pos, neg] of OPPOSITES) {
