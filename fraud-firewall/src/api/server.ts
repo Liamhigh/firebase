@@ -45,6 +45,40 @@ function notFound(res: ServerResponse): void {
   sendJson(res, 404, { error: "Not found" });
 }
 
+/**
+ * Resolve the request's Origin against the configured CORS allow-list.
+ * Returns the origin value to reflect, or null when the request is not
+ * cross-origin or the origin is not allowed.
+ */
+function corsOriginFor(req: IncomingMessage, allowed: string[]): string | null {
+  const origin = req.headers.origin;
+  if (!origin) return null;
+  if (allowed.includes("*")) return "*";
+  return allowed.includes(origin) ? origin : null;
+}
+
+/**
+ * Attach CORS response headers for an allowed origin.
+ * Must be called before writeHead; setHeader values merge into writeHead.
+ */
+function applyCorsHeaders(
+  req: IncomingMessage,
+  res: ServerResponse,
+  origin: string,
+): void {
+  res.setHeader("Access-Control-Allow-Origin", origin);
+  res.setHeader("Vary", "Origin");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  const requested = req.headers["access-control-request-headers"];
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    typeof requested === "string" && requested.length > 0
+      ? requested
+      : "Content-Type, Authorization",
+  );
+  res.setHeader("Access-Control-Max-Age", "86400");
+}
+
 function safeWebPath(urlPath: string): string | null {
   const cleaned = decodeURIComponent(urlPath.split("?")[0] || "/");
   const relative = cleaned === "/" ? "index.html" : cleaned.replace(/^\//, "");
@@ -83,6 +117,20 @@ export function startServer(firewall: FraudFirewall): {
     try {
       const url = new URL(req.url ?? "/", `http://${req.headers.host ?? "localhost"}`);
       const method = req.method ?? "GET";
+
+      // CORS: reflect allowed origins on every response; answer preflight.
+      const allowedOrigins = config.server.cors_allowed_origins ?? [];
+      const corsOrigin = corsOriginFor(req, allowedOrigins);
+      if (corsOrigin) applyCorsHeaders(req, res, corsOrigin);
+
+      if (method === "OPTIONS") {
+        // Preflight from a disallowed origin is rejected outright.
+        if (req.headers.origin && !corsOrigin) {
+          return sendJson(res, 403, { error: "Origin not allowed by CORS policy" });
+        }
+        res.writeHead(204);
+        return res.end();
+      }
 
       if (method === "GET" && url.pathname === "/health") {
         return sendJson(res, 200, {
