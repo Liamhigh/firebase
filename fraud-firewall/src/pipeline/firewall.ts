@@ -11,6 +11,12 @@ import {
   makeCaseReference,
 } from "../core/crypto.js";
 import { RuleEngine } from "./rules.js";
+import {
+  checkForRuleUpdate,
+  loadCachedRules,
+  rulesCachePath,
+  type RuleManifestFetcher,
+} from "../core/ruleUpdate.js";
 import { Gemma3Forensics, Gemma4Monitor, Phi3Legal } from "../ai/models.js";
 import { TripleAiConsensus } from "../ai/consensus.js";
 import { MistralAgentPool } from "../agents/mistral.js";
@@ -38,6 +44,22 @@ export interface MonitorResult {
   message: string;
 }
 
+/** Optional wiring for the signed rule-update client (core/ruleUpdate.ts). */
+export interface FraudFirewallOptions {
+  /** Manifest URL override (defaults to $VO_RULE_MANIFEST_URL or the live worker). */
+  ruleManifestUrl?: string;
+  /** Injectable manifest fetcher — tests never touch the network. */
+  ruleFetcher?: RuleManifestFetcher;
+  /** Set false to disable the background refresh (default: enabled). */
+  autoUpdateRules?: boolean;
+  /** Fetch timeout in ms (default 10s). */
+  ruleUpdateTimeoutMs?: number;
+  /** Pinned-key override — tests pin their own generated RSA-4096 key. */
+  rulePublicKeyDerB64?: string;
+  /** Quiet logger for rule-update notes. Defaults to single-line console.warn. */
+  log?: (message: string) => void;
+}
+
 export class FraudFirewall {
   private readonly rules: RuleEngine;
   private readonly gemma4: Gemma4Monitor;
@@ -53,9 +75,21 @@ export class FraudFirewall {
   private alertSeq = 0;
   private caseSeq = 0;
 
-  constructor(private readonly config: FirewallConfig) {
+  constructor(
+    private readonly config: FirewallConfig,
+    options: FraudFirewallOptions = {},
+  ) {
     ensureVault(config);
     this.rules = new RuleEngine(config);
+    // Signed rule updates: start from the last signature-verified cache
+    // (offline-safe), then refresh in the background. Neither path ever
+    // blocks or throws — unverified/stale packages are never applied.
+    const cachePath = rulesCachePath(config.storage.vault_dir);
+    const cached = loadCachedRules(cachePath, options.rulePublicKeyDerB64);
+    if (cached) this.rules.updateRules(cached.package);
+    if (options.autoUpdateRules !== false) {
+      void this.refreshRulesInBackground(cachePath, options);
+    }
     this.gemma4 = new Gemma4Monitor();
     this.gemma3 = new Gemma3Forensics();
     this.phi3 = new Phi3Legal();
@@ -83,6 +117,49 @@ export class FraudFirewall {
 
   getConfig(): FirewallConfig {
     return this.config;
+  }
+
+  /** Version of the downloaded fraud rules currently in force, if any. */
+  getRulesVersion(): string | null {
+    return this.rules.downloadedRulesVersion;
+  }
+
+  /**
+   * Fire-and-forget rule refresh: fetch → verify → accept-if-newer → cache,
+   * then hot-swap the RuleEngine's downloaded rules. Never throws; failures
+   * are logged quietly and the previous rules (or none) keep running.
+   */
+  private async refreshRulesInBackground(
+    cachePath: string,
+    options: FraudFirewallOptions,
+  ): Promise<void> {
+    const log =
+      options.log ??
+      ((message: string) => console.warn(`[fraud-firewall] ${message}`));
+    try {
+      const result = await checkForRuleUpdate({
+        cachePath,
+        manifestUrl: options.ruleManifestUrl,
+        fetcher: options.ruleFetcher,
+        timeoutMs: options.ruleUpdateTimeoutMs,
+        publicKeyDerB64: options.rulePublicKeyDerB64,
+        log,
+      });
+      if (result.kind === "updated") {
+        this.rules.updateRules(result.package);
+        log(
+          `[rule-update] rules updated to v${result.version}` +
+            (result.previousVersion ? ` (was v${result.previousVersion})` : ""),
+        );
+      } else if (result.kind === "current" || result.kind === "cached") {
+        this.rules.updateRules(result.package);
+      }
+      // "none": no verified package anywhere — engine runs bank rules only.
+    } catch (err) {
+      log(
+        `[rule-update] background refresh failed: ${err instanceof Error ? err.message : String(err)}`,
+      );
+    }
   }
 
   getCredits() {
