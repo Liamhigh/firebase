@@ -7,9 +7,35 @@ export { DocumentSealingService } from "./core/sealing.js";
 export { generateCommissionInvoice, assertInvoicePrivacy } from "./core/commission.js";
 export { NotificationService } from "./notifications/email.js";
 export { RuleEngine } from "./pipeline/rules.js";
+export {
+  checkForRuleUpdate,
+  loadCachedRules,
+  rulesCachePath,
+  canonicalJson,
+  compareSemver,
+  isSemver,
+  parseManifest,
+  verifyRulePackageSignature,
+  defaultRuleManifestFetcher,
+  DEFAULT_RULE_MANIFEST_URL,
+  RULE_MANIFEST_URL_ENV,
+  RULES_ALGORITHM,
+  RULES_PUBLIC_KEY_ID,
+  VO_RULES_PUBLIC_KEY_DER_B64,
+} from "./core/ruleUpdate.js";
+export type {
+  CachedRules,
+  RuleManifest,
+  RuleManifestFetcher,
+  RulePackage,
+  RuleSet,
+  RuleUpdateOptions,
+  RuleUpdateOutcome,
+} from "./core/ruleUpdate.js";
 export { TripleAiConsensus } from "./ai/consensus.js";
 export { MistralAgentPool } from "./agents/mistral.js";
 export { FraudFirewall, demoTransactions } from "./pipeline/firewall.js";
+export type { FraudFirewallOptions, MonitorResult } from "./pipeline/firewall.js";
 export { startServer } from "./api/server.js";
 
 // CONTRADICTION ENGINE v5.2.9 — Full forensic contradiction detection
