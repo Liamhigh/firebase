@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 import type { FraudFirewall } from "../pipeline/firewall.js";
 import { TransactionSchema } from "../core/types.js";
 import { findingsPath, readJson } from "../storage/vault.js";
+import { exportFindings } from "./export.js";
 import { z } from "zod";
 
 const WEB_ROOT = resolve(
@@ -286,6 +287,29 @@ export function startServer(firewall: FraudFirewall): {
           "Content-Disposition": `attachment; filename="${sealId}.pdf"`,
         });
         return res.end(bytes);
+      }
+
+      if (method === "GET" && url.pathname === "/v1/export/findings") {
+        const start = url.searchParams.get("start_date");
+        const end = url.searchParams.get("end_date");
+        if (!start || !end) {
+          return sendJson(res, 400, {
+            error: "start_date and end_date required (ISO 8601 format)",
+          });
+        }
+        try {
+          const result = await exportFindings(config, {
+            start_date: start,
+            end_date: end,
+            jurisdiction: url.searchParams.get("jurisdiction") ?? undefined,
+            institution: url.searchParams.get("institution") ?? undefined,
+          });
+          return sendJson(res, 200, result);
+        } catch (err) {
+          return sendJson(res, 400, {
+            error: err instanceof Error ? err.message : String(err),
+          });
+        }
       }
 
       if (method === "GET") {
