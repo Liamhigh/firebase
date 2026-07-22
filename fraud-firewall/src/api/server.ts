@@ -6,6 +6,7 @@ import type { FraudFirewall } from "../pipeline/firewall.js";
 import { TransactionSchema } from "../core/types.js";
 import { findingsPath, readJson } from "../storage/vault.js";
 import { exportFindings } from "./export.js";
+import { AdminService } from "./admin.js";
 import { z } from "zod";
 
 const WEB_ROOT = resolve(
@@ -310,6 +311,84 @@ export function startServer(firewall: FraudFirewall): {
             error: err instanceof Error ? err.message : String(err),
           });
         }
+      }
+
+      // Admin API (MVP: simple key-based auth)
+      if (url.pathname.startsWith("/api/v1/admin/")) {
+        const adminKey = req.headers["x-admin-key"];
+        if (adminKey !== "demo-admin-key-12345") {
+          return sendJson(res, 403, { error: "Unauthorized" });
+        }
+
+        const admin = new AdminService(config);
+
+        if (method === "GET" && url.pathname === "/api/v1/admin/quarterly-report") {
+          const start = url.searchParams.get("start_date");
+          const end = url.searchParams.get("end_date");
+          if (!start || !end) {
+            return sendJson(res, 400, {
+              error: "start_date and end_date required",
+            });
+          }
+          try {
+            const report = admin.generateQuarterlyReport(
+              new Date(start),
+              new Date(end)
+            );
+            return sendJson(res, 200, report);
+          } catch (err) {
+            return sendJson(res, 400, {
+              error: err instanceof Error ? err.message : String(err),
+            });
+          }
+        }
+
+        if (method === "GET" && url.pathname === "/api/v1/admin/detector-trends") {
+          const detector = url.searchParams.get("detector") || "AMOUNT_ANOMALY";
+          const weeks = parseInt(url.searchParams.get("weeks") || "12", 10);
+          try {
+            const trends = admin.getDetectorTrends(detector, weeks);
+            return sendJson(res, 200, { detector, trends });
+          } catch (err) {
+            return sendJson(res, 400, {
+              error: err instanceof Error ? err.message : String(err),
+            });
+          }
+        }
+
+        if (method === "GET" && url.pathname === "/api/v1/admin/false-positive-analysis") {
+          try {
+            const analysis = admin.getFalsePositiveAnalysis();
+            return sendJson(res, 200, analysis);
+          } catch (err) {
+            return sendJson(res, 400, {
+              error: err instanceof Error ? err.message : String(err),
+            });
+          }
+        }
+
+        if (method === "GET" && url.pathname === "/api/v1/admin/fraud-by-jurisdiction") {
+          const start = url.searchParams.get("start_date");
+          const end = url.searchParams.get("end_date");
+          if (!start || !end) {
+            return sendJson(res, 400, {
+              error: "start_date and end_date required",
+            });
+          }
+          try {
+            const analysis = admin.getFraudByJurisdiction(
+              new Date(start),
+              new Date(end)
+            );
+            return sendJson(res, 200, analysis);
+          } catch (err) {
+            return sendJson(res, 400, {
+              error: err instanceof Error ? err.message : String(err),
+            });
+          }
+        }
+
+        return notFound(res);
       }
 
       if (method === "GET") {
