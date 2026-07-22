@@ -269,6 +269,49 @@
             border-radius: 4px;
             font-size: 13px;
         }
+
+        .chart-container {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            overflow-x: auto;
+        }
+
+        .chart-container h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #040D1B;
+            margin-bottom: 16px;
+        }
+
+        svg {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .chart-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #f0f0f0;
+            font-size: 13px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+        }
     </style>
 </head>
 <body>
@@ -321,6 +364,11 @@
         <!-- Detectors Tab -->
         <div id="detectors" class="tab">
             <h2 class="section-title">Detector Performance</h2>
+            <div class="chart-container">
+                <h3>Accuracy & Detection Rates by Detector</h3>
+                <svg id="detectors-chart" style="min-height: 300px;"></svg>
+                <div id="detectors-legend" class="chart-legend"></div>
+            </div>
             <div id="detectors-content" class="card">
                 <div class="loading">Loading detector metrics...</div>
             </div>
@@ -486,6 +534,64 @@
             }
         }
 
+        // Chart rendering function for detector performance
+        function renderDetectorChart(detectorPerformance) {
+            const detectors = Object.entries(detectorPerformance);
+            if (detectors.length === 0) return;
+
+            const colors = ['#4A7EC7', '#155724', '#f0ad4e', '#d9534f', '#5bc0de'];
+            const chartWidth = Math.max(600, detectors.length * 80);
+            const chartHeight = 300;
+            const padding = { top: 20, right: 20, bottom: 60, left: 60 };
+            const innerWidth = chartWidth - padding.left - padding.right;
+            const innerHeight = chartHeight - padding.top - padding.bottom;
+
+            const barWidth = innerWidth / (detectors.length * 2);
+            const barGap = barWidth;
+
+            let svg = `<svg width="${chartWidth}" height="${chartHeight}" xmlns="http://www.w3.org/2000/svg" style="background: white;">`;
+
+            // Axes
+            svg += `<line x1="${padding.left}" y1="${padding.top}" x2="${padding.left}" y2="${chartHeight - padding.bottom}" stroke="#ccc" stroke-width="2"/>`;
+            svg += `<line x1="${padding.left}" y1="${chartHeight - padding.bottom}" x2="${chartWidth - padding.right}" y2="${chartHeight - padding.bottom}" stroke="#ccc" stroke-width="2"/>`;
+
+            // Y-axis labels (0% to 100%)
+            for (let i = 0; i <= 5; i++) {
+                const y = padding.top + (i * innerHeight / 5);
+                const label = (100 - i * 20) + '%';
+                svg += `<text x="${padding.left - 10}" y="${y + 4}" font-size="11" text-anchor="end" fill="#666">${label}</text>`;
+                svg += `<line x1="${padding.left - 5}" y1="${y}" x2="${padding.left}" y2="${y}" stroke="#ccc" stroke-width="1"/>`;
+            }
+
+            // Bars
+            detectors.forEach(([name, metrics], idx) => {
+                const accuracy = Math.min(metrics.accuracy * 100, 100);
+                const x = padding.left + idx * (barWidth + barGap) + barGap;
+                const barHeight = (accuracy / 100) * innerHeight;
+                const y = chartHeight - padding.bottom - barHeight;
+
+                svg += `<rect x="${x}" y="${y}" width="${barWidth}" height="${barHeight}" fill="${colors[idx % colors.length]}" rx="4"/>`;
+
+                // Label
+                svg += `<text x="${x + barWidth / 2}" y="${chartHeight - padding.bottom + 20}" font-size="12" text-anchor="middle" fill="#333">${name}</text>`;
+                svg += `<text x="${x + barWidth / 2}" y="${y - 5}" font-size="12" font-weight="bold" text-anchor="middle" fill="#040D1B">${accuracy.toFixed(1)}%</text>`;
+            });
+
+            svg += '</svg>';
+
+            document.getElementById('detectors-chart').outerHTML = svg;
+
+            // Render legend
+            let legend = '';
+            detectors.forEach(([name, metrics], idx) => {
+                legend += `<div class="legend-item">
+                    <div class="legend-color" style="background: ${colors[idx % colors.length]};"></div>
+                    <span>${name}: ${metrics.detections} detections, ${metrics.confirmed} confirmed</span>
+                </div>`;
+            });
+            document.getElementById('detectors-legend').innerHTML = legend;
+        }
+
         // Load data
         async function loadQuarterlyReport() {
             try {
@@ -518,7 +624,10 @@ ${JSON.stringify(data, null, 2)}
                 `;
                 document.getElementById('report-content').innerHTML = reportHtml;
 
-                // Render detectors
+                // Render detector chart
+                renderDetectorChart(data.detector_performance);
+
+                // Render detectors table
                 const detectorsHtml = `
                     <table>
                         <thead>
