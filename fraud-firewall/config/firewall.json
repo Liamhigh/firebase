@@ -10,7 +10,7 @@
     "commission_percent": 20,
     "verify_url": "https://verumglobal.foundation/#verify"
   },
-  "constitution_version": "5.2.7",
+  "constitution_version": "6.0.0",
   "nine_brain_version": "1.0",
   "seal_protocol": "verum-omnis-seal v1.0",
   "rules": {

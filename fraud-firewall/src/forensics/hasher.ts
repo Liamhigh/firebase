@@ -4,7 +4,7 @@ import type { ForensicDocument } from "../core/types.js";
 /**
  * Page + line anchoring primitives for the forensic extraction engine.
  * Everything here is deterministic: identical input always yields identical
- * hashes, atom ids, and line ranges (Constitution v5.2.7 offline requirement).
+ * hashes, atom ids, and line ranges (Constitution v6.0.0 offline requirement).
  */
 
 export interface PageText {
