@@ -203,6 +203,72 @@
         .compliance-check .icon.fail {
             color: #dc3545;
         }
+
+        .export-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        .export-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 24px;
+            background: white;
+            border: 2px solid #4A7EC7;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            color: #333;
+        }
+
+        .export-btn:hover {
+            background: #4A7EC7;
+            color: white;
+            box-shadow: 0 4px 12px rgba(74, 126, 199, 0.3);
+        }
+
+        .export-btn .icon {
+            font-size: 32px;
+            margin-bottom: 12px;
+        }
+
+        .export-btn .title {
+            font-weight: 600;
+            font-size: 16px;
+            margin-bottom: 4px;
+        }
+
+        .export-btn .description {
+            font-size: 13px;
+            opacity: 0.7;
+            text-align: center;
+        }
+
+        .date-picker {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            background: #f9f9f9;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+        }
+
+        .date-picker label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .date-picker input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 13px;
+        }
     </style>
 </head>
 <body>
@@ -216,6 +282,7 @@
         <button class="nav-btn" data-tab="detectors">Detector Performance</button>
         <button class="nav-btn" data-tab="patterns">Novel Patterns</button>
         <button class="nav-btn" data-tab="compliance">Compliance</button>
+        <button class="nav-btn" data-tab="reports">Reports & Export</button>
     </div>
 
     <div class="container">
@@ -274,11 +341,45 @@
                 <div class="loading">Loading compliance status...</div>
             </div>
         </div>
+
+        <!-- Reports Tab -->
+        <div id="reports" class="tab">
+            <h2 class="section-title">Reports & Export</h2>
+
+            <div class="card">
+                <div class="date-picker">
+                    <label for="report-start">Start Date:</label>
+                    <input type="date" id="report-start">
+                    <label for="report-end">End Date:</label>
+                    <input type="date" id="report-end">
+                    <button onclick="updateReportDates()" style="padding: 8px 16px; background: #4A7EC7; color: white; border: none; border-radius: 4px; cursor: pointer;">Update</button>
+                </div>
+
+                <p style="color: #666; margin-bottom: 16px;">Export quarterly compliance data in multiple formats for regulatory filing and audit purposes.</p>
+
+                <div class="export-buttons" id="export-buttons">
+                    <a class="export-btn" href="#" onclick="downloadPDFReport(event)">
+                        <div class="icon">📄</div>
+                        <div class="title">Compliance Report (PDF)</div>
+                        <div class="description">Professional formatted PDF suitable for regulatory submission</div>
+                    </a>
+                    <a class="export-btn" href="#" onclick="downloadAuditLog(event)">
+                        <div class="icon">📋</div>
+                        <div class="title">Audit Log (JSON)</div>
+                        <div class="description">Complete audit trail in machine-readable format</div>
+                    </a>
+                </div>
+
+                <div id="export-status" style="margin-top: 16px; display: none;"></div>
+            </div>
+        </div>
     </div>
 
     <script>
         const ADMIN_KEY = 'demo-admin-key-12345';
         const API_BASE = '/api/v1/admin';
+        let currentStartDate = null;
+        let currentEndDate = null;
 
         // Tab switching
         document.querySelectorAll('.nav-btn').forEach(btn => {
@@ -290,9 +391,105 @@
             });
         });
 
+        // Initialize date pickers
+        function initializeDatePickers() {
+            const today = new Date();
+            const start = new Date(today.getFullYear(), today.getMonth() - (today.getMonth() % 3), 1);
+
+            currentStartDate = start;
+            currentEndDate = today;
+
+            document.getElementById('report-start').valueAsDate = new Date(start.getTime() - start.getTimezoneOffset() * 60000);
+            document.getElementById('report-end').valueAsDate = new Date(today.getTime() - today.getTimezoneOffset() * 60000);
+        }
+
+        function updateReportDates() {
+            const startInput = document.getElementById('report-start').value;
+            const endInput = document.getElementById('report-end').value;
+
+            if (startInput && endInput) {
+                currentStartDate = new Date(startInput);
+                currentEndDate = new Date(endInput);
+                showStatus('Dates updated', 'success');
+            }
+        }
+
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('export-status');
+            statusDiv.textContent = message;
+            statusDiv.style.display = 'block';
+            statusDiv.style.padding = '12px';
+            statusDiv.style.borderRadius = '4px';
+            statusDiv.style.color = type === 'success' ? '#155724' : '#721c24';
+            statusDiv.style.background = type === 'success' ? '#d4edda' : '#f8d7da';
+
+            if (type === 'success') {
+                setTimeout(() => { statusDiv.style.display = 'none'; }, 3000);
+            }
+        }
+
+        async function downloadPDFReport(event) {
+            event.preventDefault();
+            if (!currentStartDate || !currentEndDate) return;
+
+            const startDate = currentStartDate.toISOString().split('T')[0];
+            const endDate = currentEndDate.toISOString().split('T')[0];
+
+            try {
+                showStatus('Generating PDF report...', 'info');
+                const url = `${API_BASE}/compliance-report/pdf?start_date=${startDate}&end_date=${endDate}`;
+                const response = await fetch(url, {
+                    headers: { 'X-Admin-Key': ADMIN_KEY }
+                });
+
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+                const blob = await response.blob();
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `compliance-report-${currentStartDate.getFullYear()}-Q${Math.floor(currentStartDate.getMonth() / 3) + 1}.pdf`;
+                link.click();
+                URL.revokeObjectURL(link.href);
+
+                showStatus('PDF report downloaded successfully', 'success');
+            } catch (err) {
+                showStatus(`Error: ${err.message}`, 'error');
+            }
+        }
+
+        async function downloadAuditLog(event) {
+            event.preventDefault();
+            if (!currentStartDate || !currentEndDate) return;
+
+            const startDate = currentStartDate.toISOString().split('T')[0];
+            const endDate = currentEndDate.toISOString().split('T')[0];
+
+            try {
+                showStatus('Generating audit log...', 'info');
+                const url = `${API_BASE}/audit-log/json?start_date=${startDate}&end_date=${endDate}`;
+                const response = await fetch(url, {
+                    headers: { 'X-Admin-Key': ADMIN_KEY }
+                });
+
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+                const blob = await response.blob();
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `audit-log-${currentStartDate.getFullYear()}-Q${Math.floor(currentStartDate.getMonth() / 3) + 1}.json`;
+                link.click();
+                URL.revokeObjectURL(link.href);
+
+                showStatus('Audit log downloaded successfully', 'success');
+            } catch (err) {
+                showStatus(`Error: ${err.message}`, 'error');
+            }
+        }
+
         // Load data
         async function loadQuarterlyReport() {
             try {
+                initializeDatePickers();
                 const today = new Date();
                 const start = new Date(today.getFullYear(), today.getMonth() - (today.getMonth() % 3), 1);
                 const end = today;

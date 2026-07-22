@@ -7,6 +7,7 @@ import { TransactionSchema } from "../core/types.js";
 import { findingsPath, readJson } from "../storage/vault.js";
 import { exportFindings } from "./export.js";
 import { AdminService } from "./admin.js";
+import { generateComplianceReport, generateAuditLog } from "./pdf-export.js";
 import { z } from "zod";
 
 const WEB_ROOT = resolve(
@@ -382,6 +383,60 @@ export function startServer(firewall: FraudFirewall): {
               new Date(end)
             );
             return sendJson(res, 200, analysis);
+          } catch (err) {
+            return sendJson(res, 400, {
+              error: err instanceof Error ? err.message : String(err),
+            });
+          }
+        }
+
+        if (method === "GET" && url.pathname === "/api/v1/admin/compliance-report/pdf") {
+          const start = url.searchParams.get("start_date");
+          const end = url.searchParams.get("end_date");
+          if (!start || !end) {
+            return sendJson(res, 400, {
+              error: "start_date and end_date required",
+            });
+          }
+          try {
+            const report = admin.generateQuarterlyReport(
+              new Date(start),
+              new Date(end)
+            );
+            const pdfPath = `/tmp/compliance-report-${Date.now()}.pdf`;
+            generateComplianceReport(report, pdfPath);
+            const pdfBytes = readFileSync(pdfPath);
+            res.writeHead(200, {
+              "Content-Type": "application/pdf",
+              "Content-Disposition": `attachment; filename="compliance-report-${report.quarter}.pdf"`,
+            });
+            return res.end(pdfBytes);
+          } catch (err) {
+            return sendJson(res, 400, {
+              error: err instanceof Error ? err.message : String(err),
+            });
+          }
+        }
+
+        if (method === "GET" && url.pathname === "/api/v1/admin/audit-log/json") {
+          const start = url.searchParams.get("start_date");
+          const end = url.searchParams.get("end_date");
+          if (!start || !end) {
+            return sendJson(res, 400, {
+              error: "start_date and end_date required",
+            });
+          }
+          try {
+            const report = admin.generateQuarterlyReport(
+              new Date(start),
+              new Date(end)
+            );
+            const auditLog = generateAuditLog(report);
+            res.writeHead(200, {
+              "Content-Type": "application/json; charset=utf-8",
+              "Content-Disposition": `attachment; filename="audit-log-${report.quarter}.json"`,
+            });
+            return res.end(auditLog);
           } catch (err) {
             return sendJson(res, 400, {
               error: err instanceof Error ? err.message : String(err),
