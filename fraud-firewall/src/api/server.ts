@@ -24,6 +24,7 @@ const MIME: Record<string, string> = {
   ".json": "application/json; charset=utf-8",
   ".ico": "image/x-icon",
   ".webp": "image/webp",
+  ".pdf": "application/pdf",
 };
 
 async function readBody(req: IncomingMessage): Promise<string> {
