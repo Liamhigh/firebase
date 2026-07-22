@@ -248,8 +248,8 @@
                     <span>Status: Active</span>
                 </div>
                 <div class="doc-actions">
-                    <a href="#" class="btn btn-primary" disabled>📥 Download</a>
-                    <button class="btn btn-secondary" disabled>👁 View</button>
+                    <a href="/documents/VO-DSS-1.2.md" download class="btn btn-primary">📥 Download</a>
+                    <a href="#" onclick="viewMarkdown('/documents/VO-DSS-1.2.md', 'VO-DSS-1.2')" class="btn btn-secondary">👁 View</a>
                 </div>
             </div>
 
@@ -257,17 +257,17 @@
             <div class="document-card">
                 <div class="doc-icon">⚙️</div>
                 <div class="seal-badge">✓ Service Documentation</div>
-                <div class="doc-title">Document Sealing Service</div>
+                <div class="doc-title">Document Sealing Service API</div>
                 <div class="doc-description">
-                    API reference and implementation guide for the Document Sealing Service. Includes endpoint specifications, authentication, and seal verification procedures.
+                    API reference and implementation guide for the Document Sealing Service. Includes endpoint specifications, authentication, seal verification procedures, and code examples.
                 </div>
                 <div class="doc-meta">
                     <span>Type: API Reference</span>
-                    <span>Format: OpenAPI 3.0</span>
+                    <span>Format: Markdown</span>
                 </div>
                 <div class="doc-actions">
-                    <a href="#" class="btn btn-primary" disabled>📥 Download</a>
-                    <button class="btn btn-secondary" disabled>👁 View</button>
+                    <a href="/documents/SEALING-SERVICE-API.md" download class="btn btn-primary">📥 Download</a>
+                    <a href="#" onclick="viewMarkdown('/documents/SEALING-SERVICE-API.md', 'Sealing Service API')" class="btn btn-secondary">👁 View</a>
                 </div>
             </div>
         </div>
@@ -300,6 +300,58 @@
         function viewDocument(filename) {
             // Open in new tab
             window.open(`/documents/${filename}`, '_blank');
+        }
+
+        function viewMarkdown(path, title) {
+            // Fetch markdown and display in modal or new window
+            fetch(path)
+                .then(r => r.text())
+                .then(content => {
+                    // Simple markdown to HTML converter
+                    let html = content
+                        .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+                        .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+                        .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+                        .replace(/^#### (.+)$/gm, '<h4>$1</h4>')
+                        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+                        .replace(/\*(.+?)\*/g, '<em>$1</em>')
+                        .replace(/`(.+?)`/g, '<code>$1</code>')
+                        .replace(/\n\n/g, '</p><p>')
+                        .replace(/\n/g, '<br>');
+
+                    const htmlContent = `
+                        <!DOCTYPE html>
+                        <html>
+                        <head>
+                            <meta charset="UTF-8">
+                            <title>${title}</title>
+                            <style>
+                                body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
+                                .container { max-width: 900px; margin: 0 auto; background: white; padding: 32px; border-radius: 8px; line-height: 1.6; }
+                                h1 { color: #040D1B; border-bottom: 3px solid #4A7EC7; padding-bottom: 8px; }
+                                h2 { color: #4A7EC7; margin-top: 24px; }
+                                h3, h4 { color: #333; }
+                                code { background: #f5f5f5; padding: 2px 6px; border-radius: 3px; font-family: monospace; }
+                                table { border-collapse: collapse; width: 100%; margin: 16px 0; }
+                                th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+                                th { background: #f9f9f9; font-weight: 600; }
+                                pre { background: #f5f5f5; padding: 16px; border-radius: 4px; overflow-x: auto; }
+                                a { color: #4A7EC7; text-decoration: none; }
+                                a:hover { text-decoration: underline; }
+                            </style>
+                        </head>
+                        <body>
+                            <div class="container">
+                                <p>${html}</p>
+                            </div>
+                        </body>
+                        </html>
+                    `;
+
+                    const win = window.open();
+                    win.document.write(htmlContent);
+                })
+                .catch(err => alert('Error loading document: ' + err.message));
         }
     </script>
 </body>
