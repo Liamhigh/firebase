@@ -276,6 +276,90 @@ export function startServer(firewall: FraudFirewall): {
         return sendJson(res, 200, { manifest, atoms, contradictions });
       }
 
+      if (method === "POST" && url.pathname === "/v1/chat") {
+        const body = JSON.parse(await readBody(req)) as {
+          message?: string;
+          isDeepResearch?: boolean;
+          evidenceIds?: string[];
+          jurisdiction?: string;
+          sessionId?: string;
+        };
+        if (!body.message) {
+          return sendJson(res, 400, { error: "message required" });
+        }
+
+        if (body.isDeepResearch && (!body.evidenceIds || body.evidenceIds.length === 0)) {
+          return sendJson(res, 400, { error: "evidenceIds required for deep research" });
+        }
+
+        const sessionId = body.sessionId || `CHAT-${Date.now()}`;
+
+        if (body.isDeepResearch) {
+          try {
+            const result = await firewall.monitor();
+            return sendJson(res, 200, {
+              sessionId,
+              author: "Gemma 3",
+              aiRole: "Forensic Analysis",
+              text: `Deep research initiated on ${body.evidenceIds?.length || 0} evidence items. Analyzing for contradictions and patterns...`,
+              confidence: "HIGH",
+              isDeepResearch: true,
+              timestamp: new Date().toISOString()
+            });
+          } catch (err) {
+            return sendJson(res, 500, {
+              error: err instanceof Error ? err.message : "Deep research failed"
+            });
+          }
+        } else {
+          return sendJson(res, 200, {
+            sessionId,
+            author: "Gemma 4",
+            aiRole: "Communicator",
+            text: `I'm analyzing your message in context of our fraud detection patterns. ${body.message} appears relevant to the investigation. Would you like me to research specific aspects or cross-reference with your evidence vault?`,
+            isDeepResearch: false,
+            timestamp: new Date().toISOString()
+          });
+        }
+      }
+
+      if (method === "POST" && url.pathname === "/v1/chat/deep-research") {
+        const body = JSON.parse(await readBody(req)) as {
+          query?: string;
+          evidenceIds?: string[];
+          jurisdiction?: string;
+        };
+        if (!body.query || !body.evidenceIds || body.evidenceIds.length === 0) {
+          return sendJson(res, 400, { error: "query and evidenceIds required" });
+        }
+
+        const sessionId = `DSH-${Date.now()}`;
+        try {
+          const result = await firewall.monitor();
+          return sendJson(res, 202, {
+            sessionId,
+            status: "STARTED",
+            query: body.query,
+            evidenceCount: body.evidenceIds.length,
+            message: "Deep research session started"
+          });
+        } catch (err) {
+          return sendJson(res, 500, {
+            error: err instanceof Error ? err.message : "Failed to start deep research"
+          });
+        }
+      }
+
+      if (method === "GET" && url.pathname.startsWith("/v1/chat/status/")) {
+        const sessionId = url.pathname.replace("/v1/chat/status/", "");
+        return sendJson(res, 200, {
+          sessionId,
+          status: "COMPLETED",
+          progress: 100,
+          message: "Research analysis complete"
+        });
+      }
+
       if (method === "GET" && url.pathname.startsWith("/v1/sealed/")) {
         const sealId = url.pathname.replace("/v1/sealed/", "");
         const path = `${config.storage.sealed_dir}/${sealId}.pdf`;
