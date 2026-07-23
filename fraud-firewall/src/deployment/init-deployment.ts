@@ -1,4 +1,5 @@
-import { ServerInitializer, initializeDeploymentConfig } from "./server-init.js";
+import { ServerInitializer } from "./server-init.js";
+import { initializeDeploymentConfig } from "./model-loader.js";
 
 async function main() {
   console.log("==========================================");
@@ -40,10 +41,10 @@ async function main() {
 
   console.log("Configuration Details:");
   if (result.config) {
-    console.log(`  Version: ${result.config.version}`);
     console.log(`  Constitution: v${result.config.constitution_version}`);
-    console.log(`  Port: ${result.config.api.port}`);
+    console.log(`  Port: ${result.config.server.port}`);
     console.log(`  Vault: ${result.config.storage.vault_dir}`);
+    console.log(`  Institution: ${result.config.institution.name}`);
   }
 
   console.log("");
