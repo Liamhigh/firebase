@@ -162,14 +162,25 @@ ADMIN_KEY=$(openssl rand -hex 32)
 EOF
   fi
 
+  # Generate unique admin key (CRITICAL: must not be demo key)
+  GENERATED_KEY=$(openssl rand -hex 32)
+  sed -i "s/^ADMIN_KEY=.*/ADMIN_KEY=${GENERATED_KEY}/" "${INSTALL_DIR}/.env"
+
   # Update port if needed
   sed -i "s/^FIREWALL_PORT=.*/FIREWALL_PORT=${PORT}/" "${INSTALL_DIR}/.env"
 
   chmod 600 "${INSTALL_DIR}/.env"
   print_success "Configuration created: ${INSTALL_DIR}/.env"
+  print_success "Generated unique ADMIN_KEY: ${GENERATED_KEY:0:16}... (full key in .env)"
   echo "  IMPORTANT: Edit .env with your institution details before startup"
+  echo "  IMPORTANT: Protect ADMIN_KEY - it authenticates all admin API requests"
 else
   print_warning "Configuration already exists"
+  # Verify ADMIN_KEY is set and not empty
+  if grep -q "^ADMIN_KEY=$" "${INSTALL_DIR}/.env" 2>/dev/null; then
+    print_error "ADMIN_KEY is empty in configuration. Edit .env and set a strong random key:"
+    echo "  ADMIN_KEY=$(openssl rand -hex 32)"
+  fi
 fi
 
 # Step 9: Create systemd service

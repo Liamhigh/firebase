@@ -318,7 +318,15 @@ export function startServer(firewall: FraudFirewall): {
       // Admin API (MVP: simple key-based auth)
       if (url.pathname.startsWith("/api/v1/admin/")) {
         const adminKey = req.headers["x-admin-key"];
-        if (adminKey !== "demo-admin-key-12345") {
+        const expectedKey = process.env.ADMIN_KEY;
+
+        if (!expectedKey) {
+          return sendJson(res, 500, {
+            error: "Server error: ADMIN_KEY not configured. Set ADMIN_KEY environment variable."
+          });
+        }
+
+        if (adminKey !== expectedKey) {
           return sendJson(res, 403, { error: "Unauthorized" });
         }
 
@@ -329,14 +337,22 @@ export function startServer(firewall: FraudFirewall): {
           const end = url.searchParams.get("end_date");
           if (!start || !end) {
             return sendJson(res, 400, {
-              error: "start_date and end_date required",
+              error: "start_date and end_date required (format: YYYY-MM-DD)",
             });
           }
+
+          // Validate date format and parse
+          const startDate = new Date(start);
+          const endDate = new Date(end);
+
+          if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+            return sendJson(res, 400, {
+              error: "Invalid date format. Use YYYY-MM-DD (e.g., 2026-07-01)",
+            });
+          }
+
           try {
-            const report = admin.generateQuarterlyReport(
-              new Date(start),
-              new Date(end)
-            );
+            const report = admin.generateQuarterlyReport(startDate, endDate);
             return sendJson(res, 200, report);
           } catch (err) {
             return sendJson(res, 400, {
