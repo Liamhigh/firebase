@@ -32,10 +32,12 @@
   "license": "UNLICENSED",
   "private": true,
   "dependencies": {
+    "adm-zip": "^0.5.14",
     "pdf-lib": "^1.17.1",
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@types/adm-zip": "^0.5.8",
     "@types/node": "^22.10.2",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2"
