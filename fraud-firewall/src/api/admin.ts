@@ -84,6 +84,15 @@ export class AdminService {
     startDate: Date,
     endDate: Date
   ): QuarterlyEvolution {
+    // Validate dates before processing
+    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+      throw new Error("Invalid date range: start_date and end_date must be valid ISO dates");
+    }
+
+    if (startDate > endDate) {
+      throw new Error("Invalid date range: start_date must be before end_date");
+    }
+
     const alerts = this.loadAlertsInRange(startDate, endDate);
 
     const quarter = this.getQuarter(startDate);
@@ -146,6 +155,10 @@ export class AdminService {
     }> = [];
     const alertsDir = this.config.storage.alerts_dir;
 
+    // Extend end date to include entire end day (up to 23:59:59.999Z)
+    const endOfDay = new Date(endDate);
+    endOfDay.setUTCHours(23, 59, 59, 999);
+
     if (existsSync(alertsDir)) {
       for (const file of readdirSync(alertsDir)) {
         if (!file.endsWith(".json")) continue;
@@ -165,7 +178,8 @@ export class AdminService {
         if (!timestamp) continue;
 
         const alertDate = new Date(timestamp);
-        if (alertDate >= startDate && alertDate <= endDate) {
+        // Check if alert is within range (including full end day)
+        if (alertDate >= startDate && alertDate <= endOfDay) {
           alerts.push({
             alert_id: alert.alert_id || "unknown",
             status: alert.status || "UNKNOWN",
@@ -429,8 +443,22 @@ export class AdminService {
     fraud_type?: string;
     timestamp?: string;
     seal?: { seal_id?: string };
+    jurisdiction?: string;
   }): string {
-    // Extract from alert_id or return ZA as default
-    return "ZA";
+    // Use jurisdiction from alert if available (populated at alert creation time)
+    if (alert.jurisdiction) {
+      return alert.jurisdiction;
+    }
+
+    // Fall back to configured institution jurisdiction
+    // CRITICAL: Do NOT default to "ZA" — use actual institution setting
+    const institutionJurisdiction = this.config.institution.jurisdiction;
+    if (!institutionJurisdiction) {
+      throw new Error(
+        "Institution jurisdiction not configured. Set JURISDICTION in .env"
+      );
+    }
+
+    return institutionJurisdiction;
   }
 }

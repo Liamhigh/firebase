@@ -140,6 +140,15 @@ export class ModelLoader {
 export function initializeDeploymentConfig(
   overrides?: Partial<DeploymentConfig>,
 ): DeploymentConfig {
+  // Jurisdiction is REQUIRED - do not default to "ZA"
+  const jurisdiction = process.env.JURISDICTION;
+  if (!jurisdiction) {
+    throw new Error(
+      "JURISDICTION environment variable is required. " +
+        "Set JURISDICTION in .env (e.g., ZA, US, EU, UK, AE)"
+    );
+  }
+
   const baseConfig: DeploymentConfig = {
     models_dir:
       process.env.FIREWALL_MODELS_DIR || "/opt/verum-firewall/models",
@@ -148,7 +157,7 @@ export function initializeDeploymentConfig(
       "/opt/verum-firewall/vault",
     port: parseInt(process.env.FIREWALL_PORT || "8787"),
     institution_name: process.env.INSTITUTION_NAME || "Bank",
-    jurisdiction: process.env.JURISDICTION || "ZA",
+    jurisdiction,
     constitution_version: "6.0.0",
     models: [],
   };
