@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verum Omnis Admin Dashboard</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #040D1B 0%, #0A1628 100%);
+            color: white;
+            padding: 24px 32px;
+            border-bottom: 4px solid #4A7EC7;
+        }
+
+        .header h1 { font-size: 28px; margin-bottom: 8px; }
+        .header p { opacity: 0.8; font-size: 14px; }
+
+        .nav {
+            display: flex;
+            gap: 2px;
+            background: white;
+            border-bottom: 1px solid #ddd;
+            padding: 0 32px;
+        }
+
+        .nav button {
+            padding: 12px 24px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            color: #666;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .nav button.active {
+            color: #4A7EC7;
+            border-bottom-color: #4A7EC7;
+        }
+
+        .nav button:hover {
+            color: #4A7EC7;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 32px;
+        }
+
+        .tab { display: none; }
+        .tab.active { display: block; }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 32px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .stat-card {
+            border-left: 4px solid #4A7EC7;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #040D1B;
+            margin: 8px 0;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            color: #999;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-change {
+            font-size: 14px;
+            margin-top: 8px;
+            color: #999;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        th {
+            background: #f9f9f9;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 13px;
+            text-transform: uppercase;
+            color: #666;
+            border-bottom: 1px solid #ddd;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        tr:hover {
+            background: #fafafa;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-high {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge-medium {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .badge-low {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .badge-confirmed {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 32px;
+            color: #999;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 16px;
+            border-radius: 8px;
+            margin: 16px 0;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #040D1B;
+            margin: 32px 0 16px 0;
+            border-bottom: 2px solid #4A7EC7;
+            padding-bottom: 8px;
+        }
+
+        .compliance-check {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            background: #f9f9f9;
+            border-radius: 4px;
+            margin: 8px 0;
+        }
+
+        .compliance-check .icon {
+            font-size: 20px;
+            margin-right: 12px;
+        }
+
+        .compliance-check .icon.pass {
+            color: #28a745;
+        }
+
+        .compliance-check .icon.fail {
+            color: #dc3545;
+        }
+
+        .export-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        .export-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 24px;
+            background: white;
+            border: 2px solid #4A7EC7;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            color: #333;
+        }
+
+        .export-btn:hover {
+            background: #4A7EC7;
+            color: white;
+            box-shadow: 0 4px 12px rgba(74, 126, 199, 0.3);
+        }
+
+        .export-btn .icon {
+            font-size: 32px;
+            margin-bottom: 12px;
+        }
+
+        .export-btn .title {
+            font-weight: 600;
+            font-size: 16px;
+            margin-bottom: 4px;
+        }
+
+        .export-btn .description {
+            font-size: 13px;
+            opacity: 0.7;
+            text-align: center;
+        }
+
+        .date-picker {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            background: #f9f9f9;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+        }
+
+        .date-picker label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .date-picker input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+
+        .chart-container {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            overflow-x: auto;
+        }
+
+        .chart-container h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #040D1B;
+            margin-bottom: 16px;
+        }
+
+        svg {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .chart-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #f0f0f0;
+            font-size: 13px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Verum Omnis Admin Dashboard</h1>
+        <p>Quarterly Engine Evolution & Compliance Monitoring</p>
+    </div>
+
+    <div class="nav">
+        <button class="nav-btn active" data-tab="summary">Summary</button>
+        <button class="nav-btn" data-tab="detectors">Detector Performance</button>
+        <button class="nav-btn" data-tab="patterns">Novel Patterns</button>
+        <button class="nav-btn" data-tab="compliance">Compliance</button>
+        <button class="nav-btn" data-tab="reports">Reports & Export</button>
+    </div>
+
+    <div class="container">
+        <!-- Summary Tab -->
+        <div id="summary" class="tab active">
+            <h2 class="section-title">Q3 2026 Summary</h2>
+            <div class="grid">
+                <div class="card stat-card">
+                    <div class="stat-label">Transactions Monitored</div>
+                    <div class="stat-value" id="stat-total">-</div>
+                    <div class="stat-change">this quarter</div>
+                </div>
+                <div class="card stat-card">
+                    <div class="stat-label">Confirmed Fraud</div>
+                    <div class="stat-value" id="stat-confirmed">-</div>
+                    <div class="stat-change">cases sealed & verified</div>
+                </div>
+                <div class="card stat-card">
+                    <div class="stat-label">False Positive Rate</div>
+                    <div class="stat-value" id="stat-fp-rate">-</div>
+                    <div class="stat-change">of all alerts</div>
+                </div>
+                <div class="card stat-card">
+                    <div class="stat-label">Novel Patterns</div>
+                    <div class="stat-value" id="stat-novel">-</div>
+                    <div class="stat-change">pending review</div>
+                </div>
+            </div>
+
+            <h2 class="section-title">Quarterly Report</h2>
+            <div class="card" id="report-content">
+                <div class="loading">Loading quarterly report...</div>
+            </div>
+        </div>
+
+        <!-- Detectors Tab -->
+        <div id="detectors" class="tab">
+            <h2 class="section-title">Detector Performance</h2>
+            <div class="chart-container">
+                <h3>Accuracy & Detection Rates by Detector</h3>
+                <svg id="detectors-chart" style="min-height: 300px;"></svg>
+                <div id="detectors-legend" class="chart-legend"></div>
+            </div>
+            <div id="detectors-content" class="card">
+                <div class="loading">Loading detector metrics...</div>
+            </div>
+        </div>
+
+        <!-- Patterns Tab -->
+        <div id="patterns" class="tab">
+            <h2 class="section-title">Novel Patterns Discovered</h2>
+            <div id="patterns-content" class="card">
+                <div class="loading">Loading novel patterns...</div>
+            </div>
+        </div>
+
+        <!-- Compliance Tab -->
+        <div id="compliance" class="tab">
+            <h2 class="section-title">Constitutional Compliance</h2>
+            <div id="compliance-content" class="card">
+                <div class="loading">Loading compliance status...</div>
+            </div>
+        </div>
+
+        <!-- Reports Tab -->
+        <div id="reports" class="tab">
+            <h2 class="section-title">Reports & Export</h2>
+
+            <div class="card">
+                <div class="date-picker">
+                    <label for="report-start">Start Date:</label>
+                    <input type="date" id="report-start">
+                    <label for="report-end">End Date:</label>
+                    <input type="date" id="report-end">
+                    <button onclick="updateReportDates()" style="padding: 8px 16px; background: #4A7EC7; color: white; border: none; border-radius: 4px; cursor: pointer;">Update</button>
+                </div>
+
+                <p style="color: #666; margin-bottom: 16px;">Export quarterly compliance data in multiple formats for regulatory filing and audit purposes.</p>
+
+                <div class="export-buttons" id="export-buttons">
+                    <a class="export-btn" href="#" onclick="downloadPDFReport(event)">
+                        <div class="icon">📄</div>
+                        <div class="title">Compliance Report (PDF)</div>
+                        <div class="description">Professional formatted PDF suitable for regulatory submission</div>
+                    </a>
+                    <a class="export-btn" href="#" onclick="downloadAuditLog(event)">
+                        <div class="icon">📋</div>
+                        <div class="title">Audit Log (JSON)</div>
+                        <div class="description">Complete audit trail in machine-readable format</div>
+                    </a>
+                </div>
+
+                <div id="export-status" style="margin-top: 16px; display: none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const ADMIN_KEY = 'demo-admin-key-12345';
+        const API_BASE = '/api/v1/admin';
+        let currentStartDate = null;
+        let currentEndDate = null;
+
+        // Tab switching
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                e.target.classList.add('active');
+                document.getElementById(e.target.dataset.tab).classList.add('active');
+            });
+        });
+
+        // Initialize date pickers
+        function initializeDatePickers() {
+            const today = new Date();
+            const start = new Date(today.getFullYear(), today.getMonth() - (today.getMonth() % 3), 1);
+
+            currentStartDate = start;
+            currentEndDate = today;
+
+            document.getElementById('report-start').valueAsDate = new Date(start.getTime() - start.getTimezoneOffset() * 60000);
+            document.getElementById('report-end').valueAsDate = new Date(today.getTime() - today.getTimezoneOffset() * 60000);
+        }
+
+        function updateReportDates() {
+            const startInput = document.getElementById('report-start').value;
+            const endInput = document.getElementById('report-end').value;
+
+            if (startInput && endInput) {
+                currentStartDate = new Date(startInput);
+                currentEndDate = new Date(endInput);
+                showStatus('Dates updated', 'success');
+            }
+        }
+
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('export-status');
+            statusDiv.textContent = message;
+            statusDiv.style.display = 'block';
+            statusDiv.style.padding = '12px';
+            statusDiv.style.borderRadius = '4px';
+            statusDiv.style.color = type === 'success' ? '#155724' : '#721c24';
+            statusDiv.style.background = type === 'success' ? '#d4edda' : '#f8d7da';
+
+            if (type === 'success') {
+                setTimeout(() => { statusDiv.style.display = 'none'; }, 3000);
+            }
+        }
+
+        async function downloadPDFReport(event) {
+            event.preventDefault();
+            if (!currentStartDate || !currentEndDate) return;
+
+            const startDate = currentStartDate.toISOString().split('T')[0];
+            const endDate = currentEndDate.toISOString().split('T')[0];
+
+            try {
+                showStatus('Generating PDF report...', 'info');
+                const url = `${API_BASE}/compliance-report/pdf?start_date=${startDate}&end_date=${endDate}`;
+                const response = await fetch(url, {
+                    headers: { 'X-Admin-Key': ADMIN_KEY }
+                });
+
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+                const blob = await response.blob();
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `compliance-report-${currentStartDate.getFullYear()}-Q${Math.floor(currentStartDate.getMonth() / 3) + 1}.pdf`;
+                link.click();
+                URL.revokeObjectURL(link.href);
+
+                showStatus('PDF report downloaded successfully', 'success');
+            } catch (err) {
+                showStatus(`Error: ${err.message}`, 'error');
+            }
+        }
+
+        async function downloadAuditLog(event) {
+            event.preventDefault();
+            if (!currentStartDate || !currentEndDate) return;
+
+            const startDate = currentStartDate.toISOString().split('T')[0];
+            const endDate = currentEndDate.toISOString().split('T')[0];
+
+            try {
+                showStatus('Generating audit log...', 'info');
+                const url = `${API_BASE}/audit-log/json?start_date=${startDate}&end_date=${endDate}`;
+                const response = await fetch(url, {
+                    headers: { 'X-Admin-Key': ADMIN_KEY }
+                });
+
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+                const blob = await response.blob();
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `audit-log-${currentStartDate.getFullYear()}-Q${Math.floor(currentStartDate.getMonth() / 3) + 1}.json`;
+                link.click();
+                URL.revokeObjectURL(link.href);
+
+                showStatus('Audit log downloaded successfully', 'success');
+            } catch (err) {
+                showStatus(`Error: ${err.message}`, 'error');
+            }
+        }
+
+        // Chart rendering function for detector performance
+        function renderDetectorChart(detectorPerformance) {
+            const detectors = Object.entries(detectorPerformance);
+            if (detectors.length === 0) return;
+
+            const colors = ['#4A7EC7', '#155724', '#f0ad4e', '#d9534f', '#5bc0de'];
+            const chartWidth = Math.max(600, detectors.length * 80);
+            const chartHeight = 300;
+            const padding = { top: 20, right: 20, bottom: 60, left: 60 };
+            const innerWidth = chartWidth - padding.left - padding.right;
+            const innerHeight = chartHeight - padding.top - padding.bottom;
+
+            const barWidth = innerWidth / (detectors.length * 2);
+            const barGap = barWidth;
+
+            let svg = `<svg width="${chartWidth}" height="${chartHeight}" xmlns="http://www.w3.org/2000/svg" style="background: white;">`;
+
+            // Axes
+            svg += `<line x1="${padding.left}" y1="${padding.top}" x2="${padding.left}" y2="${chartHeight - padding.bottom}" stroke="#ccc" stroke-width="2"/>`;
+            svg += `<line x1="${padding.left}" y1="${chartHeight - padding.bottom}" x2="${chartWidth - padding.right}" y2="${chartHeight - padding.bottom}" stroke="#ccc" stroke-width="2"/>`;
+
+            // Y-axis labels (0% to 100%)
+            for (let i = 0; i <= 5; i++) {
+                const y = padding.top + (i * innerHeight / 5);
+                const label = (100 - i * 20) + '%';
+                svg += `<text x="${padding.left - 10}" y="${y + 4}" font-size="11" text-anchor="end" fill="#666">${label}</text>`;
+                svg += `<line x1="${padding.left - 5}" y1="${y}" x2="${padding.left}" y2="${y}" stroke="#ccc" stroke-width="1"/>`;
+            }
+
+            // Bars
+            detectors.forEach(([name, metrics], idx) => {
+                const accuracy = Math.min(metrics.accuracy * 100, 100);
+                const x = padding.left + idx * (barWidth + barGap) + barGap;
+                const barHeight = (accuracy / 100) * innerHeight;
+                const y = chartHeight - padding.bottom - barHeight;
+
+                svg += `<rect x="${x}" y="${y}" width="${barWidth}" height="${barHeight}" fill="${colors[idx % colors.length]}" rx="4"/>`;
+
+                // Label
+                svg += `<text x="${x + barWidth / 2}" y="${chartHeight - padding.bottom + 20}" font-size="12" text-anchor="middle" fill="#333">${name}</text>`;
+                svg += `<text x="${x + barWidth / 2}" y="${y - 5}" font-size="12" font-weight="bold" text-anchor="middle" fill="#040D1B">${accuracy.toFixed(1)}%</text>`;
+            });
+
+            svg += '</svg>';
+
+            document.getElementById('detectors-chart').outerHTML = svg;
+
+            // Render legend
+            let legend = '';
+            detectors.forEach(([name, metrics], idx) => {
+                legend += `<div class="legend-item">
+                    <div class="legend-color" style="background: ${colors[idx % colors.length]};"></div>
+                    <span>${name}: ${metrics.detections} detections, ${metrics.confirmed} confirmed</span>
+                </div>`;
+            });
+            document.getElementById('detectors-legend').innerHTML = legend;
+        }
+
+        // Load data
+        async function loadQuarterlyReport() {
+            try {
+                initializeDatePickers();
+                const today = new Date();
+                const start = new Date(today.getFullYear(), today.getMonth() - (today.getMonth() % 3), 1);
+                const end = today;
+
+                const startDate = start.toISOString().split('T')[0];
+                const endDate = end.toISOString().split('T')[0];
+
+                const resp = await fetch(`${API_BASE}/quarterly-report?start_date=${startDate}&end_date=${endDate}`, {
+                    headers: { 'X-Admin-Key': ADMIN_KEY }
+                });
+
+                if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+                const data = await resp.json();
+
+                // Update stats
+                document.getElementById('stat-total').textContent = data.summary.total_transactions_monitored.toLocaleString();
+                document.getElementById('stat-confirmed').textContent = data.summary.fraud_cases_confirmed.toLocaleString();
+                document.getElementById('stat-fp-rate').textContent = (data.summary.false_positive_rate * 100).toFixed(1) + '%';
+                document.getElementById('stat-novel').textContent = data.summary.novel_patterns_discovered;
+
+                // Update report
+                const reportHtml = `
+                    <pre style="background: #f5f5f5; padding: 16px; border-radius: 4px; overflow-x: auto; font-size: 12px;">
+${JSON.stringify(data, null, 2)}
+                    </pre>
+                `;
+                document.getElementById('report-content').innerHTML = reportHtml;
+
+                // Render detector chart
+                renderDetectorChart(data.detector_performance);
+
+                // Render detectors table
+                const detectorsHtml = `
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Detector</th>
+                                <th>Detections</th>
+                                <th>Confirmed</th>
+                                <th>False Positives</th>
+                                <th>Accuracy</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${Object.entries(data.detector_performance).map(([name, metrics]) => `
+                                <tr>
+                                    <td><strong>${name}</strong></td>
+                                    <td>${metrics.detections}</td>
+                                    <td class="badge badge-confirmed">${metrics.confirmed}</td>
+                                    <td>${metrics.false_positives}</td>
+                                    <td>${(metrics.accuracy * 100).toFixed(1)}%</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+                document.getElementById('detectors-content').innerHTML = detectorsHtml;
+
+                // Render patterns
+                const patternsHtml = data.novel_patterns.length > 0 ? `
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Pattern</th>
+                                <th>Occurrences</th>
+                                <th>Confidence</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${data.novel_patterns.map(p => `
+                                <tr>
+                                    <td><strong>${p.name}</strong><br><small>${p.description}</small></td>
+                                    <td>${p.occurrences}</td>
+                                    <td><span class="badge badge-${p.confidence.toLowerCase()}">${p.confidence}</span></td>
+                                    <td><span class="badge badge-${p.status.toLowerCase()}">${p.status.replace(/_/g, ' ')}</span></td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                ` : '<p>No novel patterns discovered this quarter.</p>';
+                document.getElementById('patterns-content').innerHTML = patternsHtml;
+
+                // Render compliance
+                const constraints = data.constitutional_constraints_enforced;
+                const complianceHtml = `
+                    <div>
+                        ${Object.entries(constraints).map(([key, value]) => `
+                            <div class="compliance-check">
+                                <div class="icon ${value ? 'pass' : 'fail'}">${value ? '✓' : '✗'}</div>
+                                <div>${key.replace(/_/g, ' ')}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                document.getElementById('compliance-content').innerHTML = complianceHtml;
+
+            } catch (err) {
+                document.getElementById('report-content').innerHTML = `<div class="error">Error loading data: ${err.message}</div>`;
+            }
+        }
+
+        // Load on page load
+        loadQuarterlyReport();
+    </script>
+</body>
+</html>

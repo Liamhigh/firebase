@@ -163,7 +163,7 @@ export class Gemma3Forensics extends ConstitutionalModel {
       ),
       "",
       "CONSTITUTIONAL NOTE:",
-      "This report was produced under Constitution v5.2.7. Findings cannot be suppressed.",
+      "This report was produced under Constitution v6.0.0. Findings cannot be suppressed.",
     ];
     return lines.join("\n");
   }

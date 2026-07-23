@@ -202,7 +202,7 @@ function summarize(findings: ExtractionFindings): string {
     ]),
     "",
     "CONSTITUTIONAL NOTE:",
-    "Findings produced under Constitution v5.2.7. Evidence anchors and hashes are immutable.",
+    "Findings produced under Constitution v6.0.0. Evidence anchors and hashes are immutable.",
   ];
   return lines.join("\n");
 }

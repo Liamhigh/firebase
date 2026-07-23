@@ -1,7 +1,7 @@
 {
   "name": "@verum-omnis/fraud-firewall",
-  "version": "5.2.7",
-  "description": "Verum Omnis Guardian Fraud Firewall — enterprise on-premise fraud detection, sealing, and commission system under Constitution v5.2.7",
+  "version": "6.0.0",
+  "description": "Verum Omnis Guardian Fraud Firewall — enterprise on-premise fraud detection, sealing, and commission system under Constitution v6.0.0",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -14,7 +14,17 @@
     "start": "node dist/cli.js serve",
     "demo": "tsx src/cli.ts demo",
     "test": "tsx --test tests/*.test.ts",
-    "lint": "tsc -p tsconfig.json --noEmit"
+    "lint": "tsc -p tsconfig.json --noEmit",
+    "health-check": "tsx src/deployment/health-check.ts",
+    "validate-config": "tsx src/deployment/validate-config.ts",
+    "init-deployment": "tsx src/deployment/init-deployment.ts",
+    "verify-models": "tsx src/deployment/verify-models.ts",
+    "verify-constitution": "tsx src/deployment/verify-constitution.ts",
+    "verify-seal": "tsx src/deployment/verify-seal.ts",
+    "collect-diagnostics": "bash deployment/collect-diagnostics.sh",
+    "test-alert": "tsx src/deployment/test-alert.ts",
+    "build-package": "bash deployment/build-package.sh",
+    "build-package-signed": "bash deployment/build-package.sh $VERSION $GPG_KEY"
   },
   "engines": {
     "node": ">=20"
@@ -22,10 +32,12 @@
   "license": "UNLICENSED",
   "private": true,
   "dependencies": {
+    "adm-zip": "^0.5.14",
     "pdf-lib": "^1.17.1",
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@types/adm-zip": "^0.5.8",
     "@types/node": "^22.10.2",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2"

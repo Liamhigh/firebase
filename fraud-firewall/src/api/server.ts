@@ -5,6 +5,9 @@ import { fileURLToPath } from "node:url";
 import type { FraudFirewall } from "../pipeline/firewall.js";
 import { TransactionSchema } from "../core/types.js";
 import { findingsPath, readJson } from "../storage/vault.js";
+import { exportFindings } from "./export.js";
+import { AdminService } from "./admin.js";
+import { generateComplianceReport, generateAuditLog } from "./pdf-export.js";
 import { z } from "zod";
 
 const WEB_ROOT = resolve(
@@ -22,6 +25,7 @@ const MIME: Record<string, string> = {
   ".json": "application/json; charset=utf-8",
   ".ico": "image/x-icon",
   ".webp": "image/webp",
+  ".pdf": "application/pdf",
 };
 
 async function readBody(req: IncomingMessage): Promise<string> {
@@ -286,6 +290,177 @@ export function startServer(firewall: FraudFirewall): {
           "Content-Disposition": `attachment; filename="${sealId}.pdf"`,
         });
         return res.end(bytes);
+      }
+
+      if (method === "GET" && url.pathname === "/v1/export/findings") {
+        const start = url.searchParams.get("start_date");
+        const end = url.searchParams.get("end_date");
+        if (!start || !end) {
+          return sendJson(res, 400, {
+            error: "start_date and end_date required (ISO 8601 format)",
+          });
+        }
+        try {
+          const result = await exportFindings(config, {
+            start_date: start,
+            end_date: end,
+            jurisdiction: url.searchParams.get("jurisdiction") ?? undefined,
+            institution: url.searchParams.get("institution") ?? undefined,
+          });
+          return sendJson(res, 200, result);
+        } catch (err) {
+          return sendJson(res, 400, {
+            error: err instanceof Error ? err.message : String(err),
+          });
+        }
+      }
+
+      // Admin API (MVP: simple key-based auth)
+      if (url.pathname.startsWith("/api/v1/admin/")) {
+        const adminKey = req.headers["x-admin-key"];
+        const expectedKey = process.env.ADMIN_KEY;
+
+        if (!expectedKey) {
+          return sendJson(res, 500, {
+            error: "Server error: ADMIN_KEY not configured. Set ADMIN_KEY environment variable."
+          });
+        }
+
+        if (adminKey !== expectedKey) {
+          return sendJson(res, 403, { error: "Unauthorized" });
+        }
+
+        const admin = new AdminService(config);
+
+        if (method === "GET" && url.pathname === "/api/v1/admin/quarterly-report") {
+          const start = url.searchParams.get("start_date");
+          const end = url.searchParams.get("end_date");
+          if (!start || !end) {
+            return sendJson(res, 400, {
+              error: "start_date and end_date required (format: YYYY-MM-DD)",
+            });
+          }
+
+          // Validate date format and parse
+          const startDate = new Date(start);
+          const endDate = new Date(end);
+
+          if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+            return sendJson(res, 400, {
+              error: "Invalid date format. Use YYYY-MM-DD (e.g., 2026-07-01)",
+            });
+          }
+
+          try {
+            const report = admin.generateQuarterlyReport(startDate, endDate);
+            return sendJson(res, 200, report);
+          } catch (err) {
+            return sendJson(res, 400, {
+              error: err instanceof Error ? err.message : String(err),
+            });
+          }
+        }
+
+        if (method === "GET" && url.pathname === "/api/v1/admin/detector-trends") {
+          const detector = url.searchParams.get("detector") || "AMOUNT_ANOMALY";
+          const weeks = parseInt(url.searchParams.get("weeks") || "12", 10);
+          try {
+            const trends = admin.getDetectorTrends(detector, weeks);
+            return sendJson(res, 200, { detector, trends });
+          } catch (err) {
+            return sendJson(res, 400, {
+              error: err instanceof Error ? err.message : String(err),
+            });
+          }
+        }
+
+        if (method === "GET" && url.pathname === "/api/v1/admin/false-positive-analysis") {
+          try {
+            const analysis = admin.getFalsePositiveAnalysis();
+            return sendJson(res, 200, analysis);
+          } catch (err) {
+            return sendJson(res, 400, {
+              error: err instanceof Error ? err.message : String(err),
+            });
+          }
+        }
+
+        if (method === "GET" && url.pathname === "/api/v1/admin/fraud-by-jurisdiction") {
+          const start = url.searchParams.get("start_date");
+          const end = url.searchParams.get("end_date");
+          if (!start || !end) {
+            return sendJson(res, 400, {
+              error: "start_date and end_date required",
+            });
+          }
+          try {
+            const analysis = admin.getFraudByJurisdiction(
+              new Date(start),
+              new Date(end)
+            );
+            return sendJson(res, 200, analysis);
+          } catch (err) {
+            return sendJson(res, 400, {
+              error: err instanceof Error ? err.message : String(err),
+            });
+          }
+        }
+
+        if (method === "GET" && url.pathname === "/api/v1/admin/compliance-report/pdf") {
+          const start = url.searchParams.get("start_date");
+          const end = url.searchParams.get("end_date");
+          if (!start || !end) {
+            return sendJson(res, 400, {
+              error: "start_date and end_date required",
+            });
+          }
+          try {
+            const report = admin.generateQuarterlyReport(
+              new Date(start),
+              new Date(end)
+            );
+            const pdfPath = `/tmp/compliance-report-${Date.now()}.pdf`;
+            generateComplianceReport(report, pdfPath);
+            const pdfBytes = readFileSync(pdfPath);
+            res.writeHead(200, {
+              "Content-Type": "application/pdf",
+              "Content-Disposition": `attachment; filename="compliance-report-${report.quarter}.pdf"`,
+            });
+            return res.end(pdfBytes);
+          } catch (err) {
+            return sendJson(res, 400, {
+              error: err instanceof Error ? err.message : String(err),
+            });
+          }
+        }
+
+        if (method === "GET" && url.pathname === "/api/v1/admin/audit-log/json") {
+          const start = url.searchParams.get("start_date");
+          const end = url.searchParams.get("end_date");
+          if (!start || !end) {
+            return sendJson(res, 400, {
+              error: "start_date and end_date required",
+            });
+          }
+          try {
+            const report = admin.generateQuarterlyReport(
+              new Date(start),
+              new Date(end)
+            );
+            const auditLog = generateAuditLog(report);
+            res.writeHead(200, {
+              "Content-Type": "application/json; charset=utf-8",
+              "Content-Disposition": `attachment; filename="audit-log-${report.quarter}.json"`,
+            });
+            return res.end(auditLog);
+          } catch (err) {
+            return sendJson(res, 400, {
+              error: err instanceof Error ? err.message : String(err),
+            });
+          }
+        }
+
+        return notFound(res);
       }
 
       if (method === "GET") {
