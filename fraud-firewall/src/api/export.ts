@@ -4,8 +4,11 @@ import {
   readFileSync,
   writeFileSync,
   mkdirSync,
+  rmSync,
+  statSync,
 } from "node:fs";
 import { join, basename } from "node:path";
+import AdmZip from "adm-zip";
 import type { FirewallConfig } from "../core/types.js";
 import { readJson } from "../storage/vault.js";
 
@@ -37,6 +40,10 @@ export async function exportFindings(
 ): Promise<ExportResponse> {
   const startDate = new Date(req.start_date);
   const endDate = new Date(req.end_date);
+
+  // Extend end date to include entire end day (up to 23:59:59.999Z)
+  endDate.setUTCHours(23, 59, 59, 999);
+
   const exportId = `EXPORT-${new Date().toISOString().split("T")[0]}`;
   const timestamp = new Date().toISOString();
 
@@ -243,9 +250,19 @@ Confirmed Fraud: ${manifest.summary.confirmed_fraud}
 
   writeFileSync(join(exportDir, "README.txt"), readme);
 
+  // Create ZIP archive from export directory
+  const zip = new AdmZip();
+  addDirToZip(zip, exportDir, exportId);
+
+  const zipPath = join(config.storage.sealed_dir, `${exportId}.zip`);
+  zip.writeZip(zipPath);
+
+  // Clean up temporary directory
+  rmSync(exportDir, { recursive: true });
+
   return {
     export_id: exportId,
-    zip_file_path: exportDir,
+    zip_file_path: zipPath,
     total_findings: alerts.length,
     confirmed,
     false_positives: falsePositives,
@@ -253,6 +270,21 @@ Confirmed Fraud: ${manifest.summary.confirmed_fraud}
     jurisdictions,
     created_at: timestamp,
   };
+}
+
+function addDirToZip(zip: AdmZip, dirPath: string, baseDir: string): void {
+  for (const file of readdirSync(dirPath)) {
+    const fullPath = join(dirPath, file);
+    const zipPath = join(baseDir, file);
+    const stat = statSync(fullPath);
+
+    if (stat.isDirectory()) {
+      addDirToZip(zip, fullPath, zipPath);
+    } else {
+      const fileContent = readFileSync(fullPath);
+      zip.addFile(zipPath, fileContent);
+    }
+  }
 }
 
 function groupBy<T>(
