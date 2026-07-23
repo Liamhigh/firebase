@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 const skipIfServerNotRunning = process.env.SKIP_DASHBOARD_TESTS !== "false";
 
 describe("Week 3: PDF Report Export", { skip: skipIfServerNotRunning }, () => {
-  const ADMIN_KEY = "demo-admin-key-12345";
+  const ADMIN_KEY = process.env.ADMIN_KEY || "test-admin-key-placeholder";
   const API_BASE = "http://localhost:8787/api/v1/admin";
 
   it("generates PDF compliance report with valid credentials", async () => {

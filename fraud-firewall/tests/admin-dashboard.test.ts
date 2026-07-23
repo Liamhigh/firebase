@@ -5,6 +5,8 @@ import assert from "node:assert/strict";
 const skipDashboardTests = process.env.SKIP_DASHBOARD_TESTS !== "false";
 
 describe("Admin Dashboard UI", { skip: skipDashboardTests }, () => {
+  const adminKey = process.env.ADMIN_KEY || "test-admin-key-placeholder";
+
   it("loads admin dashboard HTML with all sections", async () => {
     // Fetch the admin.html page
     const response = await fetch("http://localhost:8787/admin.html");
@@ -32,7 +34,9 @@ describe("Admin Dashboard UI", { skip: skipDashboardTests }, () => {
     assert.ok(html.includes("/api/v1/admin"));
     assert.ok(html.includes("quarterly-report"));
     assert.ok(html.includes("X-Admin-Key"));
-    assert.ok(html.includes("demo-admin-key-12345"));
+
+    // SECURITY: Do NOT check for hardcoded demo key in HTML
+    // Admin key should never be embedded in frontend code
 
     // Verify styling exists
     assert.ok(html.includes("background: linear-gradient"));
@@ -44,7 +48,7 @@ describe("Admin Dashboard UI", { skip: skipDashboardTests }, () => {
     const response = await fetch(
       "http://localhost:8787/api/v1/admin/quarterly-report?start_date=2026-07-01&end_date=2026-09-30",
       {
-        headers: { "X-Admin-Key": "demo-admin-key-12345" },
+        headers: { "X-Admin-Key": adminKey },
       }
     );
 
@@ -90,7 +94,7 @@ describe("Admin Dashboard UI", { skip: skipDashboardTests }, () => {
     const response = await fetch(
       "http://localhost:8787/api/v1/admin/detector-trends?detector=AMOUNT_ANOMALY&weeks=4",
       {
-        headers: { "X-Admin-Key": "demo-admin-key-12345" },
+        headers: { "X-Admin-Key": adminKey },
       }
     );
 
@@ -115,7 +119,7 @@ describe("Admin Dashboard UI", { skip: skipDashboardTests }, () => {
     const response = await fetch(
       "http://localhost:8787/api/v1/admin/false-positive-analysis",
       {
-        headers: { "X-Admin-Key": "demo-admin-key-12345" },
+        headers: { "X-Admin-Key": adminKey },
       }
     );
 
@@ -132,7 +136,7 @@ describe("Admin Dashboard UI", { skip: skipDashboardTests }, () => {
     const response = await fetch(
       "http://localhost:8787/api/v1/admin/fraud-by-jurisdiction?start_date=2026-07-01&end_date=2026-09-30",
       {
-        headers: { "X-Admin-Key": "demo-admin-key-12345" },
+        headers: { "X-Admin-Key": adminKey },
       }
     );
 
