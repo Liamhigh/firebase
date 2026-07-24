@@ -18,6 +18,7 @@ import {
   type RuleManifestFetcher,
 } from "../core/ruleUpdate.js";
 import { Gemma3Forensics, Gemma4Monitor, Phi3Legal } from "../ai/models.js";
+import { LlamaCppClient, type LlamaLike } from "../ai/llamaClient.js";
 import { TripleAiConsensus } from "../ai/consensus.js";
 import { MistralAgentPool } from "../agents/mistral.js";
 import { DocumentSealingService } from "../core/sealing.js";
@@ -58,6 +59,12 @@ export interface FraudFirewallOptions {
   rulePublicKeyDerB64?: string;
   /** Quiet logger for rule-update notes. Defaults to single-line console.warn. */
   log?: (message: string) => void;
+  /**
+   * Local llama.cpp client for the Gemma 3 hybrid pipeline. Defaults to a
+   * client configured from VO_LLAMA_URL; pass null to force pure
+   * deterministic mode, or a stub in tests.
+   */
+  llama?: LlamaLike | null;
 }
 
 export class FraudFirewall {
@@ -70,6 +77,7 @@ export class FraudFirewall {
   private readonly notifications: NotificationService;
   private readonly credits: SealCreditLedgerService;
   private readonly agents: MistralAgentPool;
+  private readonly llama: LlamaLike | null;
   private readonly forensics: ForensicEngine;
   private readonly buffer: Transaction[] = [];
   private alertSeq = 0;
@@ -98,7 +106,9 @@ export class FraudFirewall {
     this.notifications = new NotificationService(config);
     this.credits = new SealCreditLedgerService(config);
     this.agents = new MistralAgentPool(config, () => [...this.buffer]).configureDefaultPool();
-    this.forensics = new ForensicEngine(config);
+    // One shared Gemma 3 runtime for report narration and the G3 review pass.
+    this.llama = options.llama !== undefined ? options.llama : new LlamaCppClient();
+    this.forensics = new ForensicEngine(config, { llama: this.llama });
   }
 
   /** Ingest an evidence document for forensic extraction (spec §4.1). */
@@ -113,6 +123,21 @@ export class FraudFirewall {
   /** Extract evidence atoms + contradictions from documents (spec §4.2/§4.3). */
   extractEvidence(opts: { documents?: unknown[]; seal?: boolean } = {}) {
     return this.forensics.extract(opts);
+  }
+
+  /** G3-raised candidates awaiting promotion or rejection (GHRP two-tier rule). */
+  listG3Candidates() {
+    return this.forensics.candidates.list();
+  }
+
+  /** Promote a G3 candidate — its proposition pair becomes an engine rule. */
+  promoteG3Candidate(candidateId: string, method?: string) {
+    return this.forensics.candidates.promote(candidateId, method);
+  }
+
+  /** Reject a G3 candidate — the reason is sealed with the record. */
+  rejectG3Candidate(candidateId: string, reason: string) {
+    return this.forensics.candidates.reject(candidateId, reason);
   }
 
   getConfig(): FirewallConfig {
@@ -295,7 +320,7 @@ export class FraudFirewall {
         quorum: verification.quorum,
       },
       ai_audit_trail: auditTrail,
-      evidence_summary: this.gemma3.writeForensicReport(ctx, proposed),
+      evidence_summary: await this.gemma3.writeForensicReportNarrative(ctx, proposed, this.llama),
       contradictions: allSignals
         .filter((s) => s.source === "NineBrain")
         .flatMap((s) => s.reasons),

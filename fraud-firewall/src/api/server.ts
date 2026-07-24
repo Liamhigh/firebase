@@ -273,7 +273,48 @@ export function startServer(firewall: FraudFirewall): {
         const contradictions =
           readJson<unknown[]>(findingsPath(config, "contradictions.json")) ?? [];
         const manifest = readJson<unknown>(findingsPath(config, "manifest.json"));
-        return sendJson(res, 200, { manifest, atoms, contradictions });
+        const findings_json = readJson<unknown>(findingsPath(config, "findings.json"));
+        return sendJson(res, 200, { manifest, atoms, contradictions, findings_json });
+      }
+
+      if (method === "GET" && url.pathname === "/v1/g3/candidates") {
+        return sendJson(res, 200, { candidates: firewall.listG3Candidates() });
+      }
+
+      if (method === "POST" && url.pathname === "/v1/g3/promote") {
+        const body = JSON.parse((await readBody(req)) || "{}") as {
+          candidate_id?: string;
+          method?: string;
+        };
+        if (!body.candidate_id) {
+          return sendJson(res, 400, { error: "candidate_id is required" });
+        }
+        try {
+          const promoted = firewall.promoteG3Candidate(body.candidate_id, body.method);
+          return sendJson(res, 200, { promoted });
+        } catch (err) {
+          return sendJson(res, 400, {
+            error: err instanceof Error ? err.message : String(err),
+          });
+        }
+      }
+
+      if (method === "POST" && url.pathname === "/v1/g3/reject") {
+        const body = JSON.parse((await readBody(req)) || "{}") as {
+          candidate_id?: string;
+          reason?: string;
+        };
+        if (!body.candidate_id || !body.reason) {
+          return sendJson(res, 400, { error: "candidate_id and reason are required" });
+        }
+        try {
+          const rejected = firewall.rejectG3Candidate(body.candidate_id, body.reason);
+          return sendJson(res, 200, { rejected });
+        } catch (err) {
+          return sendJson(res, 400, {
+            error: err instanceof Error ? err.message : String(err),
+          });
+        }
       }
 
       if (method === "GET" && url.pathname.startsWith("/v1/sealed/")) {

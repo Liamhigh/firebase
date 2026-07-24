@@ -62,6 +62,59 @@ export class ContradictionEngine {
     out.sort((x, y) => x.contradiction_id.localeCompare(y.contradiction_id));
     return out;
   }
+
+  /**
+   * Additive detector driven by promoted G3 candidates (GHRP feedback loop):
+   * once a candidate is promoted, its opposing phrase pair becomes a rule the
+   * deterministic engine applies itself. Two atoms conflict under a promoted
+   * pair when one contains the first phrase and the other the second.
+   * Conservative severity/confidence — substring co-occurrence is a candidate
+   * signal, not proof — and never modifies the built-in detectors.
+   */
+  detectPromotedPairs(
+    atoms: EvidenceAtom[],
+    pairs: Array<{ rule_id: string; first: string; second: string }>,
+    options: DetectOptions = {},
+  ): Contradiction[] {
+    const now = options.now ?? new Date().toISOString();
+    const out: Contradiction[] = [];
+    const seen = new Set<string>();
+    for (const pair of pairs) {
+      const first = pair.first.toLowerCase();
+      const second = pair.second.toLowerCase();
+      if (!first || !second) continue;
+      const firstAtoms = atoms.filter((a) => a.content.toLowerCase().includes(first));
+      const secondAtoms = atoms.filter((a) => a.content.toLowerCase().includes(second));
+      for (const a of firstAtoms) {
+        for (const b of secondAtoms) {
+          if (a.atom_id === b.atom_id) continue;
+          const id = makeContradictionId(a.atom_id, b.atom_id);
+          if (seen.has(id)) continue;
+          seen.add(id);
+          out.push({
+            contradiction_id: id,
+            brain_source: "B9-RnDValidation",
+            claim_a: toAnchor(a),
+            claim_b: toAnchor(b),
+            severity: "MODERATE",
+            legal_significance: `Promoted G3 rule ${pair.rule_id}: co-occurring opposing phrases "${pair.first}" / "${pair.second}"`,
+            applicable_law: [],
+            confidence: "MODERATE",
+            resolution_status: "PENDING",
+            triple_ai_consensus: {
+              gemma3: "CONCURS",
+              phi3: "ABSTAIN",
+              nine_brain: "CONCURS",
+              quorum: false,
+            },
+            timestamp: now,
+          });
+        }
+      }
+    }
+    out.sort((x, y) => x.contradiction_id.localeCompare(y.contradiction_id));
+    return out;
+  }
 }
 
 function classifyConflict(a: EvidenceAtom, b: EvidenceAtom): ConflictKind {

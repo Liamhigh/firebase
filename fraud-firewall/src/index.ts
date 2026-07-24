@@ -101,4 +101,28 @@ export {
 } from "./engine/index.js";
 export type { EngineOptions } from "./engine/index.js";
 
+// G3 Hybrid Report Pipeline (GHRP)
+export {
+  emitFindingsJson,
+  contradictionToRecord,
+  engineContradictionToRecord,
+  raiseG3Candidate,
+  STATUS_ENGINE_VERIFIED,
+  STATUS_G3_CANDIDATE,
+  STATUS_CANDIDATE_PROMOTED,
+  STATUS_CANDIDATE_REJECTED,
+} from "./pipeline/findingsJsonEmitter.js";
+export type {
+  ContradictionRecord,
+  FindingsJson,
+  G3CandidateInput,
+} from "./pipeline/findingsJsonEmitter.js";
+export { G3ReviewPass, parseCandidates, buildReviewPrompt } from "./forensics/g3Review.js";
+export { G3CandidateStore } from "./forensics/candidateStore.js";
+export type { PromotedPair } from "./forensics/candidateStore.js";
+export { LlamaCppClient } from "./ai/llamaClient.js";
+export type { LlamaLike, LlamaGenerateOptions } from "./ai/llamaClient.js";
+export { ForensicEngine, demoDocuments } from "./forensics/engine.js";
+export type { ExtractResult, EvidenceReceipt } from "./forensics/engine.js";
+
 export type * from "./core/types.js";
