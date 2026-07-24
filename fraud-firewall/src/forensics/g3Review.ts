@@ -18,6 +18,7 @@
 
 import type { Contradiction, ForensicDocument } from "../core/types.js";
 import type { LlamaLike } from "../ai/llamaClient.js";
+import { sha512 } from "../core/crypto.js";
 import {
   raiseG3Candidate,
   type ContradictionRecord,
@@ -65,19 +66,28 @@ export class G3ReviewPass {
     });
     if (!response) return [];
 
-    const bySource = new Map(docs.map((d) => [d.source_file, d]));
+    // Ambiguous file names would anchor a candidate to the wrong digest —
+    // only documents with unique names are eligible anchor targets.
+    const nameCounts = new Map<string, number>();
+    for (const d of docs) nameCounts.set(d.source_file, (nameCounts.get(d.source_file) ?? 0) + 1);
+    const bySource = new Map(
+      docs.filter((d) => nameCounts.get(d.source_file) === 1).map((d) => [d.source_file, d]),
+    );
     const out: ContradictionRecord[] = [];
-    let seq = 0;
     for (const cand of parseCandidates(response).slice(0, MAX_CANDIDATES_PER_REVIEW)) {
       const doc = bySource.get(cand.source_document);
       if (!doc) continue;
       const digest = digests.get(doc.evidence_id);
       if (!digest) continue;
       if (duplicatesEngineFinding(cand, contradictions)) continue;
-      seq += 1;
+      // Content-derived id: stable across re-scans of the same catch, no
+      // collisions between different catches raised in the same second.
+      const contentHash = sha512(
+        `${cand.proposition_a_text}|${cand.proposition_b_text}|${cand.source_document}`,
+      ).slice(0, 12);
       out.push(
         raiseG3Candidate({
-          candidateId: `G3-CAND-${now.slice(0, 19).replace(/[-:T]/g, "")}-${String(seq).padStart(3, "0")}`,
+          candidateId: `G3-CAND-${now.slice(0, 19).replace(/[-:T]/g, "")}-${contentHash}`,
           contradictionType: cand.type,
           propositionAText: cand.proposition_a_text,
           propositionBText: cand.proposition_b_text,
@@ -145,11 +155,22 @@ export function buildReviewPrompt(
 export function parseCandidates(response: string): NominatedCandidate[] {
   const start = response.indexOf("[");
   if (start < 0) return [];
+  // Bracket-match while tracking string literals so brackets inside quoted
+  // evidence text (e.g. "[00:12]") don't derail the scan.
   let depth = 0;
   let end = -1;
+  let inString = false;
+  let escaped = false;
   for (let i = start; i < response.length; i++) {
     const ch = response[i];
-    if (ch === "[") depth += 1;
+    if (inString) {
+      if (escaped) escaped = false;
+      else if (ch === "\\") escaped = true;
+      else if (ch === '"') inString = false;
+      continue;
+    }
+    if (ch === '"') inString = true;
+    else if (ch === "[") depth += 1;
     else if (ch === "]") {
       depth -= 1;
       if (depth === 0) {

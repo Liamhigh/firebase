@@ -93,11 +93,19 @@ export class G3CandidateStore {
 
     const pairs = this.promotedPairs();
     const ruleId = `G3_${candidateId}`;
-    if (!pairs.some((p) => p.rule_id === ruleId)) {
+    const first = promoted.proposition_a_text.trim();
+    const second = promoted.proposition_b_text.trim();
+    const duplicatePair = pairs.some(
+      (p) =>
+        p.rule_id === ruleId ||
+        (p.first.toLowerCase() === first.toLowerCase() &&
+          p.second.toLowerCase() === second.toLowerCase()),
+    );
+    if (!duplicatePair && first && second) {
       pairs.push({
         rule_id: ruleId,
-        first: promoted.proposition_a_text.trim(),
-        second: promoted.proposition_b_text.trim(),
+        first,
+        second,
         promoted_at: now,
         method,
       });

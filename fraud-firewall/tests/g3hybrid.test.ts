@@ -145,6 +145,14 @@ describe("G3 second-pass review", () => {
     assert.equal(parsed[0].severity, "MODERATE");
   });
 
+  it("parseCandidates tolerates brackets inside quoted strings", () => {
+    const parsed = parseCandidates(
+      'result: [{"type":"T","proposition_a_text":"at [00:12] he said yes","proposition_b_text":"see note [1]: he said no","source_document":"d.txt"}]',
+    );
+    assert.equal(parsed.length, 1);
+    assert.equal(parsed[0].proposition_a_text, "at [00:12] he said yes");
+  });
+
   it("dedupes candidates that restate engine findings", async () => {
     const docs = demoDocuments();
     const engineOnly = new ForensicEngine(isolatedConfig(), { llama: null });
