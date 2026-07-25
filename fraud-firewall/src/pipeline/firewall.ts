@@ -19,6 +19,11 @@ import {
 } from "../core/ruleUpdate.js";
 import { Gemma3Forensics, Gemma4Monitor, Phi3Legal } from "../ai/models.js";
 import { LlamaCppClient, type LlamaLike } from "../ai/llamaClient.js";
+import {
+  loadPublishedManifest,
+  publishRules,
+  type PublishOptions,
+} from "../core/rulePublisher.js";
 import { TripleAiConsensus } from "../ai/consensus.js";
 import { MistralAgentPool } from "../agents/mistral.js";
 import { DocumentSealingService } from "../core/sealing.js";
@@ -132,7 +137,27 @@ export class FraudFirewall {
 
   /** Promote a G3 candidate — its proposition pair becomes an engine rule. */
   promoteG3Candidate(candidateId: string, method?: string) {
-    return this.forensics.candidates.promote(candidateId, method);
+    const promoted = this.forensics.candidates.promote(candidateId, method);
+    // Hub role: when a signing key is provisioned, every promotion refreshes
+    // the published manifest so the whole fleet picks up the new rule on its
+    // next update check. Fire-and-forget; a missing key just skips publishing.
+    void publishRules(this.config, this.forensics.candidates, { llama: this.llama }).catch(
+      () => undefined,
+    );
+    return promoted;
+  }
+
+  /** Publish the current promoted rules as a signed manifest (website hub). */
+  publishRules(options: PublishOptions = {}) {
+    return publishRules(this.config, this.forensics.candidates, {
+      llama: this.llama,
+      ...options,
+    });
+  }
+
+  /** The manifest currently served to the fleet, or null if never published. */
+  publishedRulesManifest() {
+    return loadPublishedManifest(this.config);
   }
 
   /** Reject a G3 candidate — the reason is sealed with the record. */

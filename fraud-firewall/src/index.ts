@@ -120,6 +120,18 @@ export type {
 export { G3ReviewPass, parseCandidates, buildReviewPrompt } from "./forensics/g3Review.js";
 export { G3CandidateStore } from "./forensics/candidateStore.js";
 export type { PromotedPair } from "./forensics/candidateStore.js";
+export {
+  publishRules,
+  buildRulePackage,
+  signRulePackage,
+  curatePromotedPairs,
+  mistralReviewPairs,
+  loadPublishedManifest,
+  loadSigningKeyPem,
+  publishedManifestPath,
+  G3_PROMOTED_GROUP_ID,
+} from "./core/rulePublisher.js";
+export type { PublishOptions, PublishOutcome } from "./core/rulePublisher.js";
 export { LlamaCppClient } from "./ai/llamaClient.js";
 export type { LlamaLike, LlamaGenerateOptions } from "./ai/llamaClient.js";
 export { ForensicEngine, demoDocuments } from "./forensics/engine.js";

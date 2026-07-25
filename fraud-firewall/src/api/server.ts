@@ -281,6 +281,23 @@ export function startServer(firewall: FraudFirewall): {
         return sendJson(res, 200, { candidates: firewall.listG3Candidates() });
       }
 
+      // Rules hub: the manifest every app in the fleet polls. Both the
+      // Android client and the firewall client pin vo-master-1 and verify
+      // the signature before applying anything served here.
+      if (
+        method === "GET" &&
+        (url.pathname === "/api/v1/rules/manifest" || url.pathname === "/v1/rules/manifest")
+      ) {
+        const manifest = firewall.publishedRulesManifest();
+        if (!manifest) return sendJson(res, 404, { error: "no rule package published yet" });
+        return sendJson(res, 200, manifest);
+      }
+
+      if (method === "POST" && url.pathname === "/v1/rules/publish") {
+        const outcome = await firewall.publishRules();
+        return sendJson(res, outcome.published ? 200 : 409, outcome);
+      }
+
       if (method === "POST" && url.pathname === "/v1/g3/promote") {
         const body = JSON.parse((await readBody(req)) || "{}") as {
           candidate_id?: string;
