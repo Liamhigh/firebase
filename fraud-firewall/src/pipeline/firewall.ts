@@ -18,6 +18,7 @@ import {
   type RuleManifestFetcher,
 } from "../core/ruleUpdate.js";
 import { Gemma3Forensics, Gemma4Monitor, Phi3Legal } from "../ai/models.js";
+import { GuardianChat, type ChatReply } from "../ai/chat.js";
 import { TripleAiConsensus } from "../ai/consensus.js";
 import { MistralAgentPool } from "../agents/mistral.js";
 import { DocumentSealingService } from "../core/sealing.js";
@@ -28,10 +29,13 @@ import { ForensicEngine } from "../forensics/engine.js";
 import {
   alertPath,
   ensureVault,
+  findingsPath,
   invoicePath,
+  readJson,
   sealedPath,
   writeJson,
 } from "../storage/vault.js";
+import type { Contradiction } from "../core/types.js";
 
 export interface MonitorResult {
   alert: FraudAlert | null;
@@ -71,6 +75,7 @@ export class FraudFirewall {
   private readonly credits: SealCreditLedgerService;
   private readonly agents: MistralAgentPool;
   private readonly forensics: ForensicEngine;
+  private readonly guardianChat = new GuardianChat();
   private readonly buffer: Transaction[] = [];
   private alertSeq = 0;
   private caseSeq = 0;
@@ -394,6 +399,33 @@ export class FraudFirewall {
         ? "Fraud confirmed, sealed, and notified. WARNING: seal credits running low."
         : "Fraud confirmed, sealed, and notified. Verum received commission invoice only.",
     };
+  }
+
+  /**
+   * Case chat: answer a question about the firewall's current state.
+   * The chat only ever sees the same aggregate facts the dashboard exposes —
+   * never raw transactions or document text (privacy hard rule).
+   */
+  chat(message: string): ChatReply {
+    const manifest = readJson<{
+      generated_at: string;
+      document_count: number;
+      atom_count: number;
+      contradiction_count: number;
+    }>(findingsPath(this.config, "manifest.json"));
+    const contradictions =
+      readJson<Contradiction[]>(findingsPath(this.config, "contradictions.json")) ?? [];
+    return this.guardianChat.respond(message, {
+      institution: this.config.institution.name,
+      jurisdiction: this.config.institution.jurisdiction,
+      constitutionVersion: this.config.constitution_version,
+      credits: this.credits.load().credits,
+      agents: this.listAgents().map((a) => ({ name: a.name, mission: a.mission })),
+      evidence: this.listEvidence(),
+      findings: manifest ?? null,
+      contradictions,
+      rulesVersion: this.getRulesVersion(),
+    });
   }
 
   /** Seal an arbitrary bank document using the credit system. */

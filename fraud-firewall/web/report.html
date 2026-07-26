@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <title>Forensic Report — Verum Omnis Guardian Fraud Firewall</title>
+    <link rel="icon" type="image/png" href="./assets/favicon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=JetBrains+Mono:wght@400;500&family=Source+Sans+3:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./css/theme.css" />
+  </head>
+  <body>
+    <div class="bg-stage" aria-hidden="true">
+      <canvas id="particleNetwork"></canvas>
+    </div>
+
+    <header class="topbar">
+      <div class="shell topbar-inner">
+        <a class="brand" href="/" aria-label="Verum Omnis home">
+          <img
+            class="brand-logo"
+            src="./assets/verum-logo-banner.png"
+            alt="Verum Omnis — AI Forensics for Truth"
+          />
+        </a>
+        <nav class="topnav" aria-label="Primary">
+          <a href="/" data-nav="monitor">Monitor</a>
+          <a href="/seal.html" data-nav="seal">Seal</a>
+          <a href="/report.html" data-nav="report">Forensic Report</a>
+          <a href="/vault.html" data-nav="vault">Vault</a>
+          <a href="/chat.html" data-nav="chat">Chat</a>
+          <a class="ext" href="https://www.verumglobal.foundation/verify.html" target="_blank" rel="noreferrer">Verify ↗</a>
+        </nav>
+        <div class="nav-meta">
+          <span class="pill" id="healthPill"><span class="dot"></span> Connecting</span>
+          <span class="pill">Constitution v5.2.7</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="shell">
+      <section class="page-head">
+        <p class="eyebrow">Nine-Brain Evidence Extraction</p>
+        <h1>Forensic Scan &amp; Report</h1>
+        <p class="lead">
+          Ingest documents, extract anchored evidence atoms (SHA-512 + page/line), and detect
+          structured contradictions across the Nine-Brain roles. Deterministic and offline —
+          findings are forensic indicators for human review, not determinations of fraud.
+        </p>
+      </section>
+
+      <section class="panel extraction" id="extractionPanel">
+        <div class="stat-row">
+          <div class="stat">
+            <span class="label">Documents</span>
+            <span class="value" id="docCountValue">—</span>
+          </div>
+          <div class="stat">
+            <span class="label">Evidence Atoms</span>
+            <span class="value" id="atomCountValue">—</span>
+          </div>
+          <div class="stat">
+            <span class="label">Contradictions</span>
+            <span class="value" id="contraCountValue">—</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="docInput">Documents (JSON array of forensic documents)</label>
+          <textarea id="docInput" spellcheck="false"></textarea>
+        </div>
+
+        <div class="cta-row">
+          <button class="btn btn-primary" id="extractBtn" type="button">Run Forensic Scan</button>
+          <button class="btn btn-ghost" id="loadDemoDocsBtn" type="button">Load Demo Evidence</button>
+          <label class="seal-toggle"><input type="checkbox" id="sealFindingsChk" /> Seal findings (1 credit)</label>
+          <span class="seal-toggle">Credits: <strong id="creditValue" style="color: var(--gold-400);">—</strong></span>
+        </div>
+
+        <div class="result" hidden id="extractResultBlock">
+          <p class="sub" id="extractMessage"></p>
+          <div class="contra-list" id="contraList"></div>
+          <details class="raw-findings">
+            <summary>Raw findings JSON</summary>
+            <pre id="extractPre"></pre>
+          </details>
+          <div class="cta-row" id="extractDownloadRow" hidden>
+            <a class="btn btn-primary" id="downloadFindingsSeal" href="#" target="_blank" rel="noreferrer">Download Sealed Findings PDF</a>
+            <a class="btn btn-ghost" href="https://www.verumglobal.foundation/verify.html" target="_blank" rel="noreferrer">Verify on verumglobal.foundation</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="shell footer">
+      <span class="footer-brand">
+        <img src="./assets/verum-logo-sphere.png" alt="" />
+        Verum Omnis · Protocol verum-omnis-seal v1.0 · Patent Pending
+      </span>
+      <a href="https://www.verumglobal.foundation" target="_blank" rel="noreferrer">www.verumglobal.foundation</a>
+    </footer>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script type="module" src="./js/report.js"></script>
+  </body>
+</html>

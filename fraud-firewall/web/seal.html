@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <title>Seal Document — Verum Omnis Guardian Fraud Firewall</title>
+    <link rel="icon" type="image/png" href="./assets/favicon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=JetBrains+Mono:wght@400;500&family=Source+Sans+3:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./css/theme.css" />
+  </head>
+  <body>
+    <div class="bg-stage" aria-hidden="true">
+      <canvas id="particleNetwork"></canvas>
+    </div>
+
+    <header class="topbar">
+      <div class="shell topbar-inner">
+        <a class="brand" href="/" aria-label="Verum Omnis home">
+          <img
+            class="brand-logo"
+            src="./assets/verum-logo-banner.png"
+            alt="Verum Omnis — AI Forensics for Truth"
+          />
+        </a>
+        <nav class="topnav" aria-label="Primary">
+          <a href="/" data-nav="monitor">Monitor</a>
+          <a href="/seal.html" data-nav="seal">Seal</a>
+          <a href="/report.html" data-nav="report">Forensic Report</a>
+          <a href="/vault.html" data-nav="vault">Vault</a>
+          <a href="/chat.html" data-nav="chat">Chat</a>
+          <a class="ext" href="https://www.verumglobal.foundation/verify.html" target="_blank" rel="noreferrer">Verify ↗</a>
+        </nav>
+        <div class="nav-meta">
+          <span class="pill" id="healthPill"><span class="dot"></span> Connecting</span>
+          <span class="pill">Constitution v5.2.7</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="shell">
+      <section class="page-head">
+        <p class="eyebrow">Document Sealing Service</p>
+        <h1>Seal a Document</h1>
+        <p class="lead">
+          Apply a forensic-grade SHA-512 cryptographic seal with the Constitution embedded and
+          OpenTimestamps blockchain anchoring. One seal credit per document. The sealed PDF stays
+          in this institution's vault — verify it any time at the website hub.
+        </p>
+      </section>
+
+      <section class="panel extraction">
+        <div class="stat-row">
+          <div class="stat">
+            <span class="label">Seal Credits</span>
+            <span class="value" id="creditValue">—</span>
+          </div>
+          <div class="stat">
+            <span class="label">Hash</span>
+            <span class="value">SHA-512</span>
+          </div>
+          <div class="stat">
+            <span class="label">Anchor</span>
+            <span class="value">Bitcoin</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="refInput">Document reference</label>
+          <input id="refInput" type="text" placeholder="e.g., DOC-2026-0001 or CASE-FW-20260726" />
+        </div>
+        <div class="field">
+          <label for="titleInput">Title</label>
+          <input id="titleInput" type="text" placeholder="e.g., Supplier Contract — Q3 Review" />
+        </div>
+        <div class="field">
+          <label for="bodyInput">Document text</label>
+          <textarea id="bodyInput" spellcheck="false" placeholder="Paste the document text here, or load a .txt file below."></textarea>
+        </div>
+        <div class="cta-row">
+          <button class="btn btn-primary" id="sealBtn" type="button">Seal Document</button>
+          <label class="btn btn-ghost" for="bodyFileInput" style="cursor: pointer;">Load .txt File</label>
+          <input id="bodyFileInput" type="file" accept=".txt,text/plain" hidden />
+        </div>
+
+        <div class="result" hidden id="sealResultBlock">
+          <p class="sub">Document sealed under Constitution v5.2.7 — keep the seal ID with your case file.</p>
+          <div class="hash-block">
+            <span class="label">Seal ID</span>
+            <code id="sealIdCode"></code>
+          </div>
+          <div class="hash-block">
+            <span class="label">SHA-512 — Verum Forensic Fingerprint</span>
+            <code id="sealShaCode"></code>
+          </div>
+          <div class="cta-row">
+            <a class="btn btn-primary" id="downloadSealedPdf" href="#" target="_blank" rel="noreferrer" hidden>Download Sealed PDF</a>
+            <a class="btn btn-ghost" href="https://www.verumglobal.foundation/verify.html" target="_blank" rel="noreferrer">Verify on verumglobal.foundation</a>
+          </div>
+          <details class="raw-findings">
+            <summary>Raw seal JSON</summary>
+            <pre id="sealPre"></pre>
+          </details>
+        </div>
+
+        <div class="privacy">
+          <strong>Privacy hard rule:</strong> the document text is hashed and sealed on this
+          server — Verum Omnis never receives it. Only commission invoices ever leave the bank.
+        </div>
+      </section>
+    </main>
+
+    <footer class="shell footer">
+      <span class="footer-brand">
+        <img src="./assets/verum-logo-sphere.png" alt="" />
+        Verum Omnis · Protocol verum-omnis-seal v1.0 · Patent Pending
+      </span>
+      <a href="https://www.verumglobal.foundation" target="_blank" rel="noreferrer">www.verumglobal.foundation</a>
+    </footer>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script type="module" src="./js/seal.js"></script>
+  </body>
+</html>

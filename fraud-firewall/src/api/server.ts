@@ -268,6 +268,18 @@ export function startServer(firewall: FraudFirewall): {
         }
       }
 
+      if (method === "POST" && url.pathname === "/v1/chat") {
+        const body = JSON.parse(await readBody(req)) as { message?: unknown };
+        const message = typeof body.message === "string" ? body.message.trim() : "";
+        if (!message) {
+          return sendJson(res, 400, { error: "message (string) required" });
+        }
+        if (message.length > 4000) {
+          return sendJson(res, 400, { error: "message too long (max 4000 chars)" });
+        }
+        return sendJson(res, 200, firewall.chat(message));
+      }
+
       if (method === "GET" && url.pathname === "/v1/findings") {
         const atoms = readJson<unknown[]>(findingsPath(config, "evidence_atoms.json")) ?? [];
         const contradictions =
