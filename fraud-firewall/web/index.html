@@ -28,6 +28,14 @@
             alt="Verum Omnis — AI Forensics for Truth"
           />
         </a>
+        <nav class="topnav" aria-label="Primary">
+          <a href="/" data-nav="monitor">Monitor</a>
+          <a href="/seal.html" data-nav="seal">Seal</a>
+          <a href="/report.html" data-nav="report">Forensic Report</a>
+          <a href="/vault.html" data-nav="vault">Vault</a>
+          <a href="/chat.html" data-nav="chat">Chat</a>
+          <a class="ext" href="https://www.verumglobal.foundation/verify.html" target="_blank" rel="noreferrer">Verify ↗</a>
+        </nav>
         <div class="nav-meta">
           <span class="pill" id="healthPill"><span class="dot"></span> Connecting</span>
           <span class="pill">Constitution v5.2.7</span>
@@ -136,50 +144,18 @@
         </aside>
       </section>
 
-      <section class="panel extraction" id="extractionPanel">
-        <h2>Evidence Extraction</h2>
+      <section class="panel extraction" id="quickLinks">
+        <h2>Guardian Workspaces</h2>
         <p class="sub">
-          Ingest documents, extract anchored evidence atoms (SHA-512 + page/line), and detect
-          structured contradictions across the Nine-Brain roles. Deterministic and offline
-          (spec §4.2 / §4.3 / §12.1 / §12.2).
+          Sealing, forensic scanning, the evidence vault, and the case chat each have their own
+          page — all under the same Constitution. Verification is centralised at the website hub.
         </p>
-
-        <div class="stat-row">
-          <div class="stat">
-            <span class="label">Documents</span>
-            <span class="value" id="docCountValue">—</span>
-          </div>
-          <div class="stat">
-            <span class="label">Evidence Atoms</span>
-            <span class="value" id="atomCountValue">—</span>
-          </div>
-          <div class="stat">
-            <span class="label">Contradictions</span>
-            <span class="value" id="contraCountValue">—</span>
-          </div>
-        </div>
-
-        <div class="field">
-          <label for="docInput">Documents (JSON array of forensic documents)</label>
-          <textarea id="docInput" spellcheck="false"></textarea>
-        </div>
-
         <div class="cta-row">
-          <button class="btn btn-primary" id="extractBtn" type="button">Extract &amp; Detect</button>
-          <button class="btn btn-ghost" id="loadDemoDocsBtn" type="button">Load Demo Evidence</button>
-          <label class="seal-toggle"><input type="checkbox" id="sealFindingsChk" /> Seal findings</label>
-        </div>
-
-        <div class="result" hidden id="extractResultBlock">
-          <p class="sub" id="extractMessage"></p>
-          <div class="contra-list" id="contraList"></div>
-          <details class="raw-findings">
-            <summary>Raw findings JSON</summary>
-            <pre id="extractPre"></pre>
-          </details>
-          <div class="cta-row" id="extractDownloadRow" hidden>
-            <a class="btn btn-ghost" id="downloadFindingsSeal" href="#" target="_blank" rel="noreferrer">Download Sealed Findings PDF</a>
-          </div>
+          <a class="btn btn-primary" href="/seal.html">Seal a Document</a>
+          <a class="btn btn-primary" href="/report.html">Run Forensic Scan</a>
+          <a class="btn btn-ghost" href="/vault.html">Open Vault</a>
+          <a class="btn btn-ghost" href="/chat.html">Case Chat</a>
+          <a class="btn btn-ghost" href="https://www.verumglobal.foundation/verify.html" target="_blank" rel="noreferrer">Verify on Website</a>
         </div>
       </section>
     </main>
@@ -193,6 +169,6 @@
     </footer>
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
-    <script type="module" src="./js/app.js"></script>
+    <script type="module" src="./js/monitor.js"></script>
   </body>
 </html>

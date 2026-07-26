@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <title>Evidence Vault — Verum Omnis Guardian Fraud Firewall</title>
+    <link rel="icon" type="image/png" href="./assets/favicon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=JetBrains+Mono:wght@400;500&family=Source+Sans+3:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./css/theme.css" />
+  </head>
+  <body>
+    <div class="bg-stage" aria-hidden="true">
+      <canvas id="particleNetwork"></canvas>
+    </div>
+
+    <header class="topbar">
+      <div class="shell topbar-inner">
+        <a class="brand" href="/" aria-label="Verum Omnis home">
+          <img
+            class="brand-logo"
+            src="./assets/verum-logo-banner.png"
+            alt="Verum Omnis — AI Forensics for Truth"
+          />
+        </a>
+        <nav class="topnav" aria-label="Primary">
+          <a href="/" data-nav="monitor">Monitor</a>
+          <a href="/seal.html" data-nav="seal">Seal</a>
+          <a href="/report.html" data-nav="report">Forensic Report</a>
+          <a href="/vault.html" data-nav="vault">Vault</a>
+          <a href="/chat.html" data-nav="chat">Chat</a>
+          <a class="ext" href="https://www.verumglobal.foundation/verify.html" target="_blank" rel="noreferrer">Verify ↗</a>
+        </nav>
+        <div class="nav-meta">
+          <span class="pill" id="healthPill"><span class="dot"></span> Connecting</span>
+          <span class="pill">Constitution v5.2.7</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="shell">
+      <section class="page-head">
+        <p class="eyebrow">Bank-Side Storage — Nothing Leaves</p>
+        <h1>Evidence Vault</h1>
+        <p class="lead">
+          Every ingested document, evidence atom, and contradiction finding lives here, inside
+          this institution's infrastructure. Verum Omnis receives commission invoices only —
+          never the evidence.
+        </p>
+      </section>
+
+      <section class="panel extraction">
+        <div class="stat-row">
+          <div class="stat">
+            <span class="label">Evidence Documents</span>
+            <span class="value" id="evidenceCountValue">—</span>
+          </div>
+          <div class="stat">
+            <span class="label">Evidence Atoms</span>
+            <span class="value" id="atomCountValue">—</span>
+          </div>
+          <div class="stat">
+            <span class="label">Contradictions</span>
+            <span class="value" id="contraCountValue">—</span>
+          </div>
+        </div>
+
+        <div class="cta-row">
+          <button class="btn btn-primary" id="refreshVaultBtn" type="button">Refresh Vault</button>
+          <a class="btn btn-ghost" href="/report.html">Run Forensic Scan</a>
+          <a class="btn btn-ghost" href="/seal.html">Seal a Document</a>
+          <span class="seal-toggle">Credits: <strong id="creditValue" style="color: var(--gold-400);">—</strong></span>
+        </div>
+
+        <h2 style="margin-top: 1.5rem;">Evidence Buffer</h2>
+        <div class="vault-list" id="evidenceList">
+          <div class="empty-note">Loading…</div>
+        </div>
+
+        <h2 style="margin-top: 1.5rem;">Last Findings</h2>
+        <div id="findingsSummary">
+          <div class="empty-note">Loading…</div>
+        </div>
+
+        <div class="privacy">
+          <strong>Silence Ledger:</strong> confirmed fraud is sealed and cannot be erased.
+          Sealed PDFs remain downloadable from their seal record and verifiable at
+          <a href="https://www.verumglobal.foundation/verify.html" target="_blank" rel="noreferrer">verumglobal.foundation/verify.html</a>.
+        </div>
+      </section>
+    </main>
+
+    <footer class="shell footer">
+      <span class="footer-brand">
+        <img src="./assets/verum-logo-sphere.png" alt="" />
+        Verum Omnis · Protocol verum-omnis-seal v1.0 · Patent Pending
+      </span>
+      <a href="https://www.verumglobal.foundation" target="_blank" rel="noreferrer">www.verumglobal.foundation</a>
+    </footer>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script type="module" src="./js/vault.js"></script>
+  </body>
+</html>
