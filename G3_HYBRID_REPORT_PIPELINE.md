@@ -4,7 +4,7 @@
 - **System**: Verum Omnis Constitutional Forensic Platform
 - **Component**: Findings JSON contract + Gemma 3 narration layer over the sealed vault
 - **Version**: 1.0.0
-- **Status**: PROPOSED — pending founder ratification (not yet BINDING)
+- **Status**: RATIFIED — BINDING (founder directive, 2026-07-14)
 - **Constitutional Authority**: Prime Directive 2 (Evidence Before Narrative), Prime Directive 4 (Determinism), Prime Directive 13 (Ordinal Confidence Only), 3-Layer Output Model, Article X Section 3
 - **Author**: Drafted with the founder, 2026-07-14
 
@@ -68,7 +68,7 @@ One record per contradiction. No prose, no interpretation, no percentages. Ordin
 ```
 
 Formal schema: `FINDINGS_JSON_SCHEMA.json` (this repo).
-Emitters: `findings_json_emitter.py` (1verum) and `fraud-firewall/src/pipeline/findingsJsonEmitter.ts` (firebase).
+Emitters: `findings_json_emitter.py` (1verum standalone), engine SECTION 14 `FindingsJsonEmitter` (1verum engine-native), `app/.../engine/contradiction/FindingsJsonEmitter.kt` (Android), `fraud-firewall/src/pipeline/findingsJsonEmitter.ts` + `g3HybridPipeline.ts` (firebase).
 Worked example: `examples/standardbank_findings_v531c.json` - 20 records produced from the 1,047-page Standard Bank master evidence bundle on 2026-07-14.
 
 ## 4. Two-Tier Rule - How G3 Adds Missed Contradictions
@@ -134,12 +134,13 @@ Rejected candidates are never deleted; they are sealed with their rejection reas
 ## 9. Signature Block
 
 This document is part of the Verum Omnis Constitutional Governance Framework.
-Upon founder ratification, GHRP functionality becomes bound by CONSTITUTION.md.
+Ratified by the founder on 2026-07-14. GHRP functionality is bound by CONSTITUTION.md.
 
 **System Version**: v5.3.1c
 **Document Version**: 1.0.0
 **Drafted**: 2026-07-14
-**Status**: PROPOSED - pending founder ratification
+**Status**: RATIFIED - BINDING (founder directive, 2026-07-14)
+**Ratified**: 2026-07-14
 
 ```
 VERUM OMNIS - G3 HYBRID REPORT PIPELINE
