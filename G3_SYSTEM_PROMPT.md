@@ -4,7 +4,7 @@
 - **System**: Verum Omnis Constitutional Forensic Platform
 - **Component**: Gemma 3 (G3) report-writing prompt, hybrid pipeline edition
 - **Version**: 1.0.0
-- **Status**: PROPOSED - pending founder ratification
+- **Status**: RATIFIED - BINDING (founder directive, 2026-07-14)
 - **Constitutional requirement**: under 10 words per instruction
 
 ---
