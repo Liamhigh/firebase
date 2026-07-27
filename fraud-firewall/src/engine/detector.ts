@@ -126,6 +126,24 @@ function createThreeLayerContradiction(
       isHypothesis: true,
       requiresHumanReview: true,
     };
+  } else if (cType === ContradictionType.CONDITIONAL_CLAUSE_MISINVOKED) {
+    legalHypothesis = {
+      suggestedOffence: "Unlawful Termination / Misrepresentation of a Contractual Right",
+      legalBasis: "A termination or expiry was invoked under a clause whose precondition (party is the lessee under a head lease, not the owner) was not met, because contemporaneous records show the party had become the owner of the premises — the triggering event never occurred",
+      jurisdictionalNote: "Contract law; SA common law on effluxion, repudiation and misrepresentation — requires legal review",
+      requiredAdditionalEvidence: ["Title deed / property transfer records establishing ownership and its date", "Any head lease agreement (or proof none existed)", "The exact clause relied upon for termination", "Cession / assignment records tracing the invoking party"],
+      isHypothesis: true,
+      requiresHumanReview: true,
+    };
+  } else if (cType === ContradictionType.ACKNOWLEDGE_THEN_DENY) {
+    legalHypothesis = {
+      suggestedOffence: "Contradictory Position / Estoppel — Perjury by Documentary Admission (if the denial was sworn)",
+      legalBasis: "The party's own contract recognises and quantifies an asset (goodwill / value of the business) whose existence or compensable value that party (or its successor-in-title) later denies",
+      jurisdictionalNote: "Estoppel; perjury if the denial was made under oath — requires legal review",
+      requiredAdditionalEvidence: ["The contract clause recognising / quantifying the asset", "The later statement denying the asset's existence or value", "Proof of successor-in-title where the actors differ"],
+      isHypothesis: true,
+      requiresHumanReview: true,
+    };
   }
 
   return {
@@ -359,6 +377,80 @@ function detectPostExpiryEnforcement(claims: Claim[]): Contradiction[] {
   return results;
 }
 
+// ==================== 2 v6.0 FRANCHISE/LEASE DETECTORS ====================
+
+/**
+ * Conditional-clause trap (Caltex Franchise Agreement cl. 3.2.3).
+ * A termination/expiry is invoked under a clause whose precondition is that the
+ * invoking party is the LESSEE under a head lease (i.e. NOT the owner) that has
+ * ended — but contemporaneous evidence shows that party had become the OWNER of
+ * the premises. The clause's triggering event never occurred, so the invoked
+ * termination is void. This is the evidence the engine previously missed because
+ * the lease agreement carrying the clause was not read against the ownership facts.
+ */
+function detectConditionalClauseMisinvoked(claims: Claim[]): Contradiction[] {
+  const results: Contradiction[] = [];
+  // The clause: termination conditioned on the party being a lessee / not the owner.
+  const clauseConditionMarkers = ["lessee", "head lease", "not the owner", "effluxion"];
+  // A contemporaneous fact that the party IS / BECAME the owner of the premises.
+  const ownershipMarkers = [
+    "is the owner", "became the owner", "purchased the property", "owner of the premises",
+    "transfer of the property", "registered owner", "acquired the property", "bought the site",
+    "took transfer", "ownership of the premises", "owns the premises", "owns the property",
+  ];
+  const clauseClaims = claims.filter((c) => clauseConditionMarkers.some((m) => c.value.toLowerCase().includes(m)));
+  const ownershipFacts = claims.filter((c) => ownershipMarkers.some((m) => c.value.toLowerCase().includes(m)));
+  for (const clause of clauseClaims) {
+    for (const own of ownershipFacts) {
+      if (clause.sha512Hash === own.sha512Hash) continue; // same source line — not a contradiction
+      results.push(createThreeLayerContradiction(
+        clause, own, ContradictionType.CONDITIONAL_CLAUSE_MISINVOKED, Severity.VERY_HIGH, Confidence.VERY_HIGH,
+        "TERMINATION_UNDER_LESSEE_CLAUSE_WHILE_OWNER",
+        `A termination/expiry rests on a clause conditioned on the party being a lessee (not the owner), but contemporaneous evidence shows that party was the owner of the premises — the clause's precondition never occurred, so the invoked termination is void`,
+        [clause.value, own.value], 0.95,
+      ));
+    }
+  }
+  return results;
+}
+
+/**
+ * Acknowledge-then-deny of an asset's value (goodwill / value of the business).
+ * One document recognises or quantifies the asset (e.g. the Caltex agreement's
+ * Goodwill definition and the clawback table over the Value of the Business),
+ * while the same party or its successor-in-title later denies that the asset
+ * exists or has any compensable value. "You only take away what exists": a
+ * forfeiture/clawback of goodwill is itself an admission that goodwill exists.
+ */
+function detectAcknowledgeThenDeny(claims: Claim[]): Contradiction[] {
+  const results: Contradiction[] = [];
+  const assetMarkers = ["goodwill", "value of the business"];
+  const recognitionMarkers = ["means", "value", "clawback", "percentage", "inure", "entitled", "recognis", "quantif", "compensat"];
+  const denialMarkers = ["no goodwill", "no compensable", "has no value", "not entitled to any compensation", "no claim", "without compensation", "no value", "not compensable", "has no compensable value"];
+  const recognition = claims.filter((c) => {
+    const t = c.value.toLowerCase();
+    return assetMarkers.some((m) => t.includes(m)) && recognitionMarkers.some((m) => t.includes(m)) &&
+      !denialMarkers.some((m) => t.includes(m));
+  });
+  const denial = claims.filter((c) => {
+    const t = c.value.toLowerCase();
+    return denialMarkers.some((m) => t.includes(m)) &&
+      (assetMarkers.some((m) => t.includes(m)) || t.includes("compensat") || t.includes("value"));
+  });
+  for (const r of recognition) {
+    for (const d of denial) {
+      if (r.sha512Hash === d.sha512Hash) continue;
+      results.push(createThreeLayerContradiction(
+        r, d, ContradictionType.ACKNOWLEDGE_THEN_DENY, Severity.VERY_HIGH, Confidence.VERY_HIGH,
+        "ASSET_VALUE_RECOGNISED_THEN_DENIED",
+        `An asset (goodwill / value of the business) is recognised or quantified in one document but its existence or compensable value is denied elsewhere — a forfeiture or clawback of the asset is itself an admission that it exists`,
+        [r.value, d.value], 0.9,
+      ));
+    }
+  }
+  return results;
+}
+
 // ==================== 6 v5.3.1c DIGSIM DETECTORS ====================
 
 /** Detector 11: DEFECTIVE_JURAT — Affidavit missing mandatory jurat elements. */
@@ -524,6 +616,9 @@ const DETECTOR_MAP: Record<string, (claims: Claim[]) => Contradiction[]> = {
   [ContradictionType.TEMPORAL_PRECEDENCE_CONFLICT]: detectTemporalPrecedenceConflict,
   [ContradictionType.PROCESS_REMEDY_CONFLICT]: detectProcessRemedyConflict,
   [ContradictionType.CHARACTER_ASSASSINATION]: detectCharacterAssassination,
+  // v6.0 franchise/lease detectors
+  [ContradictionType.CONDITIONAL_CLAUSE_MISINVOKED]: detectConditionalClauseMisinvoked,
+  [ContradictionType.ACKNOWLEDGE_THEN_DENY]: detectAcknowledgeThenDeny,
 };
 
 /** Run all 16 detectors and return deduplicated, sorted contradictions */

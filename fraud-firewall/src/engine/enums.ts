@@ -1,8 +1,8 @@
 // CONSTITUTION: v6.0 Final — Contradiction Engine Enums
 // Engine: v5.3.1c | Seal: VO-CE-v531c-DIGSIM-20260713
-// 43 contradiction types | 37 detectors | 17 serial patterns | 7 cases | B1-B11
+// 44 contradiction types | 38 detectors | 17 serial patterns | 7 cases | B1-B11
 
-/** 43 contradiction types detected by the v5.3.1c engine. */
+/** 44 contradiction types detected by the engine (v6.0: +CONDITIONAL_CLAUSE_MISINVOKED). */
 export const ContradictionType = {
   // === v5.2.9 Legacy (16 types) ===
   STATEMENT_VS_STATEMENT: "STATEMENT_VS_STATEMENT",
@@ -54,6 +54,14 @@ export const ContradictionType = {
   TEMPORAL_PRECEDENCE_CONFLICT: "TEMPORAL_PRECEDENCE_CONFLICT",
   PROCESS_REMEDY_CONFLICT: "PROCESS_REMEDY_CONFLICT",
   CHARACTER_ASSASSINATION: "CHARACTER_ASSASSINATION",
+
+  // === v6.0 Franchise/Lease Expansion (1 type) ===
+  // A contractual consequence (termination/expiry) invoked under a clause whose
+  // precondition is contradicted by contemporaneous facts. Named for the
+  // Caltex Franchise Agreement cl. 3.2.3 "Lessee" trap: the contract is deemed
+  // terminated only if the franchisor is NOT the owner but a lessee under a head
+  // lease that ended — invoked while the franchisor had become the owner.
+  CONDITIONAL_CLAUSE_MISINVOKED: "CONDITIONAL_CLAUSE_MISINVOKED",
 } as const;
 export type ContradictionType = (typeof ContradictionType)[keyof typeof ContradictionType];
 

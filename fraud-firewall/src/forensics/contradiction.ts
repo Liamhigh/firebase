@@ -24,7 +24,13 @@ export interface DetectOptions {
   now?: string;
 }
 
-type ConflictKind = "POLARITY" | "DATE" | "NUMERIC" | null;
+type ConflictKind =
+  | "POLARITY"
+  | "DATE"
+  | "NUMERIC"
+  | "CLAUSE_PRECONDITION"
+  | "ASSET_VALUE_DENIAL"
+  | null;
 
 /**
  * Deterministic contradiction engine (spec §4.3 + §12.2).
@@ -47,6 +53,17 @@ export class ContradictionEngine {
         const b = atoms[j];
         if (a.atom_id === b.atom_id) continue;
         const overlap = intersectionSize(topics[i], topics[j]);
+
+        // High-value legal patterns are checked first and are NOT gated on the
+        // generic topic-overlap threshold: the lease agreement carrying the
+        // clause and the document establishing ownership rarely share enough
+        // surface tokens, which is exactly why the engine missed them before.
+        const legalKind = classifyLegalConflict(a, b);
+        if (legalKind) {
+          out.push(buildContradiction(a, b, legalKind, overlap, now));
+          continue;
+        }
+
         if (overlap < minOverlap) continue;
 
         const kind = classifyConflict(a, b);
@@ -89,6 +106,39 @@ function classifyConflict(a: EvidenceAtom, b: EvidenceAtom): ConflictKind {
   return null;
 }
 
+/**
+ * Domain-specific legal contradictions (v6.0). These encode the AllFuels /
+ * Caltex Franchise Agreement patterns the engine previously missed:
+ *  - CLAUSE_PRECONDITION: a termination/expiry resting on a clause whose
+ *    precondition is that the party is the LESSEE (not the owner) under a head
+ *    lease, contradicted by an atom establishing that party's OWNERSHIP.
+ *  - ASSET_VALUE_DENIAL: goodwill / value of the business recognised or
+ *    quantified in one atom, denied or said to have no compensable value in
+ *    another ("you only take away what exists").
+ */
+function classifyLegalConflict(a: EvidenceAtom, b: EvidenceAtom): ConflictKind {
+  const ta = a.content.toLowerCase();
+  const tb = b.content.toLowerCase();
+
+  const clauseCond = (t: string) => /lessee|head lease|not the owner|effluxion/.test(t);
+  const ownership = (t: string) =>
+    /\b(is|became|registered|the)\s+owner\b|purchased the property|owns the (premises|property)|took transfer|acquired the property|ownership of the premises/.test(t);
+  if ((clauseCond(ta) && ownership(tb)) || (clauseCond(tb) && ownership(ta))) {
+    return "CLAUSE_PRECONDITION";
+  }
+
+  const asset = (t: string) => /goodwill|value of the business/.test(t);
+  const denies = (t: string) =>
+    /no goodwill|no compensable|has no value|not entitled to any compensation|without compensation|\bno value\b|not compensable/.test(t);
+  const recognises = (t: string) =>
+    asset(t) && /means|value|clawback|percentage|inure|entitled|recognis|quantif|compensat/.test(t) && !denies(t);
+  if ((recognises(ta) && denies(tb)) || (recognises(tb) && denies(ta))) {
+    return "ASSET_VALUE_DENIAL";
+  }
+
+  return null;
+}
+
 function buildContradiction(
   a: EvidenceAtom,
   b: EvidenceAtom,
@@ -99,7 +149,8 @@ function buildContradiction(
   const brain = brainFor(kind);
   const jurisdiction = a.jurisdiction ?? b.jurisdiction;
   const applicableLaw = applicableLawFor(kind, jurisdiction);
-  const confidence: Confidence = overlap >= 3 ? "VERY_HIGH" : "HIGH";
+  const isLegalKind = kind === "CLAUSE_PRECONDITION" || kind === "ASSET_VALUE_DENIAL";
+  const confidence: Confidence = isLegalKind || overlap >= 3 ? "VERY_HIGH" : "HIGH";
   const consensus = buildConsensus(applicableLaw.length > 0);
 
   return {
@@ -136,12 +187,19 @@ function brainFor(kind: NonNullable<ConflictKind>): BrainSource {
       return "B5-Timeline";
     case "NUMERIC":
       return "B6-Financial";
+    case "CLAUSE_PRECONDITION":
+    case "ASSET_VALUE_DENIAL":
+      return "B7-LegalMapping";
   }
 }
 
 function severityFor(kind: NonNullable<ConflictKind>): Severity {
   switch (kind) {
     case "POLARITY":
+      return "CRITICAL";
+    case "CLAUSE_PRECONDITION":
+      return "CRITICAL";
+    case "ASSET_VALUE_DENIAL":
       return "CRITICAL";
     case "NUMERIC":
       return "HIGH";
@@ -158,6 +216,10 @@ function legalSignificanceFor(kind: NonNullable<ConflictKind>): string {
       return "Conflicting figures for the same item — possible falsified financial records.";
     case "DATE":
       return "Conflicting dates for the same event — timeline inconsistency undermining reliability.";
+    case "CLAUSE_PRECONDITION":
+      return "A termination or expiry rests on a clause conditioned on the party being a lessee (not the owner), but the record shows that party was the owner — the triggering event never occurred, so the termination may be void. HYPOTHESIS: requires legal review.";
+    case "ASSET_VALUE_DENIAL":
+      return "An asset (goodwill / value of the business) is recognised or quantified in one document but denied or said to have no compensable value in another — a forfeiture or clawback is itself an admission the asset exists. HYPOTHESIS: requires legal review.";
   }
 }
 
@@ -176,6 +238,12 @@ function applicableLawFor(
   const jur = base[j.split("-")[0]] ?? [];
   if (kind === "NUMERIC") {
     jur.push("Evidentiary weight under ISO 27037 / Daubert for financial records");
+  }
+  if (kind === "CLAUSE_PRECONDITION") {
+    jur.push("Contract law — effluxion of time, repudiation and misrepresentation (precondition not met)");
+  }
+  if (kind === "ASSET_VALUE_DENIAL") {
+    jur.push("Estoppel; perjury by documentary admission if the denial was made under oath");
   }
   return jur;
 }
