@@ -16,8 +16,18 @@ export type AgentName =
 
 export interface InvestigationScope {
   systems: string[];
-  read_only: true;
+  can_block_transactions: boolean;
+  can_halt_payments: boolean;
   mission: string;
+}
+
+export interface BlockedTransaction {
+  txn_id: string;
+  blocked_at: string;
+  reason: string;
+  blocked_by_agent: string;
+  alert_level: "WARNING" | "CRITICAL";
+  automatically_reversed?: boolean;
 }
 
 export interface FraudAgent {
@@ -26,6 +36,8 @@ export interface FraudAgent {
   scope: InvestigationScope;
   constraints: string[];
   deploy(): Promise<DetectionSignal[]>;
+  blockTransaction(txn_id: string, reason: string, alert_level: "WARNING" | "CRITICAL"): Promise<BlockedTransaction>;
+  haltPaymentRun(): Promise<{ halted_count: number; reason: string }>;
 }
 
 const CONSTRAINTS = [
@@ -51,18 +63,21 @@ export class MistralAgentPool {
   configureDefaultPool(): this {
     this.addAgent("TransactionMonitor", {
       systems: ["transaction_engine"],
-      read_only: true,
-      mission: "Monitor all transactions for fraud patterns",
+      can_block_transactions: true,
+      can_halt_payments: true,
+      mission: "Monitor and block fraudulent transactions in real-time",
     });
     this.addAgent("AccountProfiler", {
       systems: ["account_database"],
-      read_only: true,
-      mission: "Profile accounts for anomalous behaviour",
+      can_block_transactions: true,
+      can_halt_payments: false,
+      mission: "Profile accounts for anomalies and block compromised accounts",
     });
     this.addAgent("CommunicationAudit", {
       systems: ["communication_logs"],
-      read_only: true,
-      mission: "Audit internal communications for fraud indicators",
+      can_block_transactions: true,
+      can_halt_payments: true,
+      mission: "Audit communications and block transactions showing internal fraud indicators",
     });
     return this;
   }
@@ -90,6 +105,51 @@ export class MistralAgentPool {
           });
         }
         return signals;
+      },
+      async blockTransaction(txn_id: string, reason: string, alert_level: "WARNING" | "CRITICAL") {
+        if (!scope.can_block_transactions) {
+          throw new Error(`Agent ${agent_id} does not have authority to block transactions`);
+        }
+        const blocked: BlockedTransaction = {
+          txn_id,
+          blocked_at: new Date().toISOString(),
+          reason,
+          blocked_by_agent: agent_id,
+          alert_level,
+        };
+        pool.audit({
+          ai_model: "Mistral Instruct",
+          agent_id,
+          action: alert_level === "CRITICAL" ? "BLOCKED_TRANSACTION_CRITICAL" : "BLOCKED_TRANSACTION_WARNING",
+          target: txn_id,
+          reason,
+          confidence: alert_level === "CRITICAL" ? "HIGH" : "MODERATE",
+        });
+        return blocked;
+      },
+      async haltPaymentRun() {
+        if (!scope.can_halt_payments) {
+          throw new Error(`Agent ${agent_id} does not have authority to halt payment runs`);
+        }
+        const txns = pool.getTransactions();
+        const suspiciousCount = txns.filter(t => {
+          const score = (t.metadata as Record<string, unknown> | undefined)?.fraud_score;
+          return typeof score === 'number' && score > 0.7;
+        }).length;
+
+        pool.audit({
+          ai_model: "Mistral Instruct",
+          agent_id,
+          action: "HALTED_PAYMENT_RUN",
+          target: `payment_batch_${runtimeId(4)}`,
+          reason: `Payment run halted due to ${suspiciousCount} high-risk transactions detected`,
+          confidence: "HIGH",
+        });
+
+        return {
+          halted_count: suspiciousCount,
+          reason: `${suspiciousCount} transactions halted pending verification`
+        };
       },
     };
     this.agents.push(agent);

@@ -1,0 +1,1471 @@
+{
+  "timestamp": "2026-07-22T20:35:52.494Z",
+  "summary": {
+    "total_transactions": 90,
+    "fraud_alerts": 90,
+    "fraud_rate": 1,
+    "confirmed": 1,
+    "human_review": 89,
+    "rejected": 0,
+    "avg_response_time_ms": 2.9,
+    "min_response_time_ms": 1,
+    "max_response_time_ms": 77,
+    "fraud_types": {
+      "AMOUNT_ANOMALY": 90
+    },
+    "jurisdictions": {
+      "ZA": 72,
+      "US": 6,
+      "EU": 6,
+      "UK": 6
+    },
+    "test_status": "PASS",
+    "pass_criteria": {
+      "all_completed": true,
+      "response_time_under_500ms": true,
+      "fraud_detection_rate_above_80": true
+    }
+  },
+  "transactions": [
+    {
+      "txn_id": "TXN-001",
+      "account_id": "ACC-VELOCITY-001",
+      "amount": 13222,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T00:00:00.000Z",
+      "country": "ZA",
+      "counterparty": "MULE-ACCT-001",
+      "alert": {
+        "txn_id": "TXN-001",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "ZA",
+        "status": "CONFIRMED"
+      },
+      "response_time_ms": 77
+    },
+    {
+      "txn_id": "TXN-002",
+      "account_id": "ACC-VELOCITY-001",
+      "amount": 13422,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T00:00:02.000Z",
+      "country": "ZA",
+      "counterparty": "SHELL-CORP-002",
+      "alert": {
+        "txn_id": "TXN-002",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "ZA",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 5
+    },
+    {
+      "txn_id": "TXN-003",
+      "account_id": "ACC-VELOCITY-001",
+      "amount": 11187,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T00:00:04.000Z",
+      "country": "ZA",
+      "counterparty": "OVERSEAS-TRNSF",
+      "alert": {
+        "txn_id": "TXN-003",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "ZA",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 3
+    },
+    {
+      "txn_id": "TXN-004",
+      "account_id": "ACC-VELOCITY-001",
+      "amount": 12983,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T00:00:06.000Z",
+      "country": "ZA",
+      "counterparty": "CRYPTO-GATE-003",
+      "alert": {
+        "txn_id": "TXN-004",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "ZA",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 3
+    },
+    {
+      "txn_id": "TXN-005",
+      "account_id": "ACC-VELOCITY-001",
+      "amount": 12576,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T00:00:08.000Z",
+      "country": "ZA",
+      "counterparty": "CASHLOAN-LTD",
+      "alert": {
+        "txn_id": "TXN-005",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "ZA",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 3
+    },
+    {
+      "txn_id": "TXN-006",
+      "account_id": "ACC-VELOCITY-001",
+      "amount": 12560,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T00:00:10.000Z",
+      "country": "ZA",
+      "counterparty": "SUSPECT-ACCOUNT",
+      "alert": {
+        "txn_id": "TXN-006",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "ZA",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 2
+    },
+    {
+      "txn_id": "TXN-007",
+      "account_id": "ACC-VELOCITY-001",
+      "amount": 11235,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T00:00:12.000Z",
+      "country": "ZA",
+      "counterparty": "RAPID-TRANSFER",
+      "alert": {
+        "txn_id": "TXN-007",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "ZA",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 7
+    },
+    {
+      "txn_id": "TXN-008",
+      "account_id": "ACC-VELOCITY-001",
+      "amount": 11101,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T00:00:14.000Z",
+      "country": "ZA",
+      "counterparty": "MULE-ACCT-001",
+      "alert": {
+        "txn_id": "TXN-008",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "ZA",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 2
+    },
+    {
+      "txn_id": "TXN-009",
+      "account_id": "ACC-VELOCITY-001",
+      "amount": 13643,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T00:00:16.000Z",
+      "country": "ZA",
+      "counterparty": "SHELL-CORP-002",
+      "alert": {
+        "txn_id": "TXN-009",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "ZA",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 2
+    },
+    {
+      "txn_id": "TXN-010",
+      "account_id": "ACC-VELOCITY-001",
+      "amount": 13344,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T00:00:18.000Z",
+      "country": "ZA",
+      "counterparty": "OVERSEAS-TRNSF",
+      "alert": {
+        "txn_id": "TXN-010",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "ZA",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 5
+    },
+    {
+      "txn_id": "TXN-011",
+      "account_id": "ACC-VELOCITY-001",
+      "amount": 13694,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T00:00:20.000Z",
+      "country": "ZA",
+      "counterparty": "CRYPTO-GATE-003",
+      "alert": {
+        "txn_id": "TXN-011",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "ZA",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 1
+    },
+    {
+      "txn_id": "TXN-012",
+      "account_id": "ACC-VELOCITY-001",
+      "amount": 12316,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T00:00:22.000Z",
+      "country": "ZA",
+      "counterparty": "CASHLOAN-LTD",
+      "alert": {
+        "txn_id": "TXN-012",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "ZA",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 2
+    },
+    {
+      "txn_id": "TXN-013",
+      "account_id": "ACC-VELOCITY-001",
+      "amount": 13229,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T00:00:24.000Z",
+      "country": "ZA",
+      "counterparty": "SUSPECT-ACCOUNT",
+      "alert": {
+        "txn_id": "TXN-013",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "ZA",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 2
+    },
+    {
+      "txn_id": "TXN-014",
+      "account_id": "ACC-VELOCITY-001",
+      "amount": 10746,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T00:00:26.000Z",
+      "country": "ZA",
+      "counterparty": "RAPID-TRANSFER",
+      "alert": {
+        "txn_id": "TXN-014",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "ZA",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 3
+    },
+    {
+      "txn_id": "TXN-015",
+      "account_id": "ACC-VELOCITY-001",
+      "amount": 14859,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T00:00:28.000Z",
+      "country": "ZA",
+      "counterparty": "MULE-ACCT-001",
+      "alert": {
+        "txn_id": "TXN-015",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "ZA",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 2
+    },
+    {
+      "txn_id": "TXN-016",
+      "account_id": "ACC-LAYER-01",
+      "amount": 125404,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T01:00:00.000Z",
+      "country": "ZA",
+      "counterparty": "LAYER-TRANSFER-0",
+      "alert": {
+        "txn_id": "TXN-016",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "ZA",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 2
+    },
+    {
+      "txn_id": "TXN-017",
+      "account_id": "ACC-LAYER-02",
+      "amount": 92163,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T01:10:00.000Z",
+      "country": "ZA",
+      "counterparty": "LAYER-TRANSFER-1",
+      "alert": {
+        "txn_id": "TXN-017",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "ZA",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 1
+    },
+    {
+      "txn_id": "TXN-018",
+      "account_id": "ACC-LAYER-03",
+      "amount": 116021,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T01:20:00.000Z",
+      "country": "ZA",
+      "counterparty": "LAYER-TRANSFER-2",
+      "alert": {
+        "txn_id": "TXN-018",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "ZA",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 2
+    },
+    {
+      "txn_id": "TXN-019",
+      "account_id": "ACC-LAYER-04",
+      "amount": 54798,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T01:30:00.000Z",
+      "country": "ZA",
+      "counterparty": "LAYER-TRANSFER-3",
+      "alert": {
+        "txn_id": "TXN-019",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "ZA",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 2
+    },
+    {
+      "txn_id": "TXN-020",
+      "account_id": "ACC-LAYER-05",
+      "amount": 117173,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T01:40:00.000Z",
+      "country": "ZA",
+      "counterparty": "LAYER-TRANSFER-4",
+      "alert": {
+        "txn_id": "TXN-020",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "ZA",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 1
+    },
+    {
+      "txn_id": "TXN-021",
+      "account_id": "ACC-LAYER-01",
+      "amount": 67338,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T01:50:00.000Z",
+      "country": "ZA",
+      "counterparty": "LAYER-TRANSFER-5",
+      "alert": {
+        "txn_id": "TXN-021",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "ZA",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 1
+    },
+    {
+      "txn_id": "TXN-022",
+      "account_id": "ACC-LAYER-02",
+      "amount": 79845,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T02:00:00.000Z",
+      "country": "ZA",
+      "counterparty": "LAYER-TRANSFER-6",
+      "alert": {
+        "txn_id": "TXN-022",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "ZA",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 2
+    },
+    {
+      "txn_id": "TXN-023",
+      "account_id": "ACC-LAYER-03",
+      "amount": 85955,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T02:10:00.000Z",
+      "country": "ZA",
+      "counterparty": "LAYER-TRANSFER-7",
+      "alert": {
+        "txn_id": "TXN-023",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "ZA",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 1
+    },
+    {
+      "txn_id": "TXN-024",
+      "account_id": "ACC-LAYER-04",
+      "amount": 71729,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T02:20:00.000Z",
+      "country": "ZA",
+      "counterparty": "LAYER-TRANSFER-8",
+      "alert": {
+        "txn_id": "TXN-024",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "ZA",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 1
+    },
+    {
+      "txn_id": "TXN-025",
+      "account_id": "ACC-LAYER-05",
+      "amount": 142879,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T02:30:00.000Z",
+      "country": "ZA",
+      "counterparty": "LAYER-TRANSFER-9",
+      "alert": {
+        "txn_id": "TXN-025",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "ZA",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 2
+    },
+    {
+      "txn_id": "TXN-026",
+      "account_id": "ACC-LAYER-01",
+      "amount": 87154,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T02:40:00.000Z",
+      "country": "ZA",
+      "counterparty": "LAYER-TRANSFER-10",
+      "alert": {
+        "txn_id": "TXN-026",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "ZA",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 2
+    },
+    {
+      "txn_id": "TXN-027",
+      "account_id": "ACC-LAYER-02",
+      "amount": 95205,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T02:50:00.000Z",
+      "country": "ZA",
+      "counterparty": "LAYER-TRANSFER-11",
+      "alert": {
+        "txn_id": "TXN-027",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "ZA",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 2
+    },
+    {
+      "txn_id": "TXN-028",
+      "account_id": "ACC-LAYER-03",
+      "amount": 109826,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T03:00:00.000Z",
+      "country": "ZA",
+      "counterparty": "LAYER-TRANSFER-12",
+      "alert": {
+        "txn_id": "TXN-028",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "ZA",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 2
+    },
+    {
+      "txn_id": "TXN-029",
+      "account_id": "ACC-LAYER-04",
+      "amount": 60822,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T03:10:00.000Z",
+      "country": "ZA",
+      "counterparty": "LAYER-TRANSFER-13",
+      "alert": {
+        "txn_id": "TXN-029",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "ZA",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 2
+    },
+    {
+      "txn_id": "TXN-030",
+      "account_id": "ACC-LAYER-05",
+      "amount": 70866,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T03:20:00.000Z",
+      "country": "ZA",
+      "counterparty": "LAYER-TRANSFER-14",
+      "alert": {
+        "txn_id": "TXN-030",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "ZA",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 2
+    },
+    {
+      "txn_id": "TXN-031",
+      "account_id": "ACC-LAYER-01",
+      "amount": 127768,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T03:30:00.000Z",
+      "country": "ZA",
+      "counterparty": "LAYER-TRANSFER-15",
+      "alert": {
+        "txn_id": "TXN-031",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "ZA",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 2
+    },
+    {
+      "txn_id": "TXN-032",
+      "account_id": "ACC-LAYER-02",
+      "amount": 106897,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T03:40:00.000Z",
+      "country": "ZA",
+      "counterparty": "LAYER-TRANSFER-16",
+      "alert": {
+        "txn_id": "TXN-032",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "ZA",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 2
+    },
+    {
+      "txn_id": "TXN-033",
+      "account_id": "ACC-LAYER-03",
+      "amount": 59579,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T03:50:00.000Z",
+      "country": "ZA",
+      "counterparty": "LAYER-TRANSFER-17",
+      "alert": {
+        "txn_id": "TXN-033",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "ZA",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 2
+    },
+    {
+      "txn_id": "TXN-034",
+      "account_id": "ACC-LAYER-04",
+      "amount": 72795,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T04:00:00.000Z",
+      "country": "ZA",
+      "counterparty": "LAYER-TRANSFER-18",
+      "alert": {
+        "txn_id": "TXN-034",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "ZA",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 2
+    },
+    {
+      "txn_id": "TXN-035",
+      "account_id": "ACC-LAYER-05",
+      "amount": 147039,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T04:10:00.000Z",
+      "country": "ZA",
+      "counterparty": "LAYER-TRANSFER-19",
+      "alert": {
+        "txn_id": "TXN-035",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "ZA",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 2
+    },
+    {
+      "txn_id": "TXN-036",
+      "account_id": "ACC-MULE-RECV-0",
+      "amount": 184188,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T02:00:00.000Z",
+      "country": "ZA",
+      "counterparty": "MULE-0",
+      "alert": {
+        "txn_id": "TXN-036",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "ZA",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 2
+    },
+    {
+      "txn_id": "TXN-037",
+      "account_id": "ACC-MULE-RECV-1",
+      "amount": 283071,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T02:05:00.000Z",
+      "country": "ZA",
+      "counterparty": "MULE-1",
+      "alert": {
+        "txn_id": "TXN-037",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "ZA",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 2
+    },
+    {
+      "txn_id": "TXN-038",
+      "account_id": "ACC-MULE-RECV-2",
+      "amount": 265626,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T02:10:00.000Z",
+      "country": "ZA",
+      "counterparty": "MULE-2",
+      "alert": {
+        "txn_id": "TXN-038",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "ZA",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 2
+    },
+    {
+      "txn_id": "TXN-039",
+      "account_id": "ACC-MULE-RECV-0",
+      "amount": 189710,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T02:15:00.000Z",
+      "country": "ZA",
+      "counterparty": "MULE-3",
+      "alert": {
+        "txn_id": "TXN-039",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "ZA",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 2
+    },
+    {
+      "txn_id": "TXN-040",
+      "account_id": "ACC-MULE-RECV-1",
+      "amount": 171382,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T02:20:00.000Z",
+      "country": "ZA",
+      "counterparty": "MULE-4",
+      "alert": {
+        "txn_id": "TXN-040",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "ZA",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 2
+    },
+    {
+      "txn_id": "TXN-041",
+      "account_id": "ACC-MULE-RECV-2",
+      "amount": 288939,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T02:25:00.000Z",
+      "country": "ZA",
+      "counterparty": "MULE-5",
+      "alert": {
+        "txn_id": "TXN-041",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "ZA",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 2
+    },
+    {
+      "txn_id": "TXN-042",
+      "account_id": "ACC-MULE-RECV-0",
+      "amount": 211870,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T02:30:00.000Z",
+      "country": "ZA",
+      "counterparty": "MULE-6",
+      "alert": {
+        "txn_id": "TXN-042",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "ZA",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 2
+    },
+    {
+      "txn_id": "TXN-043",
+      "account_id": "ACC-MULE-RECV-1",
+      "amount": 151344,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T02:35:00.000Z",
+      "country": "ZA",
+      "counterparty": "MULE-7",
+      "alert": {
+        "txn_id": "TXN-043",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "ZA",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 2
+    },
+    {
+      "txn_id": "TXN-044",
+      "account_id": "ACC-MULE-RECV-2",
+      "amount": 178331,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T02:40:00.000Z",
+      "country": "ZA",
+      "counterparty": "MULE-8",
+      "alert": {
+        "txn_id": "TXN-044",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "ZA",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 2
+    },
+    {
+      "txn_id": "TXN-045",
+      "account_id": "ACC-MULE-RECV-0",
+      "amount": 113986,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T02:45:00.000Z",
+      "country": "ZA",
+      "counterparty": "MULE-9",
+      "alert": {
+        "txn_id": "TXN-045",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "ZA",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 2
+    },
+    {
+      "txn_id": "TXN-046",
+      "account_id": "ACC-MULE-RECV-1",
+      "amount": 184832,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T02:50:00.000Z",
+      "country": "ZA",
+      "counterparty": "MULE-0",
+      "alert": {
+        "txn_id": "TXN-046",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "ZA",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 2
+    },
+    {
+      "txn_id": "TXN-047",
+      "account_id": "ACC-MULE-RECV-2",
+      "amount": 256167,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T02:55:00.000Z",
+      "country": "ZA",
+      "counterparty": "MULE-1",
+      "alert": {
+        "txn_id": "TXN-047",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "ZA",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 2
+    },
+    {
+      "txn_id": "TXN-048",
+      "account_id": "ACC-MULE-RECV-0",
+      "amount": 109988,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T03:00:00.000Z",
+      "country": "ZA",
+      "counterparty": "MULE-2",
+      "alert": {
+        "txn_id": "TXN-048",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "ZA",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 2
+    },
+    {
+      "txn_id": "TXN-049",
+      "account_id": "ACC-MULE-RECV-1",
+      "amount": 132676,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T03:05:00.000Z",
+      "country": "ZA",
+      "counterparty": "MULE-3",
+      "alert": {
+        "txn_id": "TXN-049",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "ZA",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 2
+    },
+    {
+      "txn_id": "TXN-050",
+      "account_id": "ACC-MULE-RECV-2",
+      "amount": 260475,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T03:10:00.000Z",
+      "country": "ZA",
+      "counterparty": "MULE-4",
+      "alert": {
+        "txn_id": "TXN-050",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "ZA",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 2
+    },
+    {
+      "txn_id": "TXN-051",
+      "account_id": "ACC-LARGE-0",
+      "amount": 664704,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T03:00:00.000Z",
+      "country": "ZA",
+      "counterparty": "LARGE-TXN-COUNTERPARTY-0",
+      "alert": {
+        "txn_id": "TXN-051",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "ZA",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 2
+    },
+    {
+      "txn_id": "TXN-052",
+      "account_id": "ACC-LARGE-1",
+      "amount": 692401,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T03:20:00.000Z",
+      "country": "US",
+      "counterparty": "LARGE-TXN-COUNTERPARTY-1",
+      "alert": {
+        "txn_id": "TXN-052",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "US",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 2
+    },
+    {
+      "txn_id": "TXN-053",
+      "account_id": "ACC-LARGE-2",
+      "amount": 481952,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T03:40:00.000Z",
+      "country": "EU",
+      "counterparty": "LARGE-TXN-COUNTERPARTY-2",
+      "alert": {
+        "txn_id": "TXN-053",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "EU",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 2
+    },
+    {
+      "txn_id": "TXN-054",
+      "account_id": "ACC-LARGE-3",
+      "amount": 538694,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T04:00:00.000Z",
+      "country": "UK",
+      "counterparty": "LARGE-TXN-COUNTERPARTY-3",
+      "alert": {
+        "txn_id": "TXN-054",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "UK",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 2
+    },
+    {
+      "txn_id": "TXN-055",
+      "account_id": "ACC-LARGE-0",
+      "amount": 533212,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T04:20:00.000Z",
+      "country": "ZA",
+      "counterparty": "LARGE-TXN-COUNTERPARTY-4",
+      "alert": {
+        "txn_id": "TXN-055",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "ZA",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 2
+    },
+    {
+      "txn_id": "TXN-056",
+      "account_id": "ACC-LARGE-1",
+      "amount": 744859,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T04:40:00.000Z",
+      "country": "US",
+      "counterparty": "LARGE-TXN-COUNTERPARTY-5",
+      "alert": {
+        "txn_id": "TXN-056",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "US",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 2
+    },
+    {
+      "txn_id": "TXN-057",
+      "account_id": "ACC-LARGE-2",
+      "amount": 414361,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T05:00:00.000Z",
+      "country": "EU",
+      "counterparty": "LARGE-TXN-COUNTERPARTY-6",
+      "alert": {
+        "txn_id": "TXN-057",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "EU",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 2
+    },
+    {
+      "txn_id": "TXN-058",
+      "account_id": "ACC-LARGE-3",
+      "amount": 393792,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T05:20:00.000Z",
+      "country": "UK",
+      "counterparty": "LARGE-TXN-COUNTERPARTY-7",
+      "alert": {
+        "txn_id": "TXN-058",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "UK",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 1
+    },
+    {
+      "txn_id": "TXN-059",
+      "account_id": "ACC-LARGE-0",
+      "amount": 378719,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T05:40:00.000Z",
+      "country": "ZA",
+      "counterparty": "LARGE-TXN-COUNTERPARTY-8",
+      "alert": {
+        "txn_id": "TXN-059",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "ZA",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 1
+    },
+    {
+      "txn_id": "TXN-060",
+      "account_id": "ACC-LARGE-1",
+      "amount": 380027,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T06:00:00.000Z",
+      "country": "US",
+      "counterparty": "LARGE-TXN-COUNTERPARTY-9",
+      "alert": {
+        "txn_id": "TXN-060",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "US",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 2
+    },
+    {
+      "txn_id": "TXN-061",
+      "account_id": "ACC-LARGE-2",
+      "amount": 781944,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T06:20:00.000Z",
+      "country": "EU",
+      "counterparty": "LARGE-TXN-COUNTERPARTY-10",
+      "alert": {
+        "txn_id": "TXN-061",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "EU",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 2
+    },
+    {
+      "txn_id": "TXN-062",
+      "account_id": "ACC-LARGE-3",
+      "amount": 729008,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T06:40:00.000Z",
+      "country": "UK",
+      "counterparty": "LARGE-TXN-COUNTERPARTY-11",
+      "alert": {
+        "txn_id": "TXN-062",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "UK",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 3
+    },
+    {
+      "txn_id": "TXN-063",
+      "account_id": "ACC-BORDER-0",
+      "amount": 83989,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T04:00:00.000Z",
+      "country": "ZA",
+      "counterparty": "OVERSEAS-ZA-0",
+      "alert": {
+        "txn_id": "TXN-063",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "ZA",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 2
+    },
+    {
+      "txn_id": "TXN-064",
+      "account_id": "ACC-BORDER-1",
+      "amount": 111740,
+      "currency": "USD",
+      "timestamp": "2026-07-22T04:10:00.000Z",
+      "country": "US",
+      "counterparty": "OVERSEAS-US-1",
+      "alert": {
+        "txn_id": "TXN-064",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "US",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 2
+    },
+    {
+      "txn_id": "TXN-065",
+      "account_id": "ACC-BORDER-2",
+      "amount": 126613,
+      "currency": "EUR",
+      "timestamp": "2026-07-22T04:20:00.000Z",
+      "country": "EU",
+      "counterparty": "OVERSEAS-EU-2",
+      "alert": {
+        "txn_id": "TXN-065",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "EU",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 2
+    },
+    {
+      "txn_id": "TXN-066",
+      "account_id": "ACC-BORDER-0",
+      "amount": 149022,
+      "currency": "EUR",
+      "timestamp": "2026-07-22T04:30:00.000Z",
+      "country": "UK",
+      "counterparty": "OVERSEAS-UK-3",
+      "alert": {
+        "txn_id": "TXN-066",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "UK",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 2
+    },
+    {
+      "txn_id": "TXN-067",
+      "account_id": "ACC-BORDER-1",
+      "amount": 90727,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T04:40:00.000Z",
+      "country": "ZA",
+      "counterparty": "OVERSEAS-ZA-4",
+      "alert": {
+        "txn_id": "TXN-067",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "ZA",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 2
+    },
+    {
+      "txn_id": "TXN-068",
+      "account_id": "ACC-BORDER-2",
+      "amount": 172777,
+      "currency": "USD",
+      "timestamp": "2026-07-22T04:50:00.000Z",
+      "country": "US",
+      "counterparty": "OVERSEAS-US-5",
+      "alert": {
+        "txn_id": "TXN-068",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "US",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 2
+    },
+    {
+      "txn_id": "TXN-069",
+      "account_id": "ACC-BORDER-0",
+      "amount": 198367,
+      "currency": "EUR",
+      "timestamp": "2026-07-22T05:00:00.000Z",
+      "country": "EU",
+      "counterparty": "OVERSEAS-EU-6",
+      "alert": {
+        "txn_id": "TXN-069",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "EU",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 2
+    },
+    {
+      "txn_id": "TXN-070",
+      "account_id": "ACC-BORDER-1",
+      "amount": 115473,
+      "currency": "EUR",
+      "timestamp": "2026-07-22T05:10:00.000Z",
+      "country": "UK",
+      "counterparty": "OVERSEAS-UK-7",
+      "alert": {
+        "txn_id": "TXN-070",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "UK",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 2
+    },
+    {
+      "txn_id": "TXN-071",
+      "account_id": "ACC-BORDER-2",
+      "amount": 127018,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T05:20:00.000Z",
+      "country": "ZA",
+      "counterparty": "OVERSEAS-ZA-8",
+      "alert": {
+        "txn_id": "TXN-071",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "ZA",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 2
+    },
+    {
+      "txn_id": "TXN-072",
+      "account_id": "ACC-BORDER-0",
+      "amount": 91736,
+      "currency": "USD",
+      "timestamp": "2026-07-22T05:30:00.000Z",
+      "country": "US",
+      "counterparty": "OVERSEAS-US-9",
+      "alert": {
+        "txn_id": "TXN-072",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "US",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 2
+    },
+    {
+      "txn_id": "TXN-073",
+      "account_id": "ACC-BORDER-1",
+      "amount": 186650,
+      "currency": "EUR",
+      "timestamp": "2026-07-22T05:40:00.000Z",
+      "country": "EU",
+      "counterparty": "OVERSEAS-EU-10",
+      "alert": {
+        "txn_id": "TXN-073",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "EU",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 1
+    },
+    {
+      "txn_id": "TXN-074",
+      "account_id": "ACC-BORDER-2",
+      "amount": 153173,
+      "currency": "EUR",
+      "timestamp": "2026-07-22T05:50:00.000Z",
+      "country": "UK",
+      "counterparty": "OVERSEAS-UK-11",
+      "alert": {
+        "txn_id": "TXN-074",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "UK",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 1
+    },
+    {
+      "txn_id": "TXN-075",
+      "account_id": "ACC-STRUCT-0",
+      "amount": 249674,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T05:00:00.000Z",
+      "country": "ZA",
+      "counterparty": "STRUCTURE-PARTNER-0",
+      "alert": {
+        "txn_id": "TXN-075",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "ZA",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 1
+    },
+    {
+      "txn_id": "TXN-076",
+      "account_id": "ACC-STRUCT-1",
+      "amount": 249315,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T05:15:00.000Z",
+      "country": "ZA",
+      "counterparty": "STRUCTURE-PARTNER-1",
+      "alert": {
+        "txn_id": "TXN-076",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "ZA",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 2
+    },
+    {
+      "txn_id": "TXN-077",
+      "account_id": "ACC-STRUCT-0",
+      "amount": 249508,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T05:30:00.000Z",
+      "country": "ZA",
+      "counterparty": "STRUCTURE-PARTNER-2",
+      "alert": {
+        "txn_id": "TXN-077",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "ZA",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 2
+    },
+    {
+      "txn_id": "TXN-078",
+      "account_id": "ACC-STRUCT-1",
+      "amount": 249419,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T05:45:00.000Z",
+      "country": "ZA",
+      "counterparty": "STRUCTURE-PARTNER-3",
+      "alert": {
+        "txn_id": "TXN-078",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "ZA",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 2
+    },
+    {
+      "txn_id": "TXN-079",
+      "account_id": "ACC-STRUCT-0",
+      "amount": 249197,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T06:00:00.000Z",
+      "country": "ZA",
+      "counterparty": "STRUCTURE-PARTNER-4",
+      "alert": {
+        "txn_id": "TXN-079",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "ZA",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 2
+    },
+    {
+      "txn_id": "TXN-080",
+      "account_id": "ACC-STRUCT-1",
+      "amount": 249652,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T06:15:00.000Z",
+      "country": "ZA",
+      "counterparty": "STRUCTURE-PARTNER-5",
+      "alert": {
+        "txn_id": "TXN-080",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "ZA",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 2
+    },
+    {
+      "txn_id": "TXN-081",
+      "account_id": "ACC-STRUCT-0",
+      "amount": 249467,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T06:30:00.000Z",
+      "country": "ZA",
+      "counterparty": "STRUCTURE-PARTNER-6",
+      "alert": {
+        "txn_id": "TXN-081",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "ZA",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 3
+    },
+    {
+      "txn_id": "TXN-082",
+      "account_id": "ACC-STRUCT-1",
+      "amount": 249783,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T06:45:00.000Z",
+      "country": "ZA",
+      "counterparty": "STRUCTURE-PARTNER-7",
+      "alert": {
+        "txn_id": "TXN-082",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "ZA",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 2
+    },
+    {
+      "txn_id": "TXN-083",
+      "account_id": "ACC-STRUCT-0",
+      "amount": 249412,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T07:00:00.000Z",
+      "country": "ZA",
+      "counterparty": "STRUCTURE-PARTNER-8",
+      "alert": {
+        "txn_id": "TXN-083",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "ZA",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 2
+    },
+    {
+      "txn_id": "TXN-084",
+      "account_id": "ACC-STRUCT-1",
+      "amount": 249863,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T07:15:00.000Z",
+      "country": "ZA",
+      "counterparty": "STRUCTURE-PARTNER-9",
+      "alert": {
+        "txn_id": "TXN-084",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "ZA",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 2
+    },
+    {
+      "txn_id": "TXN-085",
+      "account_id": "ACC-NORMAL-0",
+      "amount": 104425,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T06:00:00.000Z",
+      "country": "ZA",
+      "counterparty": "NORMAL-VENDOR-0",
+      "alert": {
+        "txn_id": "TXN-085",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "ZA",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 2
+    },
+    {
+      "txn_id": "TXN-086",
+      "account_id": "ACC-NORMAL-1",
+      "amount": 125057,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T06:30:00.000Z",
+      "country": "ZA",
+      "counterparty": "NORMAL-VENDOR-1",
+      "alert": {
+        "txn_id": "TXN-086",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "ZA",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 2
+    },
+    {
+      "txn_id": "TXN-087",
+      "account_id": "ACC-NORMAL-2",
+      "amount": 119754,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T07:00:00.000Z",
+      "country": "ZA",
+      "counterparty": "NORMAL-VENDOR-2",
+      "alert": {
+        "txn_id": "TXN-087",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "ZA",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 2
+    },
+    {
+      "txn_id": "TXN-088",
+      "account_id": "ACC-NORMAL-3",
+      "amount": 111703,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T07:30:00.000Z",
+      "country": "ZA",
+      "counterparty": "NORMAL-VENDOR-3",
+      "alert": {
+        "txn_id": "TXN-088",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "ZA",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 2
+    },
+    {
+      "txn_id": "TXN-089",
+      "account_id": "ACC-NORMAL-4",
+      "amount": 116562,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T08:00:00.000Z",
+      "country": "ZA",
+      "counterparty": "NORMAL-VENDOR-4",
+      "alert": {
+        "txn_id": "TXN-089",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "ZA",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 2
+    },
+    {
+      "txn_id": "TXN-090",
+      "account_id": "ACC-NORMAL-5",
+      "amount": 113127,
+      "currency": "ZAR",
+      "timestamp": "2026-07-22T08:30:00.000Z",
+      "country": "ZA",
+      "counterparty": "NORMAL-VENDOR-5",
+      "alert": {
+        "txn_id": "TXN-090",
+        "fraud_type": "AMOUNT_ANOMALY",
+        "country": "ZA",
+        "status": "HUMAN_REVIEW"
+      },
+      "response_time_ms": 2
+    }
+  ]
+}
