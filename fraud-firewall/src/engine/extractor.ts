@@ -49,7 +49,8 @@ export function hashCorpus(texts: string[]): string {
 }
 
 const SUBJECT_KEYWORDS: Record<string, string[]> = {
-  GOODWILL_VALUE: ["goodwill", "brand", "franchise", "entrenched"],
+  GOODWILL_VALUE: ["goodwill", "brand", "franchise", "entrenched", "value of the business", "clawback", "compensable"],
+  OWNERSHIP: ["owner", "lessee", "head lease", "effluxion", "premises", "title deed", "registered owner", "transfer of the property"],
   CONTRACT_VALIDITY: ["contract", "agreement", "binding", "countersign", "lease"],
   SIGNATURE_STATUS: ["signature", "signed", "blank", "unsigned"],
   SECTION_12B: ["section 12B", "arbitration", "referral", "Business Zone"],
