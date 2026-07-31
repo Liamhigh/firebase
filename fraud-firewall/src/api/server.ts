@@ -8,6 +8,7 @@ import { findingsPath, readJson } from "../storage/vault.js";
 import { exportFindings } from "./export.js";
 import { AdminService } from "./admin.js";
 import { generateComplianceReport, generateAuditLog } from "./pdf-export.js";
+import { PdfOcrExtractor } from "../forensics/pdfExtractor.js";
 import { z } from "zod";
 
 const WEB_ROOT = resolve(
@@ -34,6 +35,50 @@ async function readBody(req: IncomingMessage): Promise<string> {
     chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
   }
   return Buffer.concat(chunks).toString("utf8");
+}
+
+/**
+ * Server-side PDF extraction for the firewall (desktop/on-premise) build.
+ *
+ * A document may arrive as `{ pdfBase64 }` instead of pre-extracted text. When
+ * it does — and no `text`/`pages` were supplied — we extract page-segmented
+ * text with the native hybrid extractor (poppler text layer + tesseract OCR for
+ * image-only pages), which is stronger than the website's in-browser OCR. The
+ * `pdfBase64` field is stripped before the document reaches the schema-validated
+ * pipeline. Non-PDF documents pass through untouched.
+ */
+async function hydratePdfDocuments(documents: unknown[]): Promise<unknown[]> {
+  const extractor = new PdfOcrExtractor();
+  const out: unknown[] = [];
+  for (const doc of documents) {
+    const d = doc as Record<string, unknown> | null;
+    const b64 = d && typeof d.pdfBase64 === "string" ? d.pdfBase64 : null;
+    const alreadyHasText =
+      d && (typeof d.text === "string" || Array.isArray(d.pages));
+    if (!b64 || alreadyHasText) {
+      if (d && "pdfBase64" in d) {
+        const { pdfBase64: _drop, ...rest } = d;
+        out.push(rest);
+      } else {
+        out.push(doc);
+      }
+      continue;
+    }
+    let bytes: Buffer;
+    try {
+      bytes = Buffer.from(b64, "base64");
+    } catch {
+      throw new Error(`document "${String(d?.source_file ?? "?")}" has invalid pdfBase64`);
+    }
+    const result = await extractor.extract(bytes);
+    const { pdfBase64: _drop, ...rest } = d as Record<string, unknown>;
+    out.push({
+      ...rest,
+      type: (rest.type as string) ?? "document",
+      pages: result.pages,
+    });
+  }
+  return out;
 }
 
 function sendJson(res: ServerResponse, status: number, body: unknown): void {
@@ -263,6 +308,7 @@ export function startServer(firewall: FraudFirewall): {
           }
         }
         try {
+          documents = documents ? await hydratePdfDocuments(documents) : documents;
           const result = await firewall.extractEvidence({ documents, seal });
           return sendJson(res, 200, result);
         } catch (err) {

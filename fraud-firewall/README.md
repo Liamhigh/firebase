@@ -27,6 +27,32 @@ cd fraud-firewall
 docker compose -f docker/docker-compose.yml up --build
 ```
 
+## Native document OCR (optional but recommended)
+
+The firewall extracts text from uploaded PDFs **server-side** with a native
+hybrid extractor: poppler's `pdftotext` reads the embedded text layer, and only
+image-only pages (scanned exhibits, photographed documents) are rendered with
+`pdftoppm` and read with the native `tesseract` OCR engine. This is a materially
+higher OCR ceiling than the website's in-browser WebAssembly Tesseract.
+
+Post a document to `POST /v1/extract` as `{ "documents": [{ "evidence_id": "…",
+"source_file": "scan.pdf", "pdfBase64": "<base64 of the PDF>" }] }` and the
+server fills in page-segmented text before running the engine. Documents that
+already carry `text`/`pages` bypass extraction unchanged.
+
+Install the binaries on the host (or bake them into the container):
+
+```bash
+# Debian/Ubuntu
+sudo apt-get install -y poppler-utils tesseract-ocr
+# Windows: install poppler + Tesseract-OCR and add both to PATH
+```
+
+Extraction **degrades gracefully**: if a binary is absent the extractor returns
+whatever it could read and flags the rest as unreadable — it never throws and
+never fabricates text. With no tools installed, `pdfBase64` documents yield no
+text (supply `text`/`pages` instead).
+
 ## Pipeline
 
 1. Transaction ingestion (read-only bank APIs)  
