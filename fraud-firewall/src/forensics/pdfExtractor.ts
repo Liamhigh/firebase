@@ -24,7 +24,7 @@
  */
 
 import { execFile } from "node:child_process";
-import { mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
+import { mkdtemp, readdir, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -196,17 +196,26 @@ export class PopplerTesseractBackend implements PdfBackend {
     return this.cache[bin] as boolean;
   }
 
-  private withTemp<T>(pdf: Buffer, fn: (dir: string, pdfPath: string) => Promise<T>): Promise<T> {
-    const dir = mkdtempSync(join(tmpdir(), "vo-fw-ocr-"));
+  // Async fs throughout: this runs inside request handlers, so the sync
+  // variants (mkdtempSync/writeFileSync/rmSync) would block the event loop for
+  // large PDFs or slow disks. The native tools are still invoked via execFile,
+  // which is already non-blocking.
+  private async withTemp<T>(
+    pdf: Buffer,
+    fn: (dir: string, pdfPath: string) => Promise<T>,
+  ): Promise<T> {
+    const dir = await mkdtemp(join(tmpdir(), "vo-fw-ocr-"));
     const pdfPath = join(dir, "in.pdf");
-    writeFileSync(pdfPath, pdf);
-    return fn(dir, pdfPath).finally(() => {
+    await writeFile(pdfPath, pdf);
+    try {
+      return await fn(dir, pdfPath);
+    } finally {
       try {
-        rmSync(dir, { recursive: true, force: true });
+        await rm(dir, { recursive: true, force: true });
       } catch {
         /* best-effort cleanup */
       }
-    });
+    }
   }
 
   async pageCount(pdf: Buffer): Promise<number> {
@@ -254,7 +263,7 @@ export class PopplerTesseractBackend implements PdfBackend {
           "-f", String(pageNo), "-l", String(pageNo),
           pdfPath, prefix,
         ]);
-        const png = readdirSync(dir).find((f) => f.startsWith("pg") && f.endsWith(".png"));
+        const png = (await readdir(dir)).find((f) => f.startsWith("pg") && f.endsWith(".png"));
         if (!png) return "";
         const imgPath = join(dir, png);
         // tesseract <image> stdout — LSTM engine, page-segmentation "auto".

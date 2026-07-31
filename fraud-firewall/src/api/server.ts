@@ -47,8 +47,12 @@ async function readBody(req: IncomingMessage): Promise<string> {
  * `pdfBase64` field is stripped before the document reaches the schema-validated
  * pipeline. Non-PDF documents pass through untouched.
  */
+// One extractor for the process: its backend caches native-tool capability
+// probes, so a shared instance avoids re-probing (and re-spawning `--version`
+// checks) on every request.
+const pdfExtractor = new PdfOcrExtractor();
+
 async function hydratePdfDocuments(documents: unknown[]): Promise<unknown[]> {
-  const extractor = new PdfOcrExtractor();
   const out: unknown[] = [];
   for (const doc of documents) {
     const d = doc as Record<string, unknown> | null;
@@ -64,14 +68,15 @@ async function hydratePdfDocuments(documents: unknown[]): Promise<unknown[]> {
       }
       continue;
     }
-    let bytes: Buffer;
-    try {
-      bytes = Buffer.from(b64, "base64");
-    } catch {
-      throw new Error(`document "${String(d?.source_file ?? "?")}" has invalid pdfBase64`);
-    }
-    const result = await extractor.extract(bytes);
+    // Degrade gracefully, mirroring the extractor's "never throw" contract:
+    // an undecodable/empty pdfBase64 yields a document with no pages rather
+    // than hard-failing the whole request. Buffer.from is lenient (it drops
+    // invalid base64 chars), so a bad payload simply decodes to few/no bytes.
+    const bytes = Buffer.from(b64, "base64");
     const { pdfBase64: _drop, ...rest } = d as Record<string, unknown>;
+    const result = bytes.length > 0
+      ? await pdfExtractor.extract(bytes)
+      : { pages: [] as { page: number; text: string }[] };
     out.push({
       ...rest,
       type: (rest.type as string) ?? "document",
