@@ -88,6 +88,15 @@
           <input id="bodyFileInput" type="file" accept=".txt,text/plain" hidden />
         </div>
 
+        <div class="vo-pipeline" id="sealPipeline" hidden aria-live="polite">
+          <div class="vo-phead">Sealing Pipeline</div>
+          <div class="vo-step is-pending" data-step="validate"><span class="ico"><span class="ring"></span></span><span class="txt"><strong>Validate</strong><span>Reference, title &amp; document text present</span></span></div>
+          <div class="vo-step is-pending" data-step="hash"><span class="ico"><span class="ring"></span></span><span class="txt"><strong>SHA-512 seal</strong><span>Verum forensic fingerprint</span></span></div>
+          <div class="vo-step is-pending" data-step="constitution"><span class="ico"><span class="ring"></span></span><span class="txt"><strong>Constitution embedded</strong><span>Ruleset bound into the seal</span></span></div>
+          <div class="vo-step is-pending" data-step="ots"><span class="ico"><span class="ring"></span></span><span class="txt"><strong>OpenTimestamps</strong><span>Anchoring the hash to Bitcoin</span></span></div>
+          <div class="vo-step is-pending" data-step="vault"><span class="ico"><span class="ring"></span></span><span class="txt"><strong>Vault</strong><span>Sealed PDF stored in this institution's vault</span></span></div>
+        </div>
+
         <div class="result" hidden id="sealResultBlock">
           <p class="sub">Document sealed under Constitution v5.2.7 — keep the seal ID with your case file.</p>
           <div class="hash-block">
