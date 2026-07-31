@@ -963,3 +963,38 @@ footer {
   color: var(--success);
   word-break: break-all;
 }
+
+/* ============================================================
+   Sealing pipeline — stepped "green lights", mirrors the
+   website's Sealing Pipeline so the three apps read the same.
+   ============================================================ */
+.vo-pipeline { margin: 22px 0 4px; display: grid; gap: 12px; }
+.vo-pipeline[hidden] { display: none; }
+.vo-pipeline .vo-phead {
+  font-family: var(--font-mono, "JetBrains Mono", monospace);
+  font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--gold-400); margin-bottom: 2px;
+}
+.vo-step { display: flex; align-items: flex-start; gap: 12px; }
+.vo-step .ico { flex: 0 0 22px; width: 22px; height: 22px; display: grid; place-items: center; }
+.vo-step .ico .ring {
+  width: 16px; height: 16px; border-radius: 50%;
+  border: 2px solid #2a4a82; box-sizing: border-box;
+}
+.vo-step .txt strong { display: block; font-size: 0.9rem; color: #8a94a6; }
+.vo-step .txt span { font-size: 0.78rem; color: #94a3b8; }
+.vo-step.is-active .txt strong { color: var(--gold-300); font-weight: 600; }
+.vo-step.is-active .ico .ring {
+  border-color: var(--gold-400); border-top-color: transparent;
+  animation: vo-spin 0.7s linear infinite;
+}
+.vo-step.is-done .txt strong { color: #e8e6e1; }
+.vo-step.is-done .ico .ring { display: none; }
+.vo-step.is-done .ico::before { content: "\2713"; color: #22c55e; font-size: 1.05rem; font-weight: 700; line-height: 1; }
+.vo-step.is-warn .txt strong { color: #e8c567; }
+.vo-step.is-warn .ico .ring { display: none; }
+.vo-step.is-warn .ico::before { content: "\0021"; color: #e8c567; font-weight: 700; }
+.vo-step.is-error .txt strong { color: #ef4444; }
+.vo-step.is-error .ico .ring { display: none; }
+.vo-step.is-error .ico::before { content: "\2715"; color: #ef4444; font-weight: 700; }
+@keyframes vo-spin { to { transform: rotate(360deg); } }
