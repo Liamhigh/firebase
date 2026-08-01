@@ -1,4 +1,5 @@
 import { systemPromptFor, loadConstitution } from "../core/constitution.js";
+import type { LlamaLike } from "./llamaClient.js";
 import type {
   Confidence,
   DetectionSignal,
@@ -140,6 +141,54 @@ export class Gemma3Forensics extends ConstitutionalModel {
         : "Missing anchors or rationale — cannot seal narrative without evidence",
       checks: ["transaction_patterns", "metadata", "document_integrity"],
     };
+  }
+
+  /**
+   * Gemma 3 writes the human-readable forensic report. When a local
+   * llama.cpp runtime is configured the narrative is real model output over
+   * the constitution system prompt and the structured findings; the
+   * deterministic template is always appended as the verifiable findings
+   * appendix, and is the sole output when no runtime is available.
+   */
+  async writeForensicReportNarrative(
+    ctx: ModelContext,
+    proposed: DetectionSignal[],
+    llama: LlamaLike | null,
+  ): Promise<string> {
+    const deterministic = this.writeForensicReport(ctx, proposed);
+    if (!llama?.enabled() || !(await llama.available())) return deterministic;
+    const prompt = [
+      this.prompt(),
+      "",
+      "Write a clear, professional forensic analysis narrative for the findings below.",
+      "Rules: ordinal confidence only (no percentages); anchor every claim to the",
+      "transaction ids listed; never invent findings that are not listed; flag gaps",
+      "explicitly rather than writing around them.",
+      "",
+      "STRUCTURED FINDINGS (JSON):",
+      JSON.stringify(
+        {
+          institution: ctx.institution,
+          jurisdiction: ctx.jurisdiction,
+          anomaly_score: ctx.anomaly_score,
+          signals: proposed,
+          transactions: ctx.transactions,
+        },
+        null,
+        2,
+      ),
+      "",
+      "Write the narrative now.",
+    ].join("\n");
+    const narrative = await llama.generate(prompt, { maxTokens: 2048 });
+    if (!narrative) return deterministic;
+    return [
+      "NARRATIVE ANALYSIS (Gemma 3):",
+      narrative.trim(),
+      "",
+      "DETERMINISTIC FINDINGS APPENDIX:",
+      deterministic,
+    ].join("\n");
   }
 
   writeForensicReport(ctx: ModelContext, proposed: DetectionSignal[]): string {

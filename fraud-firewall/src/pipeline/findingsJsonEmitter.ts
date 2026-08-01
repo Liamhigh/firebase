@@ -58,6 +58,8 @@ export interface ContradictionRecord {
   logical_pattern?: Record<string, unknown> | null;
   legal_hypothesis?: Record<string, unknown> | null;
   verification_status: VerificationStatus;
+  /** Set only on rejected candidates — the reason is sealed with the record. */
+  rejection_reason?: string;
 }
 
 export interface FindingsJson {
@@ -103,6 +105,40 @@ export function contradictionToRecord(c: Partial<ContradictionRecord> & {
     legal_hypothesis: c.legal_hypothesis ?? null,
     verification_status: c.verification_status ?? STATUS_ENGINE_VERIFIED,
   };
+}
+
+/**
+ * Convert one deterministic-engine contradiction (core/types.ts shape) into a
+ * Findings JSON record. This is the bridge that lets the production engine
+ * emit the GHRP contract instead of a parallel ad-hoc shape.
+ */
+export function engineContradictionToRecord(c: {
+  contradiction_id: string;
+  brain_source: string;
+  respondent?: string;
+  claim_a: { text: string; source: string; page: number; line: number; sha512: string };
+  claim_b: { text: string; source: string; page: number; line: number; sha512: string };
+  severity: string;
+  legal_significance?: string;
+  confidence: string;
+}): ContradictionRecord {
+  return contradictionToRecord({
+    contradiction_id: c.contradiction_id,
+    type: c.brain_source,
+    severity: c.severity as OrdinalSeverity,
+    confidence: c.confidence as OrdinalConfidence,
+    proposition_a_text: c.claim_a.text,
+    proposition_a_actor: c.respondent ?? c.claim_a.source,
+    proposition_b_text: c.claim_b.text,
+    proposition_b_actor: c.respondent ?? c.claim_b.source,
+    conflict_description: c.legal_significance ?? "",
+    source_document: c.claim_a.source,
+    source_page: c.claim_a.page,
+    source_line: c.claim_a.line,
+    sha512_anchor: c.claim_a.sha512,
+    extraction_method: "engine",
+    verification_status: STATUS_ENGINE_VERIFIED,
+  });
 }
 
 export interface G3CandidateInput {
