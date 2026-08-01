@@ -9,7 +9,7 @@
     "vo-firewall": "dist/cli.js"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json && mkdir -p dist/constitution && cp src/constitution/*.json dist/constitution/",
+    "build": "tsc -p tsconfig.json && node scripts/copy-constitution.mjs",
     "dev": "tsx watch src/cli.ts serve",
     "start": "node dist/cli.js serve",
     "demo": "tsx src/cli.ts demo",
