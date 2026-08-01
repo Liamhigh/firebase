@@ -27,6 +27,9 @@ Rules:
 - Flag extraction gaps. Never write around holes.
 - Legal conclusions are HYPOTHESIS only.
 - Do not guess. If insufficient, say so.
+- Emit all 17 sections. Empty ones say "none identified."
+- Give each accused their own account. Weigh it fairly.
+- Show dated pattern-of-conduct where a sequence exists.
 - Seal the report: SHA-512 footer, page count.
 ```
 

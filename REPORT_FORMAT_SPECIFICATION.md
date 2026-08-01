@@ -12,25 +12,33 @@
 
 ---
 
-## Report Sections (14 Total)
+## Report Sections (17 Total)
 
-| # | Section | Description |
-|---|---------|-------------|
-| 1 | Cover Page | Professional cover with logo, classification, seal ID |
-| 2 | Table of Contents | Dotted leaders, page numbers, VERIFY SEAL marker |
-| 3 | Authentication & Methodology | Brain counts, bundle info, triple verification |
-| 4 | How to Use This Report | Audience guides (investigators, legal, judicial) |
-| 5 | Executive Summary | Numbered findings with evidence anchors and severity |
-| 6 | Evidence Index | Page-by-page breakdown of all evidence |
-| 7 | Four Pillars of Fraud | Fraud element analysis with summary table |
-| 8 | Contradiction Matrix | Table: #, Respondent, Claim A, Claim B, Sev |
-| 9 | Perjury & False Statement | Sworn statement vs sealed evidence analysis |
-| 10 | Coercive Conduct | Incident documentation + Silence Ledger |
-| 11 | Critical Evidence Analysis | Deep-dive on key exhibits [ENTERPRISE: transaction clusters] |
-| 12 | Victim Profiles | Multiple victim pattern evolution [ENTERPRISE: account clusters] |
-| 13 | Legal Framework | Statute mapping + jurisdiction analysis |
-| 14 | Offence Matrix | Finding-to-offence mapping |
-| 15 | Court-Ready Declaration | Certification + triple verification panel |
+Every section below is **mandated**. A section with no data is still emitted,
+stating "none identified" — an absent heading is a defect, not a clean result
+(Prime Directive 6). The machine-checkable contract lives in
+`src/pipeline/reportStructure.ts` (`validateReportSections`); `required` sections
+fail the report if missing, `expected` sections warn.
+
+| # | Section | Level | Description |
+|---|---------|-------|-------------|
+| 1 | Cover Page | required | Professional cover with logo, classification, seal ID |
+| 2 | Table of Contents | required | Dotted leaders, page numbers, VERIFY SEAL marker |
+| 3 | Authentication & Methodology | required | Brain counts, bundle info, triple verification |
+| 4 | How to Use This Report | expected | Audience guides (investigators, legal, judicial) |
+| 5 | Executive Summary | required | Numbered findings with evidence anchors and severity |
+| 6 | Evidence Index | required | Page-by-page breakdown of all evidence |
+| 7 | Four Pillars of Fraud | expected | Fraud element analysis with summary table |
+| 8 | Contradiction Matrix | required | Table: #, Respondent, Claim A, Claim B, Sev |
+| 9 | Counter-Narratives & Rebuttals | expected | Each accused party's own account, weighed against sealed evidence |
+| 10 | Pattern of Conduct | expected | Dated step-by-step sequence showing systematic intent |
+| 11 | Perjury & False Statement | expected | Sworn statement vs sealed evidence analysis |
+| 12 | Coercive Conduct | expected | Incident documentation + Silence Ledger |
+| 13 | Critical Evidence Analysis | expected | Deep-dive on key exhibits [ENTERPRISE: transaction clusters] |
+| 14 | Victim Profiles | expected | Multiple victim pattern evolution [ENTERPRISE: account clusters] |
+| 15 | Legal Framework | required | Statute mapping + jurisdiction analysis |
+| 16 | Offence Matrix | required | Finding-to-offence mapping |
+| 17 | Court-Ready Declaration | required | Certification + triple verification panel |
 
 ---
 
@@ -149,13 +157,53 @@ Standard format from Android app spec. 7 constitutional categories.
 
 ---
 
-## 9. Perjury Analysis
+## 9. Counter-Narratives & Rebuttals
+
+Every accused party is given their own account, in their own words, before the
+report weighs it. Fairness is not optional: a court-ready report that omits the
+respondent's side is impeachable.
+
+Format, per accused party:
+
+- **Party** — name (and role).
+- **Their account** — direct quotes of their claim/denial, each anchored
+  (document, page, line). Quote faithfully; never paraphrase away the defence.
+- **Weighed against** — the sealed evidence that supports or undercuts it, also
+  anchored.
+- **Assessment** — ordinal only ("consistent with the record" /
+  "contradicted by the record at p.X"). Never a verdict; never a percentage.
+
+If a party made no statement in the bundle, say so: "No account on record."
+
+---
+
+## 10. Pattern of Conduct
+
+Where a sequence of dated steps, read together, shows systematic intent (not an
+isolated act), lay it out as a chronological ledger. This is the "how it was
+done" spine of the case.
+
+Format:
+
+| Step | Date | Actor | Action | Anchor (doc · p · line) |
+
+Rules:
+
+- Every step is anchored to sealed evidence. No step is inferred without a source.
+- Present the sequence; intent is an **indicator**, argued from the pattern —
+  never asserted as proven.
+- If the steps do not form a sequence, state "No systematic pattern identified"
+  rather than forcing one.
+
+---
+
+## 11. Perjury Analysis
 
 Standard format. [ENTERPRISE: Include internal bank communications where employees made false statements.
 
 ---
 
-## 11. Critical Evidence Analysis — [ENTERPRISE]
+## 13. Critical Evidence Analysis — [ENTERPRISE]
 
 Deep-dive on transaction clusters and patterns:
 
@@ -176,7 +224,7 @@ Deep-dive on transaction clusters and patterns:
 
 ---
 
-## 12. Victim Profiles — [ENTERPRISE: Account Cluster Profiles]
+## 14. Victim Profiles — [ENTERPRISE: Account Cluster Profiles]
 
 For accounts affected by the fraud:
 
@@ -194,7 +242,7 @@ VICTIM 1: Account [Number] — [Holder Name/Type]
 
 ---
 
-## 15. Court-Ready Declaration — [ENTERPRISE] Additions
+## 17. Court-Ready Declaration — [ENTERPRISE] Additions
 
 ```
 13.1 Certification [standard]
