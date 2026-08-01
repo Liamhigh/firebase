@@ -32,7 +32,16 @@ export interface Constitution {
 
 let cached: Constitution | null = null;
 
-export function loadConstitution(version = "5.2.7"): Constitution {
+/**
+ * The default MUST track the newest ratified constitution. It sat at "5.2.7"
+ * after v6.0.0 was ratified, which split the system's brain: seals were
+ * stamped v6.0.0 (config.constitution_version) while every AI system prompt
+ * (models.ts, mistral.ts) was still built from the superseded v5.2.7 text.
+ * constitution-current.test.ts locks the default to the newest vN.json on disk.
+ */
+export const CURRENT_CONSTITUTION_VERSION = "6.0.0";
+
+export function loadConstitution(version = CURRENT_CONSTITUTION_VERSION): Constitution {
   if (cached && cached.version === version) return cached;
   const path = join(__dirname, "..", "constitution", `v${version}.json`);
   cached = JSON.parse(readFileSync(path, "utf8")) as Constitution;
