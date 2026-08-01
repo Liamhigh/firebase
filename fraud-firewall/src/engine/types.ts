@@ -96,14 +96,10 @@ export interface ActorProfile {
 }
 
 /** Triple verification result — Thesis/Antithesis/Synthesis */
-// Windows/firewall consensus panel (Constitution §4 — Thesis / Antithesis /
-// Synthesis, three independent verifiers): Gemma 3 + Gemma 4 + Mistral Instruct.
-// The deterministic 9-Brain engine is the always-on anchor beneath the panel.
 export interface TripleVerification {
-  gemma3Status: "CONCURS" | "DISSENTS" | "PENDING"; // Thesis
-  gemma4Status: "CONCURS" | "DISSENTS" | "PENDING"; // Antithesis
-  mistralStatus: "CONCURS" | "DISSENTS" | "PENDING"; // Synthesis (Mistral Instruct)
-  nineBrainAnchor: "CONCURS" | "DISSENTS" | "PENDING"; // deterministic anchor
+  gemma3Status: "CONCURS" | "DISSENTS" | "PENDING";
+  phi3Status: "CONCURS" | "DISSENTS" | "PENDING";
+  nineBrainStatus: "CONCURS" | "DISSENTS" | "PENDING";
   quorumMet: boolean;
   discrepancies: string[];
 }
