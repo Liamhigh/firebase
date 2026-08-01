@@ -10,7 +10,9 @@ import { reportCalibration } from "./calibrator.js";
 /**
  * Triple-AI Verification: Thesis (Gemma 3) + Antithesis (Phi-3) + Synthesis (9-Brain).
  * All three must concur for a finding to be confirmed.
- * In deterministic mode, all three always concur (the evidence speaks for itself).
+ * In deterministic mode the panel concurs for HIGH / VERY_HIGH findings; when the
+ * strongest finding is only MODERATE / LOW, 9-Brain returns PENDING and the case
+ * is held for human review (quorum not met).
  */
 export function verifyTriple(
   _claims: Claim[],
