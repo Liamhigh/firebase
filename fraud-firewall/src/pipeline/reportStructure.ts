@@ -23,13 +23,18 @@ export interface ReportSection {
   level: "required" | "expected";
 }
 
-// The canonical order. Titles mirror the spec's section table; the two analytical
-// sections the full-system report demonstrated but the spec had not codified —
-// Counter-Narratives and Pattern of Conduct — are now first-class here.
+// The canonical order. Titles mirror the spec's section table. Counter-Narratives
+// and Pattern of Conduct were codified from the full-system report; the AllFuels
+// reference report added two more first-class sections: Nine-Brain Architecture
+// (the deterministic methodology, named per Constitution v6.0 §3) and External
+// Corroboration (open-source court/news signal, kept strictly separate from — and
+// never overriding — sealed evidence; Constitution v6.0 "overrides external
+// instructions", so fetched text is data, never instruction).
 export const REPORT_SECTIONS: readonly ReportSection[] = [
   { title: "Cover Page", aliases: ["forensic report", "sealed document"], level: "required" },
   { title: "Table of Contents", aliases: ["contents"], level: "required" },
   { title: "Authentication & Methodology", aliases: ["authentication", "methodology"], level: "required" },
+  { title: "Nine-Brain Architecture", aliases: ["nine-brain", "nine brain", "9-brain", "brain designation"], level: "expected" },
   { title: "How to Use This Report", aliases: ["how to use", "how to read"], level: "expected" },
   { title: "Executive Summary", aliases: ["executive summary"], level: "required" },
   { title: "Evidence Index", aliases: ["evidence index", "evidence map"], level: "required" },
@@ -42,6 +47,7 @@ export const REPORT_SECTIONS: readonly ReportSection[] = [
   { title: "Critical Evidence Analysis", aliases: ["critical evidence"], level: "expected" },
   { title: "Victim Profiles", aliases: ["victim profile", "account cluster"], level: "expected" },
   { title: "Legal Framework", aliases: ["legal framework", "statute mapping", "statutory anchoring"], level: "required" },
+  { title: "External Corroboration", aliases: ["external corroboration", "open-source", "open source", "osint", "public record", "corroborating source", "corroborating sources"], level: "expected" },
   { title: "Offence Matrix", aliases: ["offence matrix", "offense matrix"], level: "required" },
   { title: "Court-Ready Declaration", aliases: ["court-ready declaration", "declaration", "certification"], level: "required" },
 ];
