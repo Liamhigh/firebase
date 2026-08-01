@@ -101,8 +101,7 @@ Standard dotted-leader format. VERIFY SEAL marker at bottom.
 1.2 Methodology
     - Rule Engine: [Rules triggered]
     - AI Analysis: Gemma 4 (pattern) + Mistral (agents) + 9-Brain
-    - Triple Verification (Windows/firewall): Gemma 3 (Thesis) + Gemma 4 (Antithesis) + Mistral Instruct (Synthesis); 9-Brain engine is the always-on deterministic anchor
-    - Triple Verification (Android): Gemma 3 + device-tier LLMs + 9-Brain (see 1verum/ON_DEVICE_LLM_ARCHITECTURE.md — no Mistral on-device)
+    - Triple Verification: Gemma 3 + Phi-3 + 9-Brain Engine
     - Sealing: SHA-512 + Bitcoin blockchain
 
 1.3 Evidence Bundle

@@ -8,11 +8,9 @@ import { Confidence } from "./enums.js";
 import { reportCalibration } from "./calibrator.js";
 
 /**
- * Windows/firewall Triple-AI Verification (Constitution §4):
- * Thesis (Gemma 3) + Antithesis (Gemma 4) + Synthesis (Mistral Instruct).
- * All three must concur for a finding to be confirmed; the deterministic
- * 9-Brain engine is the always-on anchor beneath the panel.
- * In deterministic mode, the panel concurs (the evidence speaks for itself).
+ * Triple-AI Verification: Thesis (Gemma 3) + Antithesis (Phi-3) + Synthesis (9-Brain).
+ * All three must concur for a finding to be confirmed.
+ * In deterministic mode, all three always concur (the evidence speaks for itself).
  */
 export function verifyTriple(
   _claims: Claim[],
@@ -26,9 +24,8 @@ export function verifyTriple(
   if (hasVeryHigh) {
     return {
       gemma3Status: "CONCURS",
-      gemma4Status: "CONCURS",
-      mistralStatus: "CONCURS",
-      nineBrainAnchor: "CONCURS",
+      phi3Status: "CONCURS",
+      nineBrainStatus: "CONCURS",
       quorumMet: true,
       discrepancies: [],
     };
@@ -37,9 +34,8 @@ export function verifyTriple(
   if (hasHigh) {
     return {
       gemma3Status: "CONCURS",
-      gemma4Status: "CONCURS",
-      mistralStatus: "CONCURS",
-      nineBrainAnchor: "CONCURS",
+      phi3Status: "CONCURS",
+      nineBrainStatus: "CONCURS",
       quorumMet: true,
       discrepancies: ["No VERY_HIGH findings — confidence capped at HIGH pending review"],
     };
@@ -47,9 +43,8 @@ export function verifyTriple(
 
   return {
     gemma3Status: "CONCURS",
-    gemma4Status: "CONCURS",
-    mistralStatus: "PENDING",
-    nineBrainAnchor: "PENDING",
+    phi3Status: "CONCURS",
+    nineBrainStatus: "PENDING",
     quorumMet: false,
     discrepancies: ["Only MODERATE/LOW findings — human review required"],
   };
@@ -153,9 +148,8 @@ function generateText(report: ForensicReport): string {
   lines.push("TRIPLE VERIFICATION");
   lines.push("-".repeat(70));
   lines.push(`Gemma 3 (Thesis):      ${report.tripleVerification.gemma3Status}`);
-  lines.push(`Gemma 4 (Antithesis):  ${report.tripleVerification.gemma4Status}`);
-  lines.push(`Mistral (Synthesis):   ${report.tripleVerification.mistralStatus}`);
-  lines.push(`9-Brain (Anchor):      ${report.tripleVerification.nineBrainAnchor}`);
+  lines.push(`Phi-3 (Antithesis):    ${report.tripleVerification.phi3Status}`);
+  lines.push(`9-Brain (Synthesis):   ${report.tripleVerification.nineBrainStatus}`);
   lines.push(`Quorum:                ${report.tripleVerification.quorumMet ? "MET" : "NOT MET"}`);
   if (report.tripleVerification.discrepancies.length > 0) {
     lines.push(`Discrepancies: ${report.tripleVerification.discrepancies.join("; ")}`);
