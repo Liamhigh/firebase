@@ -42,6 +42,25 @@ describe("report structure contract", () => {
     assert.ok(titles.includes("Pattern of Conduct"), "pattern of conduct is a section");
   });
 
+  it("codifies the two sections the AllFuels reference report added", () => {
+    const titles = REPORT_SECTIONS.map((s) => s.title);
+    assert.ok(titles.includes("Nine-Brain Architecture"), "nine-brain architecture is a section");
+    assert.ok(titles.includes("External Corroboration"), "external corroboration is a section");
+    // Both are expected (not required): a report on an offline device with no web
+    // signal, or one that omits the methodology table, must still validate.
+    const byTitle = Object.fromEntries(REPORT_SECTIONS.map((s) => [s.title, s.level]));
+    assert.equal(byTitle["Nine-Brain Architecture"], "expected");
+    assert.equal(byTitle["External Corroboration"], "expected");
+  });
+
+  it("resolves the new sections by alias (heading drift)", () => {
+    const v = validateReportSections(
+      [FULL_REPORT, "9-Brain methodology", "Corroborating sources (open source)"].join("\n"),
+    );
+    assert.ok(v.present.includes("Nine-Brain Architecture"));
+    assert.ok(v.present.includes("External Corroboration"));
+  });
+
   it("matches sections by alias, tolerating heading drift", () => {
     // Use aliases instead of canonical titles for the required sections.
     const aliased = [
