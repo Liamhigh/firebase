@@ -13,14 +13,14 @@
 **Component:** `src/ai/`
 **Status:** Open
 
-**Description:** The llama.cpp integration for loading GGUF models is not yet implemented. The system runs in deterministic mode (`ai.mode: "deterministic"`) which uses hard-coded mock responses instead of actual AI inference.
+**Description:** In-process llama.cpp bindings for loading GGUF models are not implemented. However, the hybrid pipeline now has a real inference path: `src/ai/llamaClient.ts` talks to a local llama.cpp `llama-server` (set `VO_LLAMA_URL`, e.g. `http://127.0.0.1:8080`) and is wired into (a) Gemma 3 report narration (`Gemma3Forensics.writeForensicReportNarrative`), and (b) the G3 second-pass vault review (`src/forensics/g3Review.ts`), which raises anchored `G3-RAISED CANDIDATE` records the deterministic engine missed. Candidates persist in `src/forensics/candidateStore.ts` and can be promoted into engine rules (`/v1/g3/promote`) that `ContradictionEngine.detectPromotedPairs` applies on the next extraction. Without `VO_LLAMA_URL` everything degrades to the deterministic pipeline.
 
-**Impact:** The system can detect fraud using rule-based evaluation but cannot perform AI-enhanced analysis, triple verification, or generate forensic reports.
+**Impact:** With a local llama-server running and a Gemma 3 GGUF loaded, AI-enhanced analysis, second-pass contradiction catching, and model-written forensic report narratives all function. Without it the system remains rule-based only.
 
-**Workaround:** Use deterministic mode for development and testing. Rule engine works fully.
+**Workaround:** Run `llama-server -m gemma-3-4b-it-Q4_K_M.gguf --port 8080` locally and set `VO_LLAMA_URL=http://127.0.0.1:8080`.
 
-**Proposed Fix:**
-- Implement `src/ai/loader.ts` with llama.cpp bindings
+**Remaining Fix:**
+- Optional in-process bindings (node-llama-cpp) as an alternative to the local server
 - Download and cache GGUF models on first run
 - Add GPU acceleration support (CUDA/ROCm)
 

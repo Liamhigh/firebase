@@ -11,6 +11,15 @@ import { hashDocument, toPages } from "./hasher.js";
 import { EvidenceExtractor } from "./extractor.js";
 import { ContradictionEngine } from "./contradiction.js";
 import { DocumentSealingService } from "../core/sealing.js";
+import { G3ReviewPass } from "./g3Review.js";
+import { G3CandidateStore } from "./candidateStore.js";
+import { LlamaCppClient, type LlamaLike } from "../ai/llamaClient.js";
+import {
+  emitFindingsJson,
+  engineContradictionToRecord,
+  type ContradictionRecord,
+  type FindingsJson,
+} from "../pipeline/findingsJsonEmitter.js";
 import {
   ensureVault,
   evidencePath,
@@ -30,9 +39,13 @@ export interface EvidenceReceipt {
 
 export interface ExtractResult {
   findings: ExtractionFindings;
+  /** The GHRP Findings JSON contract document (engine + G3 candidate tiers). */
+  findings_json: FindingsJson;
   atoms_path: string;
   contradictions_path: string;
   manifest_path: string;
+  findings_json_path: string;
+  g3_candidate_count: number;
   seal?: SealRecord;
   sealed_pdf_path?: string;
   low_balance_warning?: boolean;
@@ -51,10 +64,20 @@ export class ForensicEngine {
   private readonly contradictions = new ContradictionEngine();
   private readonly sealing: DocumentSealingService;
   private readonly buffer = new Map<string, ForensicDocument>();
+  private readonly g3Review: G3ReviewPass;
+  readonly candidates: G3CandidateStore;
 
-  constructor(private readonly config: FirewallConfig) {
+  constructor(
+    private readonly config: FirewallConfig,
+    options: { llama?: LlamaLike | null } = {},
+  ) {
     ensureVault(config);
     this.sealing = new DocumentSealingService(config);
+    // Hybrid pipeline: with no llama.cpp server configured the review pass is
+    // a no-op and the engine stays purely deterministic.
+    const llama = options.llama !== undefined ? options.llama : new LlamaCppClient();
+    this.g3Review = new G3ReviewPass(llama, llama?.model);
+    this.candidates = new G3CandidateStore(config);
   }
 
   /** Validate + persist an original document; add it to the extraction buffer. */
@@ -112,12 +135,25 @@ export class ForensicEngine {
     }
 
     const atoms: EvidenceAtom[] = [];
+    const digests = new Map<string, string>();
     for (const doc of docs) {
       atoms.push(...this.extractor.extract(doc, { now }));
+      digests.set(doc.evidence_id, hashDocument(toPages(doc)));
     }
     const contradictions: Contradiction[] = this.contradictions.detect(atoms, {
       now,
     });
+
+    // Feedback loop: promoted G3 candidates run as additive engine rules, so
+    // a contradiction Gemma 3 once caught is now caught by the engine itself.
+    const promotedPairs = this.candidates.promotedPairs();
+    if (promotedPairs.length) {
+      const existing = new Set(contradictions.map((c) => c.contradiction_id));
+      for (const extra of this.contradictions.detectPromotedPairs(atoms, promotedPairs, { now })) {
+        if (!existing.has(extra.contradiction_id)) contradictions.push(extra);
+      }
+      contradictions.sort((x, y) => x.contradiction_id.localeCompare(y.contradiction_id));
+    }
 
     const findings: ExtractionFindings = {
       generated_at: now,
@@ -130,11 +166,37 @@ export class ForensicEngine {
       contradictions,
     };
 
+    // G3 second pass: Gemma 3 reviews the evidence for contradictions the
+    // engine missed. Candidates are anchored to the engine's own document
+    // digests and persisted for later promotion or rejection.
+    const g3Candidates: ContradictionRecord[] = await this.g3Review.review(
+      docs,
+      contradictions,
+      digests,
+      now,
+    );
+    this.candidates.record(g3Candidates, now);
+
+    // Emit the GHRP Findings JSON contract: one document, two tiers —
+    // ENGINE-VERIFIED records plus any G3-RAISED CANDIDATE records.
+    const findingsJson = emitFindingsJson(
+      contradictions.map(engineContradictionToRecord),
+      {
+        engineVersion: this.config.constitution_version,
+        sourceBundle: findings.institution,
+        caseIds: docs.map((d) => d.evidence_id),
+        integrityFindings: [],
+        extraRecords: g3Candidates,
+      },
+    );
+
     const atomsPath = findingsPath(this.config, "evidence_atoms.json");
     const contradictionsPath = findingsPath(this.config, "contradictions.json");
     const manifestPath = findingsPath(this.config, "manifest.json");
+    const findingsJsonPath = findingsPath(this.config, "findings.json");
     writeJson(atomsPath, atoms);
     writeJson(contradictionsPath, contradictions);
+    writeJson(findingsJsonPath, findingsJson);
     writeJson(manifestPath, {
       generated_at: findings.generated_at,
       constitution_version: findings.constitution_version,
@@ -150,9 +212,12 @@ export class ForensicEngine {
 
     const result: ExtractResult = {
       findings,
+      findings_json: findingsJson,
       atoms_path: atomsPath,
       contradictions_path: contradictionsPath,
       manifest_path: manifestPath,
+      findings_json_path: findingsJsonPath,
+      g3_candidate_count: findingsJson.g3_candidate_count,
     };
 
     if (opts.seal) {
