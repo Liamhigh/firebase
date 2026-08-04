@@ -1,5 +1,27 @@
 # Architecture — Verum Omnis Guardian Fraud Firewall
 
+> ## System context — this repo is one surface of a larger system
+> **Read this before treating the firewall as a standalone app.** Verum Omnis is **one forensic
+> engine across three surfaces**: the **website hub** (`webdocsol` — document sealing + the canonical
+> public verification endpoint), the **Android app** (`1verum` — on-device hybrid engine), and
+> **this Guardian fraud firewall** (`firebase`).
+>
+> Two system-wide rules:
+> 1. **Serverless / stateless — no self-managed servers, and no central store of user *documents*.**
+>    (This surface's Storage Layer holds firewall pipeline data, *not* the canonical verification
+>    state.) Durable **verification** truth lives only in the **sealed artifact** and its **Bitcoin
+>    (OpenTimestamps) anchor** — never a server the project runs.
+> 2. **All verification is done at the website hub.** A seal is proven at
+>    `verumglobal.foundation/verify.html` by recomputing SHA-512 and checking the OpenTimestamps/
+>    Bitcoin anchor — **not** by a server lookup. Findings this firewall produces seal and verify
+>    against the same endpoint and the same public blockchain.
+>
+> **Shared engine contract:** the Findings JSON schema + **signed, RSA-verified rule packages**
+> (contradiction types **CT01–CT45**) from the website Worker. The firewall consumes the same engine
+> contract and **self-updates** its detectors from signed packages — additively, and new detectors
+> are **human-signed, never auto-ingested** from arbitrary input. See `webdocsol/ARCHITECTURE.md` for
+> the whole-system picture.
+
 **Document Purpose:** System architecture, data flows, component communication, and deployment topology.
 
 **Version:** 5.2.7
