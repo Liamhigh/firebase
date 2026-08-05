@@ -1,358 +1,225 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Documents & Resources - Verum Omnis</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: #f5f5f5;
-            color: #333;
-        }
-
-        .header {
-            background: linear-gradient(135deg, #040D1B 0%, #0A1628 100%);
-            color: white;
-            padding: 24px 32px;
-            border-bottom: 4px solid #4A7EC7;
-        }
-
-        .header h1 { font-size: 28px; margin-bottom: 8px; }
-        .header p { opacity: 0.8; font-size: 14px; }
-
-        .nav {
-            display: flex;
-            gap: 0;
-            background: white;
-            border-bottom: 1px solid #ddd;
-            padding: 0 32px;
-        }
-
-        .nav a {
-            padding: 12px 24px;
-            text-decoration: none;
-            color: #666;
-            font-weight: 500;
-            transition: all 0.2s;
-            border-bottom: 3px solid transparent;
-        }
-
-        .nav a:hover {
-            color: #4A7EC7;
-        }
-
-        .nav a.active {
-            color: #4A7EC7;
-            border-bottom-color: #4A7EC7;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 32px;
-        }
-
-        .page-title {
-            font-size: 32px;
-            font-weight: 300;
-            color: #040D1B;
-            margin-bottom: 32px;
-            letter-spacing: 0.5px;
-        }
-
-        .documents-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 24px;
-        }
-
-        .document-card {
-            background: white;
-            border-radius: 8px;
-            padding: 24px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            border-left: 4px solid #4A7EC7;
-            transition: all 0.2s;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .document-card:hover {
-            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-            transform: translateY(-2px);
-        }
-
-        .doc-icon {
-            font-size: 40px;
-            margin-bottom: 12px;
-        }
-
-        .doc-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: #040D1B;
-            margin-bottom: 8px;
-        }
-
-        .doc-description {
-            font-size: 14px;
-            color: #666;
-            margin-bottom: 16px;
-            flex-grow: 1;
-            line-height: 1.5;
-        }
-
-        .doc-meta {
-            font-size: 12px;
-            color: #999;
-            margin-bottom: 16px;
-            display: flex;
-            gap: 12px;
-        }
-
-        .doc-meta span {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .doc-actions {
-            display: flex;
-            gap: 8px;
-        }
-
-        .btn {
-            padding: 8px 16px;
-            border-radius: 4px;
-            text-decoration: none;
-            font-size: 13px;
-            font-weight: 500;
-            transition: all 0.2s;
-            border: none;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .btn-primary {
-            background: #4A7EC7;
-            color: white;
-            flex: 1;
-            justify-content: center;
-        }
-
-        .btn-primary:hover {
-            background: #3a6ab5;
-        }
-
-        .btn-secondary {
-            background: #f0f0f0;
-            color: #333;
-            flex: 1;
-            justify-content: center;
-        }
-
-        .btn-secondary:hover {
-            background: #e0e0e0;
-        }
-
-        .seal-badge {
-            display: inline-block;
-            background: #d4edda;
-            color: #155724;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: 600;
-            margin-bottom: 12px;
-        }
-
-        .info-section {
-            background: white;
-            padding: 24px;
-            border-radius: 8px;
-            margin-top: 32px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-
-        .info-section h2 {
-            font-size: 20px;
-            color: #040D1B;
-            margin-bottom: 12px;
-        }
-
-        .info-section p {
-            color: #666;
-            line-height: 1.6;
-            margin-bottom: 12px;
-        }
-
-        .seal-info {
-            background: #f9f9f9;
-            padding: 16px;
-            border-radius: 4px;
-            margin-top: 16px;
-            font-size: 13px;
-            color: #666;
-            border-left: 3px solid #4A7EC7;
-        }
-    </style>
-</head>
-<body>
-    <div class="header">
-        <h1>Verum Omnis</h1>
-        <p>Documents & Resources</p>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <title>Documents &amp; Resources — Verum Omnis Guardian Fraud Firewall</title>
+    <link rel="icon" type="image/png" href="./assets/favicon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=JetBrains+Mono:wght@400;500&family=Source+Sans+3:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./css/verum-ui.css" />
+    <link rel="stylesheet" href="./css/theme.css" />
+  </head>
+  <body class="vo-page">
+    <div class="bg-stage" aria-hidden="true">
+      <canvas id="particleNetwork"></canvas>
     </div>
 
-    <div class="nav">
-        <a href="/">Firewall</a>
-        <a href="/admin.html">Admin Dashboard</a>
-        <a href="/documents.html" class="active">Documents</a>
-    </div>
+    <header class="topbar">
+      <div class="shell topbar-inner">
+        <a class="brand" href="/" aria-label="Verum Omnis home">
+          <img
+            class="brand-logo"
+            src="./assets/verum-logo-banner.png"
+            alt="Verum Omnis — AI Forensics for Truth"
+          />
+        </a>
+        <nav class="topnav" aria-label="Primary">
+          <a href="/" data-nav="monitor">Monitor</a>
+          <a href="/seal.html" data-nav="seal">Seal</a>
+          <a href="/report.html" data-nav="report">Forensic Report</a>
+          <a href="/vault.html" data-nav="vault">Vault</a>
+          <a href="/chat.html" data-nav="chat">Chat</a>
+          <a class="active" href="/documents.html" data-nav="documents">Documents</a>
+          <a href="/admin.html" data-nav="admin">Admin</a>
+          <a class="ext" href="https://verumglobal.foundation/verify.html" target="_blank" rel="noreferrer">Verify ↗</a>
+        </nav>
+        <div class="nav-meta">
+          <span class="pill" id="healthPill"><span class="dot"></span> Connecting</span>
+          <span class="pill">Constitution v8.0</span>
+        </div>
+      </div>
+    </header>
 
-    <div class="container">
-        <h2 class="page-title">Documents & Resources</h2>
+    <main class="shell">
+      <section class="page-head">
+        <p class="eyebrow">Governance &amp; Specifications</p>
+        <h1>Documents &amp; Resources</h1>
+        <p class="lead">
+          The governing Constitution and the technical standards behind every seal this firewall
+          produces. Documents are sealed here — verification always happens at the
+          Verification Hub on verumglobal.foundation.
+        </p>
+      </section>
 
-        <div class="documents-grid">
-            <!-- Constitution v6.0 -->
-            <div class="document-card">
-                <div class="doc-icon">📜</div>
-                <div class="seal-badge">✓ Cryptographically Sealed</div>
-                <div class="doc-title">Constitution v6.0 Final</div>
-                <div class="doc-description">
-                    The foundational document governing all Verum Omnis systems. Establishes the AI Non-Weaponization Doctrine and the evidentiary standards for forensic AI.
-                </div>
-                <div class="doc-meta">
-                    <span>📅 Filed: 12 July 2026</span>
-                    <span>🌍 South Africa</span>
-                </div>
-                <div class="doc-actions">
-                    <a href="/documents/constitution-v6.0-final.pdf" class="btn btn-primary">📥 Download</a>
-                    <button class="btn btn-secondary" onclick="viewDocument('constitution-v6.0-final.pdf')">👁 View</button>
-                </div>
-            </div>
-
-            <!-- Document Sealing Standard -->
-            <div class="document-card">
-                <div class="doc-icon">🔐</div>
-                <div class="seal-badge">✓ Technical Specification</div>
-                <div class="doc-title">Document Sealing Standard (VO-DSS-1.2)</div>
-                <div class="doc-description">
-                    Technical specification for the cryptographic sealing system. Covers SHA-512 fingerprints, OpenTimestamps Bitcoin anchoring, QR code encoding, and chain of custody.
-                </div>
-                <div class="doc-meta">
-                    <span>Version: 1.2</span>
-                    <span>Status: Active</span>
-                </div>
-                <div class="doc-actions">
-                    <a href="/documents/VO-DSS-1.2.md" download class="btn btn-primary">📥 Download</a>
-                    <a href="#" onclick="viewMarkdown('/documents/VO-DSS-1.2.md', 'VO-DSS-1.2')" class="btn btn-secondary">👁 View</a>
-                </div>
-            </div>
-
-            <!-- Document Sealing Service -->
-            <div class="document-card">
-                <div class="doc-icon">⚙️</div>
-                <div class="seal-badge">✓ Service Documentation</div>
-                <div class="doc-title">Document Sealing Service API</div>
-                <div class="doc-description">
-                    API reference and implementation guide for the Document Sealing Service. Includes endpoint specifications, authentication, seal verification procedures, and code examples.
-                </div>
-                <div class="doc-meta">
-                    <span>Type: API Reference</span>
-                    <span>Format: Markdown</span>
-                </div>
-                <div class="doc-actions">
-                    <a href="/documents/SEALING-SERVICE-API.md" download class="btn btn-primary">📥 Download</a>
-                    <a href="#" onclick="viewMarkdown('/documents/SEALING-SERVICE-API.md', 'Sealing Service API')" class="btn btn-secondary">👁 View</a>
-                </div>
-            </div>
+      <div class="doc-grid">
+        <!-- Constitution v6.0 -->
+        <div class="vo-card vo-card--hover doc-card">
+          <h3 class="vo-card__title">Constitution v6.0 Final</h3>
+          <div class="doc-badge-row"><span class="vo-pill">Cryptographically Sealed</span></div>
+          <p class="doc-desc">
+            The foundational document governing all Verum Omnis systems. Establishes the AI
+            Non-Weaponization Doctrine and the evidentiary standards for forensic AI.
+          </p>
+          <div class="doc-meta">
+            <span>Filed: 12 July 2026</span>
+            <span>South Africa</span>
+          </div>
+          <div class="doc-actions">
+            <a href="/documents/constitution-v6.0-final.pdf" class="vo-btn-gold vo-btn-gold--sm">Download</a>
+            <button class="vo-btn-outline vo-btn-outline--sm" onclick="viewDocument('constitution-v6.0-final.pdf')" type="button">View</button>
+            <a href="https://verumglobal.foundation/verify.html" target="_blank" rel="noreferrer" class="vo-btn-outline vo-btn-outline--sm">Verify at the Hub ↗</a>
+          </div>
         </div>
 
-        <!-- Information Section -->
-        <div class="info-section">
-            <h2>About These Documents</h2>
-            <p>
-                All Verum Omnis documents are cryptographically sealed and immutable. The Constitution v6.0 Final
-                is the authoritative governance document for all Verum Omnis systems, including the Fraud Firewall,
-                evidence vault, and reporting engines.
-            </p>
-            <p>
-                Documents are sealed with:
-            </p>
-            <div class="seal-info">
-                <strong>Cryptographic Integrity:</strong> SHA-512 fingerprinting<br>
-                <strong>Blockchain Anchoring:</strong> Bitcoin via OpenTimestamps<br>
-                <strong>Jurisdiction:</strong> Constitutional Court of South Africa<br>
-                <strong>Status:</strong> Immutable • Court-Validated • Open to All
-            </div>
-            <p style="margin-top: 16px;">
-                Visit <a href="https://www.verumglobal.foundation" target="_blank" style="color: #4A7EC7;">verumglobal.foundation</a>
-                for additional resources and regulatory information.
-            </p>
+        <!-- Document Sealing Standard -->
+        <div class="vo-card vo-card--hover doc-card">
+          <h3 class="vo-card__title">Document Sealing Standard (VO-DSS-1.2)</h3>
+          <div class="doc-badge-row"><span class="vo-pill">Technical Specification</span></div>
+          <p class="doc-desc">
+            Technical specification for the cryptographic sealing system. Covers SHA-512
+            fingerprints, OpenTimestamps Bitcoin anchoring, QR code encoding, and chain of custody.
+          </p>
+          <div class="doc-meta">
+            <span>Version: 1.2</span>
+            <span>Status: Active</span>
+          </div>
+          <div class="doc-actions">
+            <a href="/documents/VO-DSS-1.2.md" download class="vo-btn-gold vo-btn-gold--sm">Download</a>
+            <a href="#" onclick="viewMarkdown('/documents/VO-DSS-1.2.md', 'VO-DSS-1.2')" class="vo-btn-outline vo-btn-outline--sm">View</a>
+          </div>
         </div>
-    </div>
 
-    <script>
-        function viewDocument(filename) {
-            // Open in new tab
-            window.open(`/documents/${filename}`, '_blank');
-        }
+        <!-- Document Sealing Service -->
+        <div class="vo-card vo-card--hover doc-card">
+          <h3 class="vo-card__title">Document Sealing Service API</h3>
+          <div class="doc-badge-row"><span class="vo-pill">Service Documentation</span></div>
+          <p class="doc-desc">
+            API reference and implementation guide for the Document Sealing Service. Includes
+            endpoint specifications, authentication, sealing procedures, and code examples.
+          </p>
+          <div class="doc-meta">
+            <span>Type: API Reference</span>
+            <span>Format: Markdown</span>
+          </div>
+          <div class="doc-actions">
+            <a href="/documents/SEALING-SERVICE-API.md" download class="vo-btn-gold vo-btn-gold--sm">Download</a>
+            <a href="#" onclick="viewMarkdown('/documents/SEALING-SERVICE-API.md', 'Sealing Service API')" class="vo-btn-outline vo-btn-outline--sm">View</a>
+          </div>
+        </div>
+      </div>
 
-        function viewMarkdown(path, title) {
-            // Fetch markdown and display in modal or new window
-            fetch(path)
-                .then(r => r.text())
-                .then(content => {
-                    // Simple markdown to HTML converter
-                    let html = content
-                        .replace(/^# (.+)$/gm, '<h1>$1</h1>')
-                        .replace(/^## (.+)$/gm, '<h2>$1</h2>')
-                        .replace(/^### (.+)$/gm, '<h3>$1</h3>')
-                        .replace(/^#### (.+)$/gm, '<h4>$1</h4>')
-                        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-                        .replace(/\*(.+?)\*/g, '<em>$1</em>')
-                        .replace(/`(.+?)`/g, '<code>$1</code>')
-                        .replace(/\n\n/g, '</p><p>')
-                        .replace(/\n/g, '<br>');
+      <!-- Information Section -->
+      <section class="vo-card">
+        <h3 class="vo-card__title">About These Documents</h3>
+        <p>
+          All Verum Omnis documents are cryptographically sealed and immutable. The Constitution
+          v6.0 Final is the authoritative governance document for all Verum Omnis systems,
+          including the Fraud Firewall, evidence vault, and reporting engines.
+        </p>
+        <div class="vo-id-field">
+          <span class="vo-id-label">Cryptographic Integrity</span>
+          <span class="vo-id-value">SHA-512 fingerprinting</span>
+        </div>
+        <div class="vo-id-field">
+          <span class="vo-id-label">Blockchain Anchoring</span>
+          <span class="vo-id-value">Bitcoin via OpenTimestamps</span>
+        </div>
+        <div class="vo-id-field">
+          <span class="vo-id-label">Jurisdiction</span>
+          <span class="vo-id-value">Constitutional Court of South Africa</span>
+        </div>
+        <div class="vo-id-field">
+          <span class="vo-id-label">Status</span>
+          <span class="vo-id-value">Immutable · Court-Validated · Open to All</span>
+        </div>
+        <div class="vo-note note-tight">
+          <strong>Verification = website.</strong> This firewall seals and analyses locally; it
+          never verifies locally. Check any sealed document at the
+          <a href="https://verumglobal.foundation/verify.html" target="_blank" rel="noreferrer">Verification Hub</a>.
+        </div>
+      </section>
+    </main>
 
-                    const htmlContent = `
-                        <!DOCTYPE html>
-                        <html>
-                        <head>
-                            <meta charset="UTF-8">
-                            <title>${title}</title>
-                            <style>
-                                body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
-                                .container { max-width: 900px; margin: 0 auto; background: white; padding: 32px; border-radius: 8px; line-height: 1.6; }
-                                h1 { color: #040D1B; border-bottom: 3px solid #4A7EC7; padding-bottom: 8px; }
-                                h2 { color: #4A7EC7; margin-top: 24px; }
-                                h3, h4 { color: #333; }
-                                code { background: #f5f5f5; padding: 2px 6px; border-radius: 3px; font-family: monospace; }
-                                table { border-collapse: collapse; width: 100%; margin: 16px 0; }
-                                th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
-                                th { background: #f9f9f9; font-weight: 600; }
-                                pre { background: #f5f5f5; padding: 16px; border-radius: 4px; overflow-x: auto; }
-                                a { color: #4A7EC7; text-decoration: none; }
-                                a:hover { text-decoration: underline; }
-                            </style>
-                        </head>
-                        <body>
-                            <div class="container">
-                                <p>${html}</p>
-                            </div>
-                        </body>
-                        </html>
-                    `;
+    <footer class="shell vo-seal-footer">
+      Verum Omnis · Protocol verum-omnis-seal v1.0 · Patent Pending<br />
+      Sealed locally — verified at the
+      <a href="https://verumglobal.foundation/verify.html" target="_blank" rel="noreferrer">Verification Hub</a><br />
+      <a href="https://verumglobal.foundation" target="_blank" rel="noreferrer">verumglobal.foundation</a>
+    </footer>
 
-                    const win = window.open();
-                    win.document.write(htmlContent);
-                })
-                .catch(err => alert('Error loading document: ' + err.message));
-        }
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <script type="module">
+      import { initPage } from "./js/shared.js";
+      initPage("documents");
     </script>
-</body>
+    <script>
+      function viewDocument(filename) {
+        // Open in new tab
+        window.open(`/documents/${filename}`, "_blank");
+      }
+
+      function viewMarkdown(path, title) {
+        // Fetch markdown and display in a new window (Verum Omnis dark navy theme)
+        fetch(path)
+          .then((r) => r.text())
+          .then((content) => {
+            // Simple markdown to HTML converter
+            let html = content
+              .replace(/^# (.+)$/gm, "<h1>$1</h1>")
+              .replace(/^## (.+)$/gm, "<h2>$1</h2>")
+              .replace(/^### (.+)$/gm, "<h3>$1</h3>")
+              .replace(/^#### (.+)$/gm, "<h4>$1</h4>")
+              .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+              .replace(/\*(.+?)\*/g, "<em>$1</em>")
+              .replace(/`(.+?)`/g, "<code>$1</code>")
+              .replace(/\n\n/g, "</p><p>")
+              .replace(/\n/g, "<br>");
+
+            const htmlContent = `
+              <!DOCTYPE html>
+              <html>
+              <head>
+                <meta charset="UTF-8">
+                <title>${title}</title>
+                <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=JetBrains+Mono:wght@400;500&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
+                <style>
+                  body { font-family: 'Source Sans 3', 'Segoe UI', system-ui, sans-serif; margin: 0; padding: 20px; background: #040D1B; color: #D5D8DD; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+                  ::selection { background: #D4A843; color: #040D1B; }
+                  .container { max-width: 900px; margin: 0 auto; background: rgba(15,52,96,0.12); border: 1px solid rgba(26,46,82,0.5); padding: 32px; border-radius: 16px; }
+                  h1, h2, h3, h4 { font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 400; letter-spacing: -0.01em; }
+                  h1 { color: #F8F9FA; font-weight: 300; border-bottom: 1px solid rgba(212,168,67,0.4); padding-bottom: 8px; }
+                  h2 { color: #D4A843; margin-top: 24px; }
+                  h3, h4 { color: #F8F9FA; }
+                  code { background: rgba(4,13,27,0.6); color: #22c55e; padding: 2px 6px; border-radius: 3px; font-family: 'JetBrains Mono', 'Courier New', monospace; font-size: 0.85em; word-break: break-all; }
+                  table { border-collapse: collapse; width: 100%; margin: 16px 0; }
+                  th, td { border: 1px solid rgba(26,46,82,0.5); padding: 12px; text-align: left; }
+                  th { background: rgba(15,52,96,0.25); color: #D4A843; font-family: 'JetBrains Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; }
+                  pre { background: #0A1830; border: 1px solid #1A2E52; color: #C9D4E4; padding: 16px; border-radius: 6px; overflow-x: auto; font-family: 'JetBrains Mono', monospace; }
+                  a { color: #4A7EC7; text-decoration: none; transition: color 0.3s; }
+                  a:hover { color: #F8F9FA; }
+                  strong { color: #F8F9FA; }
+                </style>
+              </head>
+              <body>
+                <div class="container">
+                  <p>${html}</p>
+                </div>
+              </body>
+              </html>
+            `;
+
+            const win = window.open();
+            win.document.write(htmlContent);
+          })
+          .catch((err) => alert("Error loading document: " + err.message));
+      }
+    </script>
+  </body>
 </html>

@@ -12,9 +12,10 @@
       href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=JetBrains+Mono:wght@400;500&family=Source+Sans+3:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&display=swap"
       rel="stylesheet"
     />
+    <link rel="stylesheet" href="./css/verum-ui.css" />
     <link rel="stylesheet" href="./css/theme.css" />
   </head>
-  <body>
+  <body class="vo-page">
     <div class="bg-stage" aria-hidden="true">
       <canvas id="particleNetwork"></canvas>
     </div>
@@ -29,16 +30,18 @@
           />
         </a>
         <nav class="topnav" aria-label="Primary">
-          <a href="/" data-nav="monitor">Monitor</a>
+          <a class="active" href="/" data-nav="monitor">Monitor</a>
           <a href="/seal.html" data-nav="seal">Seal</a>
           <a href="/report.html" data-nav="report">Forensic Report</a>
           <a href="/vault.html" data-nav="vault">Vault</a>
           <a href="/chat.html" data-nav="chat">Chat</a>
-          <a class="ext" href="https://www.verumglobal.foundation/verify.html" target="_blank" rel="noreferrer">Verify ↗</a>
+          <a href="/documents.html" data-nav="documents">Documents</a>
+          <a href="/admin.html" data-nav="admin">Admin</a>
+          <a class="ext" href="https://verumglobal.foundation/verify.html" target="_blank" rel="noreferrer">Verify ↗</a>
         </nav>
         <div class="nav-meta">
           <span class="pill" id="healthPill"><span class="dot"></span> Connecting</span>
-          <span class="pill">Constitution v5.2.7</span>
+          <span class="pill">Constitution v8.0</span>
         </div>
       </div>
     </header>
@@ -53,12 +56,12 @@
         <p class="eyebrow">Guardian Fraud Firewall</p>
         <h1>Truth That <em>Cannot</em> Be Erased</h1>
         <p class="hero-lead">
-          On-premise enterprise monitoring under Constitution v5.2.7. Detect, triple-verify,
+          On-premise enterprise monitoring under Constitution v8.0. Detect, triple-verify,
           seal with SHA-512 — and notify Verum with a commission invoice only. Evidence never leaves the bank.
         </p>
         <div class="cta-row">
           <a class="btn btn-primary" id="runDemoBtn" href="#monitor" role="button">Run Detection Demo</a>
-          <a class="btn btn-ghost" href="https://www.verumglobal.foundation" target="_blank" rel="noreferrer">
+          <a class="btn btn-ghost" href="https://verumglobal.foundation" target="_blank" rel="noreferrer">
             verumglobal.foundation
           </a>
         </div>
@@ -155,17 +158,16 @@
           <a class="btn btn-primary" href="/report.html">Run Forensic Scan</a>
           <a class="btn btn-ghost" href="/vault.html">Open Vault</a>
           <a class="btn btn-ghost" href="/chat.html">Case Chat</a>
-          <a class="btn btn-ghost" href="https://www.verumglobal.foundation/verify.html" target="_blank" rel="noreferrer">Verify on Website</a>
+          <a class="btn btn-ghost" href="https://verumglobal.foundation/verify.html" target="_blank" rel="noreferrer">Verify at the Verification Hub ↗</a>
         </div>
       </section>
     </main>
 
-    <footer class="shell footer">
-      <span class="footer-brand">
-        <img src="./assets/verum-logo-sphere.png" alt="" />
-        Verum Omnis · Protocol verum-omnis-seal v1.0 · Patent Pending
-      </span>
-      <a href="https://www.verumglobal.foundation" target="_blank" rel="noreferrer">www.verumglobal.foundation</a>
+    <footer class="shell vo-seal-footer">
+      Verum Omnis · Protocol verum-omnis-seal v1.0 · Patent Pending<br />
+      Sealed locally — verified at the
+      <a href="https://verumglobal.foundation/verify.html" target="_blank" rel="noreferrer">Verification Hub</a><br />
+      <a href="https://verumglobal.foundation" target="_blank" rel="noreferrer">verumglobal.foundation</a>
     </footer>
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>

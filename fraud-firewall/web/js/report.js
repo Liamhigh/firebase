@@ -64,7 +64,7 @@ function renderFindings(result) {
 
   $("extractMessage").textContent = contradictions.length
     ? `${contradictions.length} contradiction(s) detected across ${findings.atom_count} evidence atom(s). ` +
-      "Findings are forensic indicators for human review — not determinations of fraud."
+      "Each finding is anchored to its source (SHA-512 + page/line). The verdict on any named person is for the court."
     : `No contradictions detected across ${findings.atom_count} evidence atom(s).`;
 
   $("contraList").innerHTML = contradictions
@@ -77,7 +77,6 @@ function renderFindings(result) {
           <span class="contra-id">${escapeHtml(c.contradiction_id)}</span>
           <span class="badge">${escapeHtml(c.brain_source)}</span>
           <span class="badge sev-${sev}">${escapeHtml(sev)}</span>
-          <span class="badge">${escapeHtml(c.confidence)}</span>
           ${quorum ? '<span class="badge quorum">QUORUM ✓</span>' : ""}
         </div>
         <p class="claim"><span class="tag">A</span>${escapeHtml(c.claim_a.text)}

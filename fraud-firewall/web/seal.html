@@ -12,9 +12,10 @@
       href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=JetBrains+Mono:wght@400;500&family=Source+Sans+3:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&display=swap"
       rel="stylesheet"
     />
+    <link rel="stylesheet" href="./css/verum-ui.css" />
     <link rel="stylesheet" href="./css/theme.css" />
   </head>
-  <body>
+  <body class="vo-page">
     <div class="bg-stage" aria-hidden="true">
       <canvas id="particleNetwork"></canvas>
     </div>
@@ -30,15 +31,17 @@
         </a>
         <nav class="topnav" aria-label="Primary">
           <a href="/" data-nav="monitor">Monitor</a>
-          <a href="/seal.html" data-nav="seal">Seal</a>
+          <a class="active" href="/seal.html" data-nav="seal">Seal</a>
           <a href="/report.html" data-nav="report">Forensic Report</a>
           <a href="/vault.html" data-nav="vault">Vault</a>
           <a href="/chat.html" data-nav="chat">Chat</a>
-          <a class="ext" href="https://www.verumglobal.foundation/verify.html" target="_blank" rel="noreferrer">Verify ↗</a>
+          <a href="/documents.html" data-nav="documents">Documents</a>
+          <a href="/admin.html" data-nav="admin">Admin</a>
+          <a class="ext" href="https://verumglobal.foundation/verify.html" target="_blank" rel="noreferrer">Verify ↗</a>
         </nav>
         <div class="nav-meta">
           <span class="pill" id="healthPill"><span class="dot"></span> Connecting</span>
-          <span class="pill">Constitution v5.2.7</span>
+          <span class="pill">Constitution v8.0</span>
         </div>
       </div>
     </header>
@@ -84,7 +87,7 @@
         </div>
         <div class="cta-row">
           <button class="btn btn-primary" id="sealBtn" type="button">Seal Document</button>
-          <label class="btn btn-ghost" for="bodyFileInput" style="cursor: pointer;">Load .txt File</label>
+          <label class="btn btn-ghost" for="bodyFileInput">Load .txt File</label>
           <input id="bodyFileInput" type="file" accept=".txt,text/plain" hidden />
         </div>
 
@@ -98,7 +101,7 @@
         </div>
 
         <div class="result" hidden id="sealResultBlock">
-          <p class="sub">Document sealed under Constitution v5.2.7 — keep the seal ID with your case file.</p>
+          <p class="sub">Document sealed under Constitution v8.0 — keep the seal ID with your case file.</p>
           <div class="hash-block">
             <span class="label">Seal ID</span>
             <code id="sealIdCode"></code>
@@ -109,7 +112,7 @@
           </div>
           <div class="cta-row">
             <a class="btn btn-primary" id="downloadSealedPdf" href="#" target="_blank" rel="noreferrer" hidden>Download Sealed PDF</a>
-            <a class="btn btn-ghost" href="https://www.verumglobal.foundation/verify.html" target="_blank" rel="noreferrer">Verify on verumglobal.foundation</a>
+            <a class="btn btn-ghost" href="https://verumglobal.foundation/verify.html" target="_blank" rel="noreferrer">Verify at the Verification Hub ↗</a>
           </div>
           <details class="raw-findings">
             <summary>Raw seal JSON</summary>
@@ -124,12 +127,11 @@
       </section>
     </main>
 
-    <footer class="shell footer">
-      <span class="footer-brand">
-        <img src="./assets/verum-logo-sphere.png" alt="" />
-        Verum Omnis · Protocol verum-omnis-seal v1.0 · Patent Pending
-      </span>
-      <a href="https://www.verumglobal.foundation" target="_blank" rel="noreferrer">www.verumglobal.foundation</a>
+    <footer class="shell vo-seal-footer">
+      Verum Omnis · Protocol verum-omnis-seal v1.0 · Patent Pending<br />
+      Sealed locally — verified at the
+      <a href="https://verumglobal.foundation/verify.html" target="_blank" rel="noreferrer">Verification Hub</a><br />
+      <a href="https://verumglobal.foundation" target="_blank" rel="noreferrer">verumglobal.foundation</a>
     </footer>
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
