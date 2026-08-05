@@ -998,3 +998,280 @@ footer {
 .vo-step.is-error .ico .ring { display: none; }
 .vo-step.is-error .ico::before { content: "\2715"; color: #ef4444; font-weight: 700; }
 @keyframes vo-spin { to { transform: rotate(360deg); } }
+
+/* ============================================================
+   Verum-UI integration layer.
+   css/verum-ui.css (+ VERUM_UI_TOKENS.md) is the canonical
+   design system; the helpers below bind this app's JS-generated
+   markup and legacy class hooks into that system. Load order:
+   verum-ui.css first, then this file.
+   ============================================================ */
+
+/* Keep button anchors from inheriting the global .vo-page link blue */
+.vo-page a.btn-ghost { color: var(--paper); }
+.vo-page a.btn-ghost:hover { color: var(--gold-300); }
+.vo-page a.btn-primary,
+.vo-page a.btn-primary:hover { color: var(--navy-950); }
+.vo-page a.vo-btn-gold,
+.vo-page a.vo-btn-gold:hover { color: var(--vo-navy-0); }
+.vo-page a.vo-btn-outline { color: var(--vo-blue); }
+.vo-page a.vo-btn-outline:hover { color: var(--vo-gold); }
+
+/* Small utilities replacing former inline styles */
+.gold-strong { color: var(--gold-400); }
+.section-gap { margin-top: 1.5rem; }
+.note-tight { margin: 1.25rem 0 0; }
+
+/* ---------- Documents grid ---------- */
+.doc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+.doc-card { display: flex; flex-direction: column; margin-bottom: 0; }
+.doc-card .doc-desc { flex-grow: 1; margin: 0 0 1rem; font-size: 0.9rem; line-height: 1.6; color: var(--ink); }
+.doc-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1rem;
+  margin-bottom: 1rem;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--blue-400);
+}
+.doc-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: auto; }
+.doc-badge-row { margin-bottom: 0.75rem; }
+
+/* ---------- Admin: in-page tab nav ---------- */
+.tab-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  border-bottom: 1px solid rgba(26, 46, 82, 0.5);
+  margin-bottom: 2rem;
+}
+.tab-nav .nav-btn {
+  appearance: none;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 0.75rem 1.1rem;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--blue-400);
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+.tab-nav .nav-btn:hover { color: var(--paper); }
+.tab-nav .nav-btn.active { color: var(--gold-400); border-bottom-color: var(--gold-400); }
+.tab { display: none; }
+.tab.active { display: block; }
+
+/* ---------- Admin: section titles (gold serif + rule) ---------- */
+.section-title {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 1.6rem;
+  letter-spacing: -0.01em;
+  color: var(--gold-400);
+  margin: 2rem 0 0.4rem;
+}
+.section-title:first-child { margin-top: 0; }
+.section-title + .vo-gold-rule { margin: 0 0 1.25rem; }
+
+/* ---------- Admin: stat cards ---------- */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+.stat .note {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.72rem;
+  color: var(--muted-foreground);
+}
+
+/* ---------- Admin: dark tables (JS-generated bare <table>) ---------- */
+.panel table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  margin: 0.25rem 0;
+}
+.panel th {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gold-400);
+  text-align: left;
+  padding: 10px 12px;
+  background: rgba(15, 52, 96, 0.25);
+  border: 1px solid rgba(26, 46, 82, 0.5);
+}
+.panel td {
+  padding: 10px 12px;
+  border: 1px solid rgba(26, 46, 82, 0.5);
+  vertical-align: top;
+  line-height: 1.6;
+  color: var(--ink);
+}
+.panel tr:nth-child(even) td { background: rgba(15, 52, 96, 0.07); }
+.panel td strong { color: var(--paper); }
+.panel td small { color: var(--muted-foreground); }
+.table-scroll { overflow-x: auto; }
+
+/* ---------- Admin: data-driven badge variants ---------- */
+.badge.badge-high,
+.badge.badge-confirmed {
+  color: #4ade80;
+  border-color: rgba(34, 139, 104, 0.4);
+  background: rgba(34, 139, 104, 0.15);
+}
+.badge.badge-medium,
+.badge.badge-pending {
+  color: var(--gold-300);
+  border-color: rgba(212, 168, 67, 0.4);
+  background: rgba(212, 168, 67, 0.12);
+}
+.badge.badge-low {
+  color: #7ea8e0;
+  border-color: rgba(74, 126, 199, 0.4);
+  background: rgba(74, 126, 199, 0.15);
+}
+
+/* ---------- Admin: compliance checklist ---------- */
+.compliance-check {
+  display: flex;
+  align-items: center;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid rgba(74, 126, 199, 0.18);
+  border-radius: var(--radius);
+  background: rgba(4, 13, 27, 0.45);
+  margin: 0.5rem 0;
+  color: var(--ink);
+  text-transform: capitalize;
+}
+.compliance-check .icon { font-size: 1.1rem; margin-right: 0.75rem; }
+.compliance-check .icon.pass { color: #22c55e; }
+.compliance-check .icon.fail { color: #ef4444; }
+
+/* ---------- Admin: export buttons ---------- */
+.export-buttons {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+.export-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.5rem;
+  background: rgba(15, 52, 96, 0.08);
+  border: 1px solid rgba(74, 126, 199, 0.35);
+  border-radius: 12px;
+  cursor: pointer;
+  text-decoration: none;
+  color: var(--ink);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
+}
+.vo-page a.export-btn { color: var(--ink); }
+.export-btn:hover,
+.vo-page a.export-btn:hover {
+  border-color: var(--gold-400);
+  color: var(--gold-300);
+  box-shadow: 0 0 20px rgba(212, 168, 67, 0.15);
+}
+.export-btn .icon { font-size: 1.6rem; margin-bottom: 0.5rem; }
+.export-btn .title {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--paper);
+  margin-bottom: 0.3rem;
+  text-align: center;
+}
+.export-btn .description { font-size: 0.78rem; color: var(--muted-foreground); text-align: center; }
+
+/* ---------- Admin: date picker ---------- */
+.date-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1rem;
+  align-items: center;
+  padding: 1rem;
+  border: 1px solid rgba(74, 126, 199, 0.18);
+  border-radius: var(--radius);
+  background: rgba(4, 13, 27, 0.45);
+  margin-bottom: 1.5rem;
+}
+.date-picker label {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--blue-400);
+}
+.date-picker input {
+  padding: 0.5rem 0.6rem;
+  border: 1px solid hsl(var(--input));
+  border-radius: var(--radius);
+  background: rgba(4, 13, 27, 0.65);
+  color: var(--paper);
+  font-size: 0.85rem;
+  color-scheme: dark;
+}
+.date-picker input:focus { outline: none; border-color: var(--gold-400); }
+
+/* ---------- Admin: chart ---------- */
+.chart-container {
+  border: 1px solid rgba(74, 126, 199, 0.22);
+  border-radius: calc(var(--radius) + 2px);
+  background:
+    linear-gradient(180deg, rgba(26, 46, 82, 0.35), rgba(10, 22, 40, 0.55)),
+    rgba(15, 31, 58, 0.55);
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+  overflow-x: auto;
+}
+.chart-container h3 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 1.25rem;
+  color: var(--gold-400);
+  margin: 0 0 1rem;
+}
+.chart-container svg { max-width: 100%; height: auto; }
+.chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(26, 46, 82, 0.5);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--ink);
+}
+.legend-item { display: flex; align-items: center; gap: 6px; }
+.legend-color { width: 12px; height: 12px; border-radius: 2px; }
+
+/* ---------- Admin: loading / error states ---------- */
+.loading { text-align: center; padding: 2rem; color: var(--muted-foreground); }
+.error {
+  background: rgba(180, 60, 60, 0.12);
+  border: 1px solid rgba(180, 60, 60, 0.35);
+  color: #f87171;
+  padding: 1rem;
+  border-radius: 8px;
+  margin: 1rem 0;
+}

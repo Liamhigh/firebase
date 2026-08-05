@@ -12,9 +12,10 @@
       href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=JetBrains+Mono:wght@400;500&family=Source+Sans+3:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&display=swap"
       rel="stylesheet"
     />
+    <link rel="stylesheet" href="./css/verum-ui.css" />
     <link rel="stylesheet" href="./css/theme.css" />
   </head>
-  <body>
+  <body class="vo-page">
     <div class="bg-stage" aria-hidden="true">
       <canvas id="particleNetwork"></canvas>
     </div>
@@ -33,12 +34,14 @@
           <a href="/seal.html" data-nav="seal">Seal</a>
           <a href="/report.html" data-nav="report">Forensic Report</a>
           <a href="/vault.html" data-nav="vault">Vault</a>
-          <a href="/chat.html" data-nav="chat">Chat</a>
-          <a class="ext" href="https://www.verumglobal.foundation/verify.html" target="_blank" rel="noreferrer">Verify ↗</a>
+          <a class="active" href="/chat.html" data-nav="chat">Chat</a>
+          <a href="/documents.html" data-nav="documents">Documents</a>
+          <a href="/admin.html" data-nav="admin">Admin</a>
+          <a class="ext" href="https://verumglobal.foundation/verify.html" target="_blank" rel="noreferrer">Verify ↗</a>
         </nav>
         <div class="nav-meta">
           <span class="pill" id="healthPill"><span class="dot"></span> Connecting</span>
-          <span class="pill">Constitution v5.2.7</span>
+          <span class="pill">Constitution v8.0</span>
         </div>
       </div>
     </header>
@@ -74,18 +77,17 @@
 
         <div class="privacy">
           <strong>Constitution-bound:</strong> every reply is generated on-premise from the
-          firewall's own state under Constitution v5.2.7. Nothing you type here leaves this
+          firewall's own state under Constitution v8.0. Nothing you type here leaves this
           institution.
         </div>
       </section>
     </main>
 
-    <footer class="shell footer">
-      <span class="footer-brand">
-        <img src="./assets/verum-logo-sphere.png" alt="" />
-        Verum Omnis · Protocol verum-omnis-seal v1.0 · Patent Pending
-      </span>
-      <a href="https://www.verumglobal.foundation" target="_blank" rel="noreferrer">www.verumglobal.foundation</a>
+    <footer class="shell vo-seal-footer">
+      Verum Omnis · Protocol verum-omnis-seal v1.0 · Patent Pending<br />
+      Sealed locally — verified at the
+      <a href="https://verumglobal.foundation/verify.html" target="_blank" rel="noreferrer">Verification Hub</a><br />
+      <a href="https://verumglobal.foundation" target="_blank" rel="noreferrer">verumglobal.foundation</a>
     </footer>
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>

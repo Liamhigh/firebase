@@ -58,7 +58,6 @@ async function refreshVault() {
                   <span class="contra-id">${escapeHtml(c.contradiction_id)}</span>
                   <span class="badge">${escapeHtml(c.brain_source)}</span>
                   <span class="badge sev-${c.severity}">${escapeHtml(c.severity)}</span>
-                  <span class="badge">${escapeHtml(c.confidence)}</span>
                   ${c.triple_ai_consensus?.quorum ? '<span class="badge quorum">QUORUM ✓</span>' : ""}
                 </div>
               </div>`,
